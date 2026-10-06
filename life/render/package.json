@@ -1,15 +1,16 @@
 {
-  "name": "render",
+  "name": "life-video-render",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "description": "《生命之美》代码视频的画面渲染器",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node ../build.js",
+    "preview": "node src/preview.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
+    "@expo-google-fonts/cormorant-garamond": "^0.4.1",
+    "@expo-google-fonts/jetbrains-mono": "^0.4.1",
+    "@expo-google-fonts/noto-serif-sc": "^0.4.4",
     "skia-canvas": "^3.0.8"
   }
 }

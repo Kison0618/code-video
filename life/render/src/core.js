@@ -5,18 +5,17 @@ const { Canvas, FontLibrary } = require('skia-canvas');
 
 const W = 1920, H = 1080, FPS = 60;
 
-const FONT_DIR = path.join(__dirname, '..', 'fonts');
+// 字体来自 npm 上的 Google Fonts 打包（npm install 时自动下载）
+const GF = path.join(__dirname, '..', 'node_modules', '@expo-google-fonts');
+const f = (pkg, file) => path.join(GF, pkg, file.split('_').slice(1).join('_').replace('.ttf', ''), file);
 FontLibrary.use('Song', [
-  'NotoSerifSC_200ExtraLight.ttf', 'NotoSerifSC_300Light.ttf',
-  'NotoSerifSC_400Regular.ttf', 'NotoSerifSC_500Medium.ttf',
-].map(f => path.join(FONT_DIR, f)));
+  'NotoSerifSC_200ExtraLight.ttf', 'NotoSerifSC_300Light.ttf', 'NotoSerifSC_400Regular.ttf', 'NotoSerifSC_500Medium.ttf',
+].map(x => f('noto-serif-sc', x)));
 FontLibrary.use('Garamond', [
   'CormorantGaramond_300Light.ttf', 'CormorantGaramond_400Regular.ttf',
   'CormorantGaramond_400Regular_Italic.ttf', 'CormorantGaramond_500Medium_Italic.ttf',
-].map(f => path.join(FONT_DIR, f)));
-FontLibrary.use('Mono', [
-  'JetBrainsMono_300Light.ttf', 'JetBrainsMono_400Regular.ttf',
-].map(f => path.join(FONT_DIR, f)));
+].map(x => f('cormorant-garamond', x)));
+FontLibrary.use('Mono', ['JetBrainsMono_300Light.ttf', 'JetBrainsMono_400Regular.ttf'].map(x => f('jetbrains-mono', x)));
 
 // 配色：金色只给"生命之线"和主角，青色是结构，玫红是"错误/变异"
 const C = {
