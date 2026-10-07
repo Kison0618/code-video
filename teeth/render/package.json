@@ -1,0 +1,12 @@
+{
+  "name": "teeth-video-render",
+  "version": "1.0.0",
+  "private": true,
+  "description": "teeth 音乐视频的画面渲染器",
+  "dependencies": {
+    "@expo-google-fonts/cinzel": "^0.4.1",
+    "@expo-google-fonts/jetbrains-mono": "^0.4.1",
+    "@expo-google-fonts/cormorant-garamond": "^0.4.1",
+    "skia-canvas": "^3.0.8"
+  }
+}
