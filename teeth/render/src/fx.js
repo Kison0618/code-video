@@ -1,7 +1,7 @@
-// 后期：泛光、RGB 色散、闪白、暗角、颗粒，以及节拍驱动的镜头（冲击缩放 + 抖动）
+// 后期：泛光、淡入淡出、暗角、颗粒
 'use strict';
 const K = require('./core');
-const { W, H, Canvas, C, rgba, clamp, mulberry32, noise1 } = K;
+const { W, H, Canvas, clamp, mulberry32 } = K;
 const { ImageData } = require('skia-canvas');
 
 // skia-canvas 是"延迟绘制"：把一张画布画进另一张，会把整套绘制指令重新执行一遍。
@@ -42,56 +42,6 @@ function bloom(ctx, amt = 1, base = BASE) {
   ctx.restore();
 }
 
-// —— RGB 色散：红色通道单独放大一点并向左错开（先拍扁当前画面再做）——
-const RED = new Canvas(W, H), CUR = new Canvas(W, H);
-function chroma(ctx, px) {
-  if (px < 0.4) return;
-  flatten(ctx.canvas, CUR);
-  const rx = RED.getContext('2d');
-  rx.reset();
-  rx.drawImage(CUR, 0, 0);
-  rx.globalCompositeOperation = 'multiply';
-  rx.fillStyle = 'rgb(255,0,0)'; rx.fillRect(0, 0, W, H);
-  flatten(RED, RED);
-  ctx.reset();
-  ctx.drawImage(CUR, 0, 0);
-  ctx.save();
-  ctx.globalCompositeOperation = 'multiply';
-  ctx.fillStyle = 'rgb(0,255,255)'; ctx.fillRect(0, 0, W, H);
-  ctx.globalCompositeOperation = 'lighter';
-  const s = 1 + px / 600;
-  ctx.drawImage(RED, (W - W * s) / 2 - px, (H - H * s) / 2, W * s, H * s);
-  ctx.restore();
-}
-
-// 反色：重拍上闪一下负片
-function invert(ctx, a) {
-  if (a <= 0.01) return;
-  ctx.save();
-  ctx.globalCompositeOperation = 'difference';
-  ctx.fillStyle = `rgba(255,255,255,${clamp(a)})`;
-  ctx.fillRect(0, 0, W, H);
-  ctx.restore();
-}
-// 横向撕裂：把画面切成几条，左右错开
-function glitch(ctx, amt, seed) {
-  if (amt < 0.05) return;
-  flatten(ctx.canvas, CUR);
-  const r = mulberry32(seed);
-  const n = 3 + Math.floor(amt * 8);
-  for (let i = 0; i < n; i++) {
-    const y = Math.floor(r() * H), h = Math.floor(8 + r() * 90 * amt), dx = (r() - 0.5) * 160 * amt;
-    ctx.drawImage(CUR, 0, y, W, h, dx, y, W, h);
-  }
-}
-function flash(ctx, a, c = C.white) {
-  if (a <= 0.003) return;
-  ctx.save();
-  ctx.globalCompositeOperation = 'lighter';
-  ctx.fillStyle = rgba(c, clamp(a));
-  ctx.fillRect(0, 0, W, H);
-  ctx.restore();
-}
 function black(ctx, a) {
   if (a <= 0.003) return;
   ctx.fillStyle = `rgba(0,0,0,${clamp(a)})`;
@@ -128,14 +78,4 @@ function finish(ctx, frame, vig = 1) {
   ctx.restore();
 }
 
-// —— 镜头：冲击缩放 + 抖动 + 缓慢的旋转 ——
-function camera(ctx, t, o) {
-  const { zoom = 1, shake = 0, rot = 0 } = o;
-  const sx = shake * noise1(t * 31, 1) * 14, sy = shake * noise1(t * 29, 2) * 10;
-  ctx.translate(W / 2 + sx, H / 2 + sy);
-  ctx.rotate(rot);
-  ctx.scale(zoom, zoom);
-  ctx.translate(-W / 2, -H / 2);
-}
-
-module.exports = { flatten, bake, bloom, chroma, invert, glitch, flash, black, finish, camera };
+module.exports = { flatten, bake, bloom, black, finish };
