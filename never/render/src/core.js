@@ -9,19 +9,24 @@ const GF = path.join(__dirname, '..', 'node_modules', '@expo-google-fonts');
 const font = (pkg, file) => path.join(GF, pkg, file.split('_').slice(1).join('_').replace('.ttf', ''), file);
 FontLibrary.use('Garamond', ['CormorantGaramond_300Light.ttf', 'CormorantGaramond_400Regular.ttf', 'CormorantGaramond_500Medium.ttf',
   'CormorantGaramond_300Light_Italic.ttf', 'CormorantGaramond_400Regular_Italic.ttf'].map(f => font('cormorant-garamond', f)));
+FontLibrary.use('Song', ['NotoSerifSC_300Light.ttf', 'NotoSerifSC_400Regular.ttf', 'NotoSerifSC_500Medium.ttf'].map(f => font('noto-serif-sc', f)));
 FontLibrary.use('Mono', ['JetBrainsMono_300Light.ttf', 'JetBrainsMono_400Regular.ttf'].map(f => font('jetbrains-mono', f)));
 
-// 配色：沿用《信息论》参考片的金/青/象牙，再加两种只在 drop 里出现的高饱和色
+// 配色：夜色为底，暖金与冷蓝两种光；粉、紫只在极光和烟花里出现
 const C = {
-  bg: [3, 4, 8],
+  bg: [3, 5, 12],
+  night: [6, 10, 26],
   ivory: [240, 234, 222],
   white: [255, 252, 245],
-  gold: [240, 196, 116],
-  amber: [255, 160, 64],
+  gold: [244, 196, 120],
+  amber: [255, 158, 70],
+  warm: [255, 120, 60],
   cyan: [110, 200, 230],
-  ice: [190, 235, 255],
-  rose: [236, 80, 120],
-  violet: [185, 140, 255],
+  ice: [190, 225, 255],
+  blue: [70, 120, 230],
+  rose: [240, 110, 150],
+  violet: [170, 120, 255],
+  green: [90, 240, 170],
 };
 const rgba = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
 const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
@@ -160,6 +165,15 @@ function text(ctx, str, x, y, o = {}) {
   return total;
 }
 
+function measure(ctx, str, o = {}) {
+  const { size = 32, family = 'Garamond', weight = 400, style = 'normal', spacing = 0 } = o;
+  ctx.save(); ctx.font = `${style} ${weight} ${size}px ${family}`;
+  const chars = [...str];
+  const w = chars.reduce((s, ch) => s + ctx.measureText(ch).width, 0) + spacing * size * Math.max(0, chars.length - 1);
+  ctx.restore();
+  return w;
+}
+
 // —— 3D：绕轴旋转 + 透视投影 ——
 function rot3(p, ax, ay, az) {
   let [x, y, z] = p;
@@ -181,5 +195,5 @@ function proj(p, camZ = 900, fov = 900, cx = W / 2, cy = H / 2) {
 
 module.exports = {
   W, H, FPS, Canvas, C, rgba, mix, clamp, lerp, prog, smooth, easeInOut, easeOut, easeIn, easeOutExpo, vis,
-  mulberry32, hash, noise1, glow, glowSprite, glowLine, glowSegs, line, partial, circlePts, text, rot3, proj,
+  mulberry32, hash, noise1, glow, glowSprite, glowLine, glowSegs, line, partial, circlePts, text, measure, rot3, proj,
 };

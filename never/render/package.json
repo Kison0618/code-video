@@ -2,10 +2,11 @@
   "name": "never-video-render",
   "version": "1.0.0",
   "private": true,
-  "description": "Never 音乐视频的画面渲染器",
+  "description": "We Never 音乐视频的画面渲染器",
   "dependencies": {
     "@expo-google-fonts/cormorant-garamond": "^0.4.1",
     "@expo-google-fonts/jetbrains-mono": "^0.4.1",
-    "skia-canvas": "^3.0.8"
+    "skia-canvas": "^3.0.8",
+    "@expo-google-fonts/noto-serif-sc": "^0.4.4"
   }
 }
