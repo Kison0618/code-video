@@ -4,8 +4,10 @@ const K = require('./core');
 const UI = require('./ui');
 const SCENES = require('./scenes');
 const POST = require('./post');
+const TEASER = require('./teaser');
 
 function renderFrame(ctx, t, frame) {
+  if (t < 0) { TEASER.draw(ctx, t); UI.finish(ctx, t, frame); return; }
   ctx.save();
   ctx.globalCompositeOperation = 'source-over';
   ctx.globalAlpha = 1;
@@ -20,8 +22,6 @@ function renderFrame(ctx, t, frame) {
   // 片尾黑场
   const fo = K.smooth(K.prog(t, 351.2, 352.4));
   if (fo > 0) { ctx.fillStyle = `rgba(0,0,0,${fo})`; ctx.fillRect(0, 0, K.W, K.H); }
-  const fi = 1 - K.smooth(K.prog(t, 0, 0.8));
-  if (fi > 0) { ctx.fillStyle = `rgba(0,0,0,${fi})`; ctx.fillRect(0, 0, K.W, K.H); }
   ctx.restore();
 }
 // 星尘在图灵斑纹和细胞段落减弱

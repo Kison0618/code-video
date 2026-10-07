@@ -314,6 +314,21 @@ ci = 0
 for e in TL['EVENTS']:
     if e['type'] in ('mark', 'letter', 'bloom', 'emblem', 'untwist', 'gen'):
         place_st(e['t'], chimes[CH_SEMI[ci % len(CH_SEMI)]], 0.05 if e['type'] != 'gen' else 0.03); ci += 1
+# 片头钩子：每一刀一声"叮 + 低频脉冲"，音高逐刀升高；内爆 = 倒吸的风声 → 重击
+sw_rev = sw[:, ::-1].copy()
+for e in TL['EVENTS']:
+    if e['type'] == 'teaser_cut':
+        i = e['i']
+        place_st(e['t'] - 0.08, imp, 0.16 + 0.03 * i)
+        place_st(e['t'], fades(load('chime_crystal', [0, 2, 4, 7, 9, 12][i]), 0.002, 0.5), 0.09)
+        place(bells, e['t'], bell([62, 65, 69, 72, 74, 77][i] + 12, 1.6, ratio=2.0, idx=1.2, decay=2.2), 0.09)
+        place(hits, e['t'], thump(70, 40, 0.35, 10), 0.35)
+    elif e['type'] == 'teaser_implode':
+        tend = to_out(-0.05)
+        place_st(tend - sw_rev.shape[1] / SR, sw_rev, 0.35, out_time=True)   # 倒放：能量在终点
+        place(risers, e['t'], riser(to_out(-0.05) - to_out(e['t'])), 0.12)
+        place(hits, -0.05, boom(0.9), 0.55)
+        place_st(tend - 0.08, imp, 0.45, out_time=True)
 # 水流：铺在"物质流过漩涡"段落（源时间 222.5–270）
 wt0, wt1 = to_out(222.5), to_out(270.0)
 wf = loop_to(load('water_flow'), int((wt1 - wt0) * SR))
@@ -366,7 +381,7 @@ for t, s in TL['HITS']:
 mix = music * duck + fx
 # 开头淡入、结尾淡出
 fade = np.ones(N, np.float32)
-fade[: int(0.8 * SR)] = np.linspace(0, 1, int(0.8 * SR))
+fade[: int(0.02 * SR)] = np.linspace(0, 1, int(0.02 * SR))   # 片头第一刀要有起音，不做长淡入
 e0, e1 = int(to_out(350.4) * SR), int(to_out(352.8) * SR)
 fade[e0:e1] = np.linspace(1, 0, e1 - e0); fade[e1:] = 0
 mix = mix * fade

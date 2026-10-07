@@ -13,7 +13,7 @@ function threadY(x, t) {
   return 540 + 5 * Math.sin(x * 0.011 - t * 0.9) + 2.5 * Math.sin(x * 0.037 + t * 0.5);
 }
 function headX(t) {
-  if (t < 23.5) return lerp(240, 1380, easeInOut(prog(t, 3, 21.5)));
+  if (t < 23.5) { const u = prog(t, 0.6, 21.5); return lerp(240, 1380, 1 - Math.pow(1 - u, 2.2)); }   // 快速出发，靠近"你"时减速
   return lerp(1380, 2100, easeIn(prog(t, 23.5, 25.8)));
 }
 // 心跳时，一道亮光从"你"沿线向过去传播
@@ -42,6 +42,63 @@ function drawOpenThread(ctx, t, alpha) {
   }
   return hx;
 }
+// 冷开场的两层生命感：
+// 1. 祖先支线——光点走过之处不断分出细枝，大多数长一会儿就熄灭（只有主线一直延续）
+const BRANCHES = (() => {
+  const r = mulberry32(404), out = [];
+  // 前段（光点刚出发、走得慢）分支更密，开场不空
+  const xs = [];
+  for (let k = 0; k < 64; k++) xs.push(120 + (k + r() * 0.8) * (1240 / 64));
+  for (let k = 0; k < 34; k++) xs.push(150 + Math.pow(r(), 1.6) * 420);
+  for (const x of xs) {
+    let tb = 0.8; while (tb < 23.5 && headX(tb) < x) tb += 0.05;      // 光点经过此处的时刻
+    out.push({ x, tb, dir: r() < 0.5 ? -1 : 1, L: 70 + Math.pow(r(), 1.5) * 260, bend: 0.9 + r() * 0.8,
+      life: 1.6 + r() * 3.2, ember: r() < 0.35, sub: r() < 0.45 ? 0.35 + r() * 0.4 : 0, ph: r() * 6.28 });
+  }
+  return out;
+})();
+function drawBranches(ctx, t, alpha) {
+  const hxNow = headX(t);
+  for (const b of BRANCHES) {
+    const age = t - b.tb;
+    if (age <= 0) continue;
+    const grow = easeOut(clamp(age / 1.3));
+    const die = smooth(prog(age, b.life, b.life + 1.6));
+    const a = alpha * (0.42 * (1 - die) + 0.05) * smooth(clamp(age / 0.3));
+    if (a <= 0.004) continue;
+    const y0 = threadY(b.x, t), pts = [];
+    for (let u = 0; u <= grow + 1e-6; u += 0.05) {
+      const px = b.x + b.L * u;
+      if (px > hxNow - 18) break;                 // 光点是"现在"，支线不越过它
+      const py = y0 + b.dir * b.L * 0.42 * Math.pow(u, b.bend) + 3 * Math.sin(u * 7 + t * 0.8 + b.ph) * u;
+      pts.push([px, py]);
+    }
+    if (pts.length < 2) continue;
+    line(ctx, pts, mix(C.cyan, C.gold, 0.25), a, 0.9);
+    if (b.sub && grow > b.sub) {                // 再分一叉
+      const [sx, sy] = pts[Math.floor(b.sub * (pts.length - 1))], q = [];
+      const g2 = clamp((grow - b.sub) / (1 - b.sub));
+      for (let u = 0; u <= g2 + 1e-6; u += 0.1) q.push([sx + b.L * 0.5 * u, sy - b.dir * b.L * 0.18 * u * u]);
+      if (q.length > 1) line(ctx, q, C.cyan, a * 0.7, 0.7);
+    }
+    const tip = pts[pts.length - 1];
+    if (die > 0 && b.ember) {                   // 熄灭时枝头一点玫红
+      const fl = Math.exp(-(age - b.life) * 2.2);
+      glow(ctx, tip[0], tip[1], 9, C.rose, alpha * 0.8 * fl);
+    } else if (die <= 0) glow(ctx, tip[0], tip[1], 5, C.gold, alpha * 0.5 * grow);
+  }
+}
+// 2. 汇聚的光尘——四周的微粒被吸向光点
+const MOTES = (() => { const r = mulberry32(808); return Array.from({ length: 80 }, () => ({ a0: r() * 6.283, r0: 260 + r() * 820, per: 2.4 + r() * 2.6, ph: r(), s: 2.5 + r() * 3.5, warm: r() })); })();
+function drawConverge(ctx, t, hx, hy, alpha) {
+  for (const m of MOTES) {
+    const u = ((t / m.per + m.ph) % 1);
+    const rr = m.r0 * Math.pow(1 - u, 1.6), ang = m.a0 + 2.2 * u;
+    const a = alpha * smooth(u * 4) * (1 - smooth(prog(u, 0.9, 1))) * (0.75 + 0.35 * (1 - smooth(prog(t, 6, 12))));
+    if (a <= 0.01) continue;
+    glow(ctx, hx + rr * Math.cos(ang), hy + rr * Math.sin(ang) * 0.55, m.s, mix(C.gold, C.ivory, m.warm * 0.5), a);
+  }
+}
 function drawHead(ctx, x, y, t, a, scale = 1) {
   if (a <= 0) return;
   const h = TL.heart(t);
@@ -67,9 +124,12 @@ function drawOpening(ctx, t) {
   const fx = Math.min(hxNow, 1380), fy = 540;
   ctx.save();
   ctx.translate(fx, fy); ctx.scale(z, z); ctx.translate(-fx, -fy);
-  const lineA = smooth(prog(t, 0.6, 3.2)) * fadeAll;
+  const lineA = smooth(prog(t, 0.2, 1.8)) * fadeAll;
+  const lifeA = (1 - smooth(prog(t, 22.6, 24.2))) * fadeAll;
+  drawBranches(ctx, t, lifeA);
   const hx = drawOpenThread(ctx, t, lineA);
-  const headA = smooth(prog(t, 0.4, 2.4)) * (1 - smooth(prog(t, 24.8, 25.8)));
+  drawConverge(ctx, t, hx, threadY(hx, t), lifeA * smooth(prog(t, 0.2, 1.5)));
+  const headA = 1 - smooth(prog(t, 24.8, 25.8));   // 片头内爆收成的光点直接接上
   drawHead(ctx, hx, threadY(hx, t), t, headA);
   // "你"
   const ya = vis(t, 18.6, 24.6, 0.9, 0.8);

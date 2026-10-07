@@ -2,7 +2,8 @@
 'use strict';
 
 const DURATION = 353;
-const WARP = [[0, 0], [3, 2.2], [23.5, 18.6], [34, 26.0], [97, 73.25]];
+// 源 −4..0 是片头钩子（teaser.js）；冷开场 3–23.5 速率约 0.75
+const WARP = [[-4, 0], [0, 4], [3, 6.2], [23.5, 21.6], [34, 29.0], [97, 76.25]];
 
 function mapTime(time, inputColumn) {
   const outputColumn = 1 - inputColumn;
