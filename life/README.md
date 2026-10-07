@@ -26,7 +26,12 @@ node build.js
 - `生命之美_v1_1080p60.mp4`：完整画质
 - `生命之美_v1_分享版.mp4`：体积小，方便发送
 
-时间参考（4 核 CPU）：画面约 45 分钟，音频约 3 分钟。核数越多越快，可以用 `--jobs 8` 指定进程数。
+时间参考：
+- 有 NVIDIA 显卡（脚本自动检测，用 NVENC 编码）：20 线程 CPU + RTX 4070 整片约 6 分钟（画面约 3 分钟，音频约 3 分钟）
+- 只有 CPU（4 核）：画面约 45 分钟。可以用 `--jobs 8` 指定进程数，`--cpu-encode` 强制用 x264
+
+系统自带的 Python 装不了 numpy（例如报 externally-managed-environment）时，用环境变量指定一个装好的解释器：
+`PYTHON=F:/AAA/python.exe node build.js`（PowerShell：`$env:PYTHON='F:\AAA\python.exe'; node build.js`）
 
 ## 常用命令
 

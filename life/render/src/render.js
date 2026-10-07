@@ -6,9 +6,13 @@ const { renderFrame } = require('./frame');
 
 const [a, b, out] = process.argv.slice(2);
 const f0 = +a, f1 = +b;
+// LIFE_ENC=nvenc 时交给 NVIDIA 显卡编码（build.js 会自动检测），否则用 CPU 的 x264
+const enc = process.env.LIFE_ENC === 'nvenc'
+  ? ['-c:v', 'h264_nvenc', '-preset', 'p7', '-tune', 'hq', '-rc', 'vbr', '-cq', '16', '-b:v', '0', '-profile:v', 'high', '-spatial-aq', '1', '-temporal-aq', '1', '-bf', '3']
+  : ['-c:v', 'libx264', '-preset', 'medium', '-crf', '14', '-tune', 'film', '-threads', '2'];
 const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error',
   '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', `${K.W}x${K.H}`, '-r', String(K.FPS), '-i', '-',
-  '-c:v', 'libx264', '-preset', 'medium', '-crf', '14', '-tune', 'film', '-pix_fmt', 'yuv420p', '-threads', '2', out],
+  ...enc, '-pix_fmt', 'yuv420p', out],
   { stdio: ['pipe', 'inherit', 'inherit'] });
 const cv = new K.Canvas(K.W, K.H), ctx = cv.getContext('2d');
 

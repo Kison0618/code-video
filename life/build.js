@@ -21,7 +21,7 @@ const CACHE = path.join(R, 'cache');
 const args = process.argv.slice(2);
 const opt = k => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : undefined; };
 const only = opt('only');
-const jobs = +(opt('jobs') || Math.min(8, os.cpus().length));
+const jobs = +(opt('jobs') || Math.min(8, os.cpus().length));   // NVENC 消费级显卡最多同时 8 路
 const ver = opt('version') || 'v1';
 
 function run(cmd, a, o = {}) {
@@ -32,16 +32,24 @@ function run(cmd, a, o = {}) {
 function has(cmd, a = ['--version']) {
   try { return spawnSync(cmd, a, { stdio: 'ignore', shell: process.platform === 'win32' }).status === 0; } catch { return false; }
 }
-const PY = has('python3') ? 'python3' : has('python') ? 'python' : null;
+const pyOk = p => { try { return spawnSync(p, ['-c', 'import sys; assert sys.version_info >= (3, 9)'], { stdio: 'ignore' }).status === 0; } catch { return false; } };
+// 可用环境变量 PYTHON 指定解释器（例如已装好 numpy 的 conda）
+const PY = [process.env.PYTHON, 'python3', 'python'].find(p => p && pyOk(p)) || null;
 
 // —— 0. 检查环境 ——
 if (!has('ffmpeg', ['-version'])) { console.error('✗ 没找到 ffmpeg，请先安装并加入 PATH'); process.exit(1); }
 if (!PY) { console.error('✗ 没找到 Python 3'); process.exit(1); }
 if (spawnSync(PY, ['-c', 'import numpy, scipy'], { stdio: 'ignore' }).status !== 0) {
+  console.log(`（${PY} 缺少 numpy/scipy，尝试安装；若失败可设置环境变量 PYTHON 指向已装好的解释器）`);
   run(PY, ['-m', 'pip', 'install', 'numpy', 'scipy']);
 }
 if (!fs.existsSync(path.join(R, 'node_modules', 'skia-canvas'))) run(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['install', '--no-audit', '--no-fund'], { shell: process.platform === 'win32' });
 fs.mkdirSync(OUT, { recursive: true });
+// 有 NVIDIA 显卡时用 NVENC 编码，CPU 只负责画帧（--cpu-encode 强制用 x264）
+if (!args.includes('--cpu-encode') && spawnSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', 'color=s=256x256:d=0.1', '-c:v', 'h264_nvenc', '-f', 'null', '-'], { stdio: 'ignore' }).status === 0) {
+  process.env.LIFE_ENC = 'nvenc';
+  console.log('▶ 检测到 NVIDIA 显卡：画面用 NVENC 编码');
+}
 fs.mkdirSync(CACHE, { recursive: true });
 
 // —— 1. 时间轴（画面和音频共用）——
@@ -71,12 +79,12 @@ if (opt('from') || opt('to')) {
 if (!only || only === 'audio') {
   console.log('\n▶ 合成配乐与音效（约 3 分钟）');
   run(PY, [path.join(ROOT, 'audio', 'synth.py'), path.join(CACHE, 'timeline.json'), AUDIO_RAW]);
-  // 两遍 loudnorm：整体 -14 LUFS，峰值 ≤ -1 dBTP
+  // 两遍 loudnorm：整体 -14 LUFS，峰值 ≤ -1.5 dBTP（留出 AAC 编码余量）
   console.log('\n▶ 响度标准化到 -14 LUFS');
-  const m = spawnSync('ffmpeg', ['-hide_banner', '-i', AUDIO_RAW, '-af', 'loudnorm=I=-14:TP=-1:LRA=11:print_format=json', '-f', 'null', '-'], { encoding: 'utf8' });
+  const m = spawnSync('ffmpeg', ['-hide_banner', '-i', AUDIO_RAW, '-af', 'loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json', '-f', 'null', '-'], { encoding: 'utf8' });
   const js = JSON.parse(m.stderr.slice(m.stderr.lastIndexOf('{'), m.stderr.lastIndexOf('}') + 1));
   run('ffmpeg', ['-y', '-loglevel', 'error', '-i', AUDIO_RAW, '-af',
-    `loudnorm=I=-14:TP=-1:LRA=11:measured_I=${js.input_i}:measured_TP=${js.input_tp}:measured_LRA=${js.input_lra}:measured_thresh=${js.input_thresh}:offset=${js.target_offset}:linear=true`,
+    `loudnorm=I=-14:TP=-1.5:LRA=11:measured_I=${js.input_i}:measured_TP=${js.input_tp}:measured_LRA=${js.input_lra}:measured_thresh=${js.input_thresh}:offset=${js.target_offset}:linear=true`,
     '-ar', '48000', AUDIO]);
 }
 

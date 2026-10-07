@@ -12,22 +12,23 @@ const N = +(process.argv[5] || 4);
 const F0 = Math.round(s0 * K.FPS), F1 = Math.round(s1 * K.FPS);
 const dir = path.join(path.dirname(out), 'parts');
 fs.mkdirSync(dir, { recursive: true });
-const per = Math.ceil((F1 - F0) / N);
+// 切成 4 秒的小块交给进程池：各段负载差很多（图灵斑纹段最重），小块能让每个进程一直有活干
+const CHUNK = 4 * K.FPS;
 const parts = [];
-const jobs = [];
-for (let i = 0; i < N; i++) {
-  const a = F0 + i * per, b = Math.min(F1, a + per);
-  if (a >= b) break;
-  const p = path.join(dir, `part${i}.mp4`);
-  parts.push(p);
-  jobs.push(new Promise((res, rej) => {
-    const c = spawn('node', [path.join(__dirname, 'render.js'), a, b, p], { stdio: 'inherit' });
-    c.on('close', code => (code === 0 ? res() : rej(new Error('part ' + i + ' failed'))));
-  }));
+for (let a = F0; a < F1; a += CHUNK) parts.push([a, Math.min(F1, a + CHUNK), path.join(dir, `part${String(parts.length).padStart(3, '0')}.mp4`)]);
+let next = 0;
+function worker() {
+  if (next >= parts.length) return Promise.resolve();
+  const [a, b, p] = parts[next++];
+  return new Promise((res, rej) => {
+    const c = spawn('node', [path.join(__dirname, 'render.js'), a, b, p], { stdio: ['ignore', 'ignore', 'inherit'] });
+    c.on('close', code => (code === 0 ? res() : rej(new Error(`frames ${a}-${b} failed`))));
+  }).then(() => { console.log(`  已完成 ${path.basename(p)}（共 ${parts.length} 块）`); return worker(); });
 }
+const jobs = Array.from({ length: Math.min(N, parts.length) }, worker);
 Promise.all(jobs).then(() => {
   const list = path.join(dir, 'list.txt');
-  fs.writeFileSync(list, parts.map(p => `file '${path.resolve(p).replace(/\\/g, '/')}'`).join('\n'));
+  fs.writeFileSync(list, parts.map(([, , p]) => `file '${path.resolve(p).replace(/\\/g, '/')}'`).join('\n'));
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', list, '-c', 'copy', out], { stdio: 'inherit' });
   console.log('video ->', out);
 }).catch(e => { console.error(e); process.exit(1); });

@@ -37,7 +37,9 @@ function seedPos(j, n, aDeg) {
 
 function drawSunflower(ctx, t) {
   if (t < 164.8 || t > 201) return;
-  const n = count(t), aDeg = alphaDeg(t), z = zoom(t);
+  const n = count(t), aDeg = alphaDeg(t);
+  // 拉远过程中花盘下沿不越过 y≈880，给字幕留出位置
+  const z = Math.min(zoom(t), 380 / (Math.sqrt(n + 0.5) * c + 12));
   const off = clamp(Math.abs(aDeg - GOLD) / 0.5);
   const fade = 1 - smooth(prog(t, 197.6, 200.2));
   const nInt = Math.ceil(n);

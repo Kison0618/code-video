@@ -76,8 +76,10 @@ def thump(f0=58, f1=38, dur=0.45, decay=9.0):
     f = f1 + (f0 - f1) * np.exp(-x * 18)
     ph = 2 * np.pi * np.cumsum(f) / SR
     y = np.sin(ph) * np.exp(-x * decay)
-    click = lp(rng.standard_normal(len(x)) * np.exp(-x * 120), 900)
-    return y + 0.25 * click
+    # 二、三次泛音（约 80–170 Hz）：手机和笔记本扬声器放不出 40 Hz，靠它们让心跳"听得见"
+    body = (0.45 * np.sin(2 * ph) + 0.22 * np.sin(3 * ph)) * np.exp(-x * decay * 1.5)
+    click = lp(rng.standard_normal(len(x)) * np.exp(-x * 120), 1200)
+    return 0.85 * y + body + 0.3 * click
 
 def boom(strength=1.0):
     x = tt(3.5)
@@ -269,6 +271,7 @@ fade[: int(0.8 * SR)] = np.linspace(0, 1, int(0.8 * SR))
 e0, e1 = int(350.4 * SR), int(352.8 * SR)
 fade[e0:e1] = np.linspace(1, 0, e1 - e0); fade[e1:] = 0
 mix = mix * fade
+mix = np.stack([hp(mix[0], 28), hp(mix[1], 28)])   # 去掉听不见、只占动态余量的超低频
 mix = mix[:, : int(DUR * SR)]
 mix = mix / (np.abs(mix).max() + 1e-9) * 0.9
 mix = np.tanh(mix * 1.15) / np.tanh(1.15)   # 柔和削波

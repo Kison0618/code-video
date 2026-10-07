@@ -11,6 +11,43 @@ const EMB = [
 ];
 const ET = i => 315.4 + i * 0.9;
 const events = EMB.map((_, i) => ({ t: ET(i), type: 'emblem', i }));
+// "下一段"前方亮起的那一粒新字母
+const NEXT_T = 340.6;
+events.push({ t: NEXT_T, type: 'beatflash' });
+
+// 线上的"错字"：第二幕的红色突变点回到终幕，322 秒重击时绽放成金色——不完美正是美的来源
+const FLECKS = (() => { const r = mulberry32(31); return Array.from({ length: 46 }, () => ({ x: -20 + r() * (YOU - 90), ph: r() * 6.283, s: 0.6 + r() * 0.8, d: r() * 0.5 })); })();
+const threadY = (x, t) => Y + 3 * Math.sin(x * 0.012 - t * 0.9);
+function drawFlecks(ctx, t, embFade) {
+  const appear = smooth(prog(t, 315.6, 317.4));
+  if (appear <= 0) return;
+  for (const f of FLECKS) {
+    const y = threadY(f.x, t);
+    const toGold = smooth(prog(t, 322 + f.d * 0.4, 323.0 + f.d * 0.4));
+    const col = mix(C.rose, C.gold, toGold);
+    // 金色之前轻轻呼吸，像还没被接受的"错误"
+    const breathe = 0.85 + 0.15 * Math.sin(t * 2.2 * f.s + f.ph);
+    const a = appear * lerp(breathe, 0.75, toGold) * embFade;
+    const pop = t >= 322 + f.d * 0.4 ? Math.exp(-(t - 322 - f.d * 0.4) * 3.2) : 0;
+    glow(ctx, f.x, y, lerp(10 + 5 * f.s, 6 + 3 * f.s, toGold) + 34 * pop, col, a * (lerp(1.1, 0.8, toGold) + 1.2 * pop));
+    ctx.fillStyle = rgba(mix(col, C.ivory, 0.35), a);
+    ctx.beginPath(); ctx.arc(f.x, y, lerp(2.4, 1.6, toGold) * f.s + 0.6, 0, 6.283); ctx.fill();
+  }
+}
+// "从没有停下"：沿线流向"你"的光脉冲
+function drawPulses(ctx, t, embFade) {
+  const a = smooth(prog(t, 322.3, 323.6)) * embFade;
+  if (a <= 0) return;
+  const span = YOU + 60;
+  for (let k = 0; k < 6; k++) {
+    const x = (((t - 322) * 300 + k * span / 6) % span) - 60;
+    const near = 1 - smooth(prog(x, YOU - 160, YOU));   // 汇入"你"时淡出
+    for (let j = 0; j < 5; j++) {
+      const xx = x - j * 14;
+      glow(ctx, xx, threadY(xx, t), 12 - j * 1.8, C.gold, a * near * 0.55 * (1 - j / 5));
+    }
+  }
+}
 
 // —— 五个小图标 ——
 function iconAncestors(ctx, x, y, a) {
@@ -66,8 +103,10 @@ function draw(ctx, t) {
   const pts = [];
   for (let x = -40; x <= YOU; x += 8) pts.push([x, Y + 3 * Math.sin(x * 0.012 - t * 0.9)]);
   glowLine(ctx, pts, C.gold, lineA * (0.85 + 0.6 * flare), 1.6 + 1.6 * flare, 1 + flare);
-  // 五盏灯
   const embFade = 1 - smooth(prog(t, 343.4, 345.6));
+  drawFlecks(ctx, t, embFade);
+  drawPulses(ctx, t, embFade);
+  // 五盏灯
   EMB.forEach(([x, zh, en], i) => {
     const a = smooth(prog(t, ET(i), ET(i) + 0.9)) * embFade;
     if (a <= 0) return;
@@ -105,6 +144,14 @@ function draw(ctx, t) {
     ctx.lineWidth = 1.4;
     ctx.beginPath(); ctx.moveTo(YOU + 22, Y); ctx.lineTo(reach, Y); ctx.stroke();
     ctx.restore();
+  }
+  // 虚线前方：一粒还没有写定的新字母
+  const na = smooth(prog(t, NEXT_T, NEXT_T + 1.2)) * (1 - smooth(prog(t, 349.5, 351.5)));
+  if (na > 0) {
+    const nx = YOU + 125, br = 0.7 + 0.3 * Math.sin((t - NEXT_T) * 2.4);
+    glow(ctx, nx, Y, 16, C.rose, na * 0.7 * br);
+    ctx.fillStyle = rgba(mix(C.rose, C.ivory, 0.3), na * 0.9);
+    ctx.beginPath(); ctx.arc(nx, Y, 2.2, 0, 6.283); ctx.fill();
   }
   ctx.restore();
   // 片名

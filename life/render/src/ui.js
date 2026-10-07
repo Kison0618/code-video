@@ -77,6 +77,14 @@ function subtitles(ctx, t) {
     const v = vis(t, a, b, 0.55, 0.45);
     if (v <= 0) continue;
     const rise = (1 - smooth((t - a) / 0.8)) * 6;
+    // 字幕下方的柔和压暗，画面铺满或掠过字幕区时保证可读
+    const tw = K.measure(ctx, zh, { size: 40, weight: 400, spacing: 0.04 });
+    ctx.save();
+    ctx.translate(W / 2, 980); ctx.scale((tw / 2 + 140) / 70, 1);
+    const sg = ctx.createRadialGradient(0, 0, 0, 0, 0, 70);
+    sg.addColorStop(0, `rgba(3,4,7,${0.62 * v})`); sg.addColorStop(0.6, `rgba(3,4,7,${0.4 * v})`); sg.addColorStop(1, 'rgba(3,4,7,0)');
+    ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(0, 0, 70, 0, 6.2832); ctx.fill();
+    ctx.restore();
     text(ctx, zh, W / 2, 962 + rise, { size: 40, weight: 400, alpha: 0.94 * v, spacing: 0.04 });
     text(ctx, en, W / 2, 1009 + rise, { size: 27, family: 'Garamond', style: 'italic', weight: 400, alpha: 0.58 * v });
   }
