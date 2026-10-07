@@ -4,7 +4,7 @@
 //   node build.js                       完整构建（成片在 render/out/）
 //   node build.js --from 46 --to 60    只渲染一段（带音乐），几分钟就能看效果
 //   node build.js --jobs 8              并行进程数（默认 = CPU 线程数，最多 12）
-//   node build.js --version v2          成片版本号（默认 v1；同名成片已存在会停下，不覆盖）
+//   node build.js --version v2          成片版本号（默认 v2；同名成片已存在会停下，不覆盖）
 'use strict';
 const { spawnSync } = require('child_process');
 const fs = require('fs');
@@ -16,7 +16,7 @@ const AUDIO = path.join(ROOT, 'assets', 'teeth.m4a');
 const args = process.argv.slice(2);
 const opt = k => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : undefined; };
 const jobs = +(opt('jobs') || Math.min(12, os.cpus().length));
-const ver = opt('version') || 'v1';
+const ver = opt('version') || 'v2';
 const win = process.platform === 'win32';
 
 function run(cmd, a, env) {
@@ -51,7 +51,7 @@ if (opt('from') || opt('to')) {
 }
 
 const FINAL = path.join(OUT, `Teeth_${ver}_1080p60.mp4`), SHARE = path.join(OUT, `Teeth_${ver}_分享版.mp4`);
-if (fs.existsSync(FINAL)) { console.error(`✗ ${FINAL} 已存在。为了不覆盖旧版本，请加 --version v2`); process.exit(1); }
+if (fs.existsSync(FINAL)) { console.error(`✗ ${FINAL} 已存在。为了不覆盖旧版本，请加 --version v3`); process.exit(1); }
 const VIDEO = path.join(OUT, 'video.mp4');
 console.log('\n▶ 渲染画面（1920×1080，60 帧）');
 run('node', [path.join('src', 'render_all.js'), VIDEO, '0', '', String(jobs)], env);

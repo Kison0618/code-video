@@ -10,20 +10,26 @@ const font = (pkg, file) => path.join(GF, pkg, file.split('_').slice(1).join('_'
 FontLibrary.use('Garamond', ['CormorantGaramond_300Light.ttf', 'CormorantGaramond_400Regular.ttf', 'CormorantGaramond_500Medium.ttf',
   'CormorantGaramond_300Light_Italic.ttf', 'CormorantGaramond_400Regular_Italic.ttf'].map(f => font('cormorant-garamond', f)));
 FontLibrary.use('Cinzel', ['Cinzel_400Regular.ttf', 'Cinzel_600SemiBold.ttf', 'Cinzel_700Bold.ttf', 'Cinzel_900Black.ttf'].map(f => font('cinzel', f)));
+FontLibrary.use('Song', ['NotoSerifSC_300Light.ttf', 'NotoSerifSC_400Regular.ttf', 'NotoSerifSC_500Medium.ttf', 'NotoSerifSC_700Bold.ttf'].map(f => font('noto-serif-sc', f)));
 FontLibrary.use('Mono', ['JetBrainsMono_300Light.ttf', 'JetBrainsMono_400Regular.ttf'].map(f => font('jetbrains-mono', f)));
 
-// 配色：黑、骨白、血红；主歌里加一点冷钢蓝
+// 配色 v2："一颗心的两面"。冷的青、热的品红，中间是骨白；红色只作极少的点缀
 const C = {
-  bg: [4, 3, 4],
+  bg: [5, 5, 12],
+  ink: [10, 9, 20],
   bone: [236, 226, 206],
-  white: [255, 250, 244],
-  blood: [214, 18, 42],
-  ember: [255, 70, 40],
-  wine: [110, 6, 22],
-  steel: [140, 168, 190],
-  ice: [200, 225, 240],
-  gold: [240, 196, 116],
   ivory: [236, 226, 206],
+  white: [255, 250, 244],
+  cyan: [70, 225, 235],
+  teal: [30, 150, 170],
+  ice: [190, 230, 250],
+  magenta: [255, 60, 160],
+  pink: [255, 140, 200],
+  violet: [150, 95, 255],
+  amber: [255, 175, 80],
+  gold: [240, 196, 116],
+  steel: [140, 168, 190],
+  blood: [230, 40, 80],
 };
 const rgba = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
 const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
@@ -181,7 +187,16 @@ function proj(p, camZ = 900, fov = 900, cx = W / 2, cy = H / 2) {
   return [cx + p[0] * s, cy + p[1] * s, s];
 }
 
+function measure(ctx, str, o = {}) {
+  const { size = 32, family = 'Garamond', weight = 400, style = 'normal', spacing = 0 } = o;
+  ctx.save(); ctx.font = `${style} ${weight} ${size}px ${family}`;
+  const chars = [...str];
+  const w = chars.reduce((s, ch) => s + ctx.measureText(ch).width, 0) + spacing * size * Math.max(0, chars.length - 1);
+  ctx.restore();
+  return w;
+}
+
 module.exports = {
   W, H, FPS, Canvas, C, rgba, mix, clamp, lerp, prog, smooth, easeInOut, easeOut, easeIn, easeOutExpo, vis,
-  mulberry32, hash, noise1, glow, glowSprite, glowLine, glowSegs, line, partial, circlePts, text, rot3, proj,
+  mulberry32, hash, noise1, glow, glowSprite, glowLine, glowSegs, line, partial, circlePts, text, measure, rot3, proj,
 };
