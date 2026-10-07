@@ -3,6 +3,7 @@
 const K = require('./core');
 const UI = require('./ui');
 const SCENES = require('./scenes');
+const POST = require('./post');
 
 function renderFrame(ctx, t, frame) {
   ctx.save();
@@ -10,7 +11,9 @@ function renderFrame(ctx, t, frame) {
   ctx.globalAlpha = 1;
   UI.background(ctx, t, starsFor(t));
   for (const s of SCENES) if (t >= s.start - 1 && t <= s.end + 1) s.draw(ctx, t);
-  UI.hitFlash(ctx, t);
+  const hf = UI.hitFlash(ctx, t);
+  POST.bloom(ctx, t, hf * 0.35);
+  POST.bokeh(ctx, t);
   UI.quotes(ctx, t);
   UI.subtitles(ctx, t);
   UI.finish(ctx, t, frame);

@@ -3,6 +3,7 @@
 const { spawn } = require('child_process');
 const K = require('./core');
 const { renderFrame } = require('./frame');
+const { toSrc } = require('./timeline');
 
 const [a, b, out] = process.argv.slice(2);
 const f0 = +a, f1 = +b;
@@ -22,7 +23,8 @@ function write(buf) {
 (async () => {
   const t0 = Date.now();
   for (let f = f0; f < f1; f++) {
-    renderFrame(ctx, f / K.FPS, f);
+    ctx.reset();
+    renderFrame(ctx, toSrc(f / K.FPS), f);
     await write(cv.toBufferSync('raw'));   // RGBA；在循环里引用 cv，防止画布被回收
     if ((f - f0) % 600 === 0) console.log(`[${out}] ${f}/${f1}  ${((Date.now() - t0) / 1000).toFixed(0)}s`);
   }

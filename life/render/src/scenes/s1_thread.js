@@ -1,7 +1,7 @@
 // 第零幕 冷开场 + 第一幕 祖先（0–97 秒）
 'use strict';
 const K = require('../core');
-const { W, H, C, clamp, lerp, prog, smooth, easeInOut, easeOut, easeIn, easeOutExpo, vis, glow, glowLine, line, partial, text, fmt, mulberry32, rgba } = K;
+const { W, H, C, clamp, lerp, prog, smooth, easeInOut, easeOut, easeIn, easeOutExpo, vis, glow, glowLine, line, partial, text, fmt, mulberry32, rgba, mix } = K;
 const TL = require('../timeline');
 const UI = require('../ui');
 
@@ -241,20 +241,20 @@ const TREE = (() => {
       const last = L.pts[L.pts.length - 1];
       let y = last[1];
       L.vy = L.vy * 0.985 + (r() - 0.5) * 0.28;
-      for (const M of alive) { if (M === L) continue; const my = M.pts[M.pts.length - 1][1]; const d = y - my; if (Math.abs(d) < 26) L.vy += Math.sign(d || (r() - 0.5)) * 0.05 * (26 - Math.abs(d)) / 26; }
-      if (y < 190) L.vy += 0.3; if (y > 890) L.vy -= 0.3;
+      for (const M of alive) { if (M === L) continue; const my = M.pts[M.pts.length - 1][1]; const d = y - my; if (Math.abs(d) < 14) L.vy += Math.sign(d || (r() - 0.5)) * 0.05 * (14 - Math.abs(d)) / 14; }
+      if (y < 150) L.vy += 0.3; if (y > 930) L.vy -= 0.3;
       if (Math.abs(y - 540) < 26) L.vy += Math.sign(y - 540 || 1) * 0.35;
       L.vy = Math.max(-3.2, Math.min(3.2, L.vy));
       y += L.vy;
       L.pts.push([x, y]);
-      const pDie = 0.0035 + 0.00045 * alive.length + (x > X1 - 260 ? 0.006 : 0);
+      const pDie = 0.003 + 0.00012 * alive.length + (x > X1 - 260 ? 0.006 : 0);
       if (x > X0 + 30 && r() < pDie) { L.dead = true; L.deadX = x; continue; }
       next.push(L);
     }
     // 分叉
     const born = [];
     for (const L of next) {
-      const pSplit = alive.length < 34 ? 0.03 : 0.004;
+      const pSplit = alive.length < 120 ? 0.045 : 0.004;
       if (r() < pSplit * (L.gold ? 0.8 : 1)) {
         const last = L.pts[L.pts.length - 1];
         const dir = r() < 0.5 ? -1 : 1;
@@ -298,7 +298,8 @@ function drawDeepTime(ctx, t) {
     ctx.lineJoin = 'round';
     for (const L of TREE.lines) {
       if (L.gold) continue;
-      const vis_ = L.pts.filter(p => p[0] <= front);
+      // 各点 x 以 5px 递增，直接切片，比逐点 filter 快得多
+      const vis_ = front >= L.pts[L.pts.length - 1][0] ? L.pts : L.pts.slice(0, Math.max(0, Math.floor((front - L.pts[0][0]) / 5) + 1));
       if (vis_.length < 2) continue;
       const dead = L.dead;
       // 熄灭：闪一下玫红，然后变暗
@@ -311,11 +312,24 @@ function drawDeepTime(ctx, t) {
         a = 0.55 + 0.2 * smooth(prog(t, 86.0, 88.0));
       }
       a *= treeA * (1 - smooth(prog(t, 92.6, 94.4)));
-      line(ctx, vis_, col, a, 0.9);
+      line(ctx, vis_, col, a * 0.8, 0.7);
       if (dead && front >= L.deadX) {
         const tip = vis_[vis_.length - 1];
         const fl = t >= L.tOut ? Math.exp(-(t - L.tOut) * 3) : 0;
         if (fl > 0.02) glow(ctx, tip[0], tip[1], 14, C.rose, 0.9 * fl * treeA);
+        // 熄灭的枝头飘起几粒余烬，慢慢变灰
+        const age = t - L.tOut;
+        if (age > 0 && age < 3.2) {
+          const ea = treeA * (1 - smooth(prog(t, 92.6, 94.4)));
+          for (let k = 0; k < 4; k++) {
+            const sd = (L.born * 7.31 + k * 13.7) % 1, sd2 = (L.born * 3.17 + k * 5.3) % 1;
+            const lf = 1.8 + 1.4 * sd;
+            if (age > lf) continue;
+            const u = age / lf;
+            const ex = tip[0] + (sd2 - 0.5) * 30 * u + 10 * u, ey = tip[1] - (18 + 40 * sd) * u;
+            glow(ctx, ex, ey, 4 + 3 * sd, mix(C.rose, [120, 120, 130], u), 0.7 * (1 - u) * ea);
+          }
+        }
         ctx.fillStyle = rgba(t >= L.tOut ? C.rose : C.cyan, (t >= L.tOut ? 0.35 : 0.6) * treeA * (1 - smooth(prog(t, 92.6, 94.4))));
         ctx.beginPath(); ctx.arc(tip[0], tip[1], 1.8, 0, 6.283); ctx.fill();
       }

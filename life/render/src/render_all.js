@@ -7,12 +7,12 @@ const K = require('./core');
 const TL = require('./timeline');
 
 const out = process.argv[2] || 'out/video.mp4';
-const s0 = +(process.argv[3] || 0), s1 = +(process.argv[4] || TL.DURATION);
+const s0 = +(process.argv[3] || 0), s1 = +(process.argv[4] || TL.OUT_DURATION);
 const N = +(process.argv[5] || 4);
 const F0 = Math.round(s0 * K.FPS), F1 = Math.round(s1 * K.FPS);
 const dir = path.join(path.dirname(out), 'parts');
 fs.mkdirSync(dir, { recursive: true });
-// 切成 4 秒的小块交给进程池：各段负载差很多（图灵斑纹段最重），小块能让每个进程一直有活干
+// 切成 4 秒的小块交给进程池，平衡各段负载（每帧 ctx.reset() 已防止画布指令累积占内存）
 const CHUNK = 4 * K.FPS;
 const parts = [];
 for (let a = F0; a < F1; a += CHUNK) parts.push([a, Math.min(F1, a + CHUNK), path.join(dir, `part${String(parts.length).padStart(3, '0')}.mp4`)]);

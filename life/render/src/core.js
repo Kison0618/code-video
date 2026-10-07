@@ -78,6 +78,8 @@ function keyframes(list, t) {
 // 光晕贴图：高斯衰减的白色圆，按颜色缓存
 const glowCache = new Map();
 function glowSprite(c) {
+  // 颜色量化到 8 级步长再缓存：渐变色（余烬、红转金）不会每帧生成新贴图
+  c = c.map(v => Math.min(255, Math.round(v / 12) * 12));
   const key = c.join(',');
   if (glowCache.has(key)) return glowCache.get(key);
   const S = 256, cv = new Canvas(S, S), x = cv.getContext('2d');
@@ -91,6 +93,7 @@ function glowSprite(c) {
     d[k] = c[0]; d[k + 1] = c[1]; d[k + 2] = c[2]; d[k + 3] = Math.round(a * 255);
   }
   x.putImageData(img, 0, 0);
+  if (glowCache.size > 300) glowCache.delete(glowCache.keys().next().value);   // 上限约 80 MB
   glowCache.set(key, cv);
   return cv;
 }

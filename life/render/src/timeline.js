@@ -2,6 +2,24 @@
 'use strict';
 
 const DURATION = 353;
+const WARP = [[0, 0], [3, 2.2], [23.5, 18.6], [34, 26.0], [97, 73.25]];
+
+function mapTime(time, inputColumn) {
+  const outputColumn = 1 - inputColumn;
+  for (let index = 1; index < WARP.length; index++) {
+    const start = WARP[index - 1], end = WARP[index];
+    if (time <= end[inputColumn]) {
+      const progress = (time - start[inputColumn]) / (end[inputColumn] - start[inputColumn]);
+      return start[outputColumn] + progress * (end[outputColumn] - start[outputColumn]);
+    }
+  }
+  const last = WARP[WARP.length - 1];
+  return time + last[outputColumn] - last[inputColumn];
+}
+
+const toSrc = outputTime => mapTime(outputTime, 1);
+const toOut = sourceTime => mapTime(sourceTime, 0);
+const OUT_DURATION = toOut(DURATION);
 
 // [开始, 结束, 中文, 英文]
 const SUBS = [
@@ -89,10 +107,20 @@ const HITS = [
 // 蓄力（riser）：[开始, 结束]
 const RISERS = [[19.5, 23.5], [54.0, 57.0], [147.5, 151.0], [196.5, 200.0], [317.5, 322.0], [340.5, 344.0]];
 
-module.exports = { DURATION, SUBS, QUOTES, HEARTBEATS, HEART_WINDOWS, BPM, heart, HITS, RISERS };
+module.exports = { DURATION, WARP, toSrc, toOut, OUT_DURATION, SUBS, QUOTES, HEARTBEATS, HEART_WINDOWS, BPM, heart, HITS, RISERS };
 
 if (require.main === module) {
   // 导出给 Python 音频合成
-  const ex = require('./events');
-  process.stdout.write(JSON.stringify({ DURATION, SUBS, HEARTBEATS, HITS, RISERS, EVENTS: ex.events() }, null, 1));
+  if (process.argv.includes('--check-subs')) {
+    const durations = SUBS.map(([start, end, text]) => ({
+      source: `${start}–${end}`, output: `${toOut(start).toFixed(3)}–${toOut(end).toFixed(3)}`,
+      seconds: +(toOut(end) - toOut(start)).toFixed(3),
+      short: toOut(end) - toOut(start) < 2.8, text,
+    }));
+    console.table(durations);
+    console.log(`字幕共 ${durations.length} 句；小于 2.8 秒：${durations.filter(subtitle => subtitle.short).length} 句。`);
+  } else {
+    const ex = require('./events');
+    process.stdout.write(JSON.stringify({ DURATION, WARP, OUT_DURATION, SUBS, HEARTBEATS, HITS, RISERS, EVENTS: ex.events() }, null, 1));
+  }
 }

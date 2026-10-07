@@ -2,6 +2,7 @@
 'use strict';
 const K = require('./core');
 const { renderFrame } = require('./frame');
+const { toSrc, toOut } = require('./timeline');
 
 const [outFile, ...times] = process.argv.slice(2);
 const ts = times.map(Number);
@@ -14,12 +15,14 @@ sc.fillStyle = '#000'; sc.fillRect(0, 0, sheet.width, sheet.height);
 const cv = new K.Canvas(K.W, K.H), ctx = cv.getContext('2d');
 ts.forEach((t, i) => {
   const t0 = Date.now();
-  renderFrame(ctx, t, Math.round(t * K.FPS));
+  const outputTime = toOut(t);
+  ctx.reset();
+  renderFrame(ctx, toSrc(outputTime), Math.round(outputTime * K.FPS));
   const ms = Date.now() - t0;
   const x = (i % cols) * sw, y = Math.floor(i / cols) * sh;
   sc.drawImage(cv, x, y, sw, sh);
   sc.font = '20px Mono'; sc.fillStyle = '#ff0';
-  sc.fillText(`${t.toFixed(1)}s  ${ms}ms`, x + 10, y + 26);
+  sc.fillText(`src ${t.toFixed(1)}s / out ${outputTime.toFixed(3)}s  ${ms}ms`, x + 10, y + 26);
 });
 sheet.toFileSync(outFile);
 console.log('wrote', outFile);

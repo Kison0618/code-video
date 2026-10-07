@@ -8,13 +8,28 @@ from scipy.signal import butter, sosfilt, fftconvolve
 SR = 48000
 TL = json.load(open(sys.argv[1], encoding='utf-8'))
 OUT = sys.argv[2]
-DUR = TL['DURATION']
+DUR = TL['OUT_DURATION']
+WARP = TL['WARP']
+
+def map_time(time, input_column):
+    output_column = 1 - input_column
+    for start, end in zip(WARP, WARP[1:]):
+        if time <= end[input_column]:
+            progress = (time - start[input_column]) / (end[input_column] - start[input_column])
+            return start[output_column] + progress * (end[output_column] - start[output_column])
+    last = WARP[-1]
+    return time + last[output_column] - last[input_column]
+
+def to_out(source_time): return map_time(source_time, 0)
+def to_src(output_time): return map_time(output_time, 1)
+
 N = int(DUR * SR) + SR * 4
 rng = np.random.default_rng(2026)
 
 def mtof(m): return 440.0 * 2 ** ((m - 69) / 12)
 def zeros(): return np.zeros(N, np.float32)
-def place(buf, t, sig, gain=1.0):
+def place(buf, t, sig, gain=1.0, out_time=False):
+    if not out_time: t = to_out(t)
     i = int(t * SR)
     if i >= N: return
     j = min(N, i + len(sig))
@@ -136,9 +151,10 @@ sec([(315.0, 3.5, 'Bbmaj7'), (318.5, 3.5, 'C')], 0.85)
 sec([(322.0, 8.0, 'Dmaj'), (330.0, 8.0, 'Dmaj9')], 1.0)
 sec([(344.0, 8.5, 'Dmaj9')], 0.9)
 for a, d, name, vol in SECTIONS:
+    duration = to_out(a + d) - to_out(a)
     for m in CH[name]:
-        place(pad, a, pad_note(m, d, a=1.6 if d > 3 else 0.8, r=2.5), vol * 0.07)
-    place(pad, a, pad_note(CH[name][0] - 12, d, a=2.0, r=2.5, bright=0.2), vol * 0.06)
+        place(pad, a, pad_note(m, duration, a=1.6 if duration > 3 else 0.8, r=2.5), vol * 0.07)
+    place(pad, a, pad_note(CH[name][0] - 12, duration, a=2.0, r=2.5, bright=0.2), vol * 0.06)
 # 第 322 秒的高潮再加一层高八度
 for m in CH['Dmaj']:
     place(pad, 322.0, pad_note(m + 12, 8.0, a=0.4, r=4.0, bright=0.7), 0.035)
@@ -156,17 +172,18 @@ def chord_at(t):
 ARP_RANGES = [(34.5, 86.5, 0.5), (97.0, 143.0, 0.25), (226.0, 257.5, 0.5), (266.0, 300.5, 0.5), (301.0, 321.8, 0.25)]
 for a, b, step in ARP_RANGES:
     k = 0
-    t = a
-    while t < b:
-        ch, vol = chord_at(t)
+    output_start, output_end = to_out(a), to_out(b)
+    output_time = output_start
+    while output_time < output_end:
+        ch, vol = chord_at(to_src(output_time))
         if ch:
             notes = [n + 12 for n in ch] + [ch[1] + 24]
             pat = [0, 2, 1, 3, 2, 4, 1, 2]
             m = notes[pat[k % len(pat)] % len(notes)]
             g = 0.05 * vol * (1.0 if step >= 0.5 else 0.7)
-            if a == 301.0: g *= 0.6 + 0.8 * (t - a) / (b - a)   # 高潮前逐渐加强
-            place(arp, t, pluck(m, 1.4 if step >= 0.5 else 0.7), g)
-        t += step; k += 1
+            if a == 301.0: g *= 0.6 + 0.8 * (output_time - output_start) / (output_end - output_start)
+            place(arp, output_time, pluck(m, 1.4 if step >= 0.5 else 0.7), g, out_time=True)
+        output_time += step; k += 1
 
 # ———————————— 画面事件 → 音效 ————————————
 PENTA = [62, 65, 67, 69, 72, 74, 77, 79, 81, 84]  # D 小调五声
@@ -219,7 +236,7 @@ for t, s in TL['HITS']:
     place(hits, t, boom(s), 0.55)
     place(hits, t, pad_note(38, 2.0, a=0.01, r=2.5, bright=0.1), 0.12 * s)
 for a, b in TL['RISERS']:
-    place(risers, a, riser(b - a), 0.09)
+    place(risers, a, riser(to_out(b) - to_out(a)), 0.09)
 
 # 流动段的水声（低通的粉红噪声，缓慢起伏）
 def pink(n):
@@ -234,6 +251,87 @@ place(water, 222.5, wseg, 0.5)
 tx = tt(22)
 turing = (np.sin(2 * np.pi * 73.4 * tx) + np.sin(2 * np.pi * 74.1 * tx)) * env_adsr(len(tx), 3.0, 4.0)
 place(lowfx, 200.0, turing, 0.06)
+
+# ———————————— 真实素材质感层（Mixkit 免费授权，叠在合成音色上，不替换）————————————
+import os, warnings
+from scipy.signal import resample_poly
+SAMP = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'samples')
+def load(name, semis=0.0):
+    """读 WAV → 峰值归一的 float32（立体声 2×n），重采样到 48k；semis 为移调半音数（变速移调）"""
+    from scipy.io import wavfile
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        sr, x = wavfile.read(os.path.join(SAMP, name + '.wav'))
+    x = x.astype(np.float32)
+    if x.ndim == 1: x = np.stack([x, x], 1)
+    x = x.T / (np.abs(x).max() + 1e-9)
+    up, down = 160, 147                       # 44.1k → 48k
+    if semis:                                 # 移调：再按频率比重采样
+        r = 2 ** (semis / 12)
+        up, down = int(round(160 * 1000)), int(round(147 * 1000 * r))
+        g = math.gcd(up, down); up, down = up // g, down // g
+    return np.stack([resample_poly(c, up, down) for c in x]).astype(np.float32)
+def fades(x, a=0.01, r=0.05):
+    n = x.shape[-1]; e = np.ones(n, np.float32)
+    na, nr = min(n, int(a * SR)), min(n, int(r * SR))
+    if na: e[:na] = np.linspace(0, 1, na)
+    if nr: e[-nr:] *= np.linspace(1, 0, nr)
+    return x * e
+real = np.zeros((2, N), np.float32)        # 立体声质感总线
+def place_st(t, sig, gain, out_time=False):
+    if not out_time: t = to_out(t)
+    i = int(t * SR)
+    if i < 0: sig = sig[:, -i:]; i = 0
+    if i >= N: return
+    j = min(N, i + sig.shape[1]); real[:, i:j] += sig[:, : j - i] * gain
+def loop_to(x, n, xf=2.0):
+    """交叉淡化循环到 n 个采样点"""
+    k = int(xf * SR); out = np.zeros((2, n), np.float32); pos = 0; seg = x.shape[1] - k
+    ramp = np.linspace(0, 1, k, dtype=np.float32)
+    while pos < n:
+        y = x.copy(); y[:, :k] *= ramp if pos else 1; y[:, -k:] *= ramp[::-1]
+        j = min(n, pos + y.shape[1]); out[:, pos:j] += y[:, : j - pos]; pos += seg
+    return out
+
+# 心跳：从慢心跳录音里切一拍"扑-通"（3.25–4.45 秒），起音对齐每个拍点
+hb = load('heartbeat_slow'); hb1 = fades(hb[:, int(3.25 * SR):int(4.45 * SR)], 0.005, 0.25)
+hb1 = np.stack([hp(c, 30) for c in hb1])
+for b in TL['HEARTBEATS']:
+    g = 0.5 if b < 344 else 0.5 * max(0.0, 1 - (b - 344) / 8)
+    place_st(b - 0.05, hb1, 0.32 * g / 0.5)
+# 重击：深沉的真实冲击，起音（0.08 秒）对齐
+imp = load('impact_deep')
+for t, sv in TL['HITS']:
+    place_st(to_out(t) - 0.08, imp, 0.42 * sv, out_time=True)
+# 蓄力：风感 swoosh 的能量峰（1.17 秒）对齐到蓄力终点
+sw = fades(load('swoosh_windy'), 0.3, 0.6)
+for a, b in TL['RISERS']:
+    place_st(to_out(b) - 1.17, sw, 0.22, out_time=True)
+# 晶莹泛音：关键铃音事件叠水晶铃，按事件轮换移调
+CH_SEMI = [0, 2, 5, 7, -3, 4]
+chimes = {s_: fades(load('chime_crystal', s_), 0.002, 0.4) for s_ in CH_SEMI}
+ci = 0
+for e in TL['EVENTS']:
+    if e['type'] in ('mark', 'letter', 'bloom', 'emblem', 'untwist', 'gen'):
+        place_st(e['t'], chimes[CH_SEMI[ci % len(CH_SEMI)]], 0.05 if e['type'] != 'gen' else 0.03); ci += 1
+# 水流：铺在"物质流过漩涡"段落（源时间 222.5–270）
+wt0, wt1 = to_out(222.5), to_out(270.0)
+wf = loop_to(load('water_flow'), int((wt1 - wt0) * SR))
+wf = np.stack([lp(c, 2600) for c in wf]); wf = fades(wf, 4.0, 4.0)
+place_st(wt0, wf, 0.16, out_time=True)
+# 气泡：内共生段稀疏点缀，降调更"有机"
+rb = np.random.default_rng(31)
+bubs = [fades(load('bubble_liquid', sm), 0.002, 0.2) for sm in (-4, -6, -8)]
+for k in range(16):
+    place_st(268.5 + k * 1.95 + rb.random() * 0.9, bubs[k % 3], 0.05 + 0.04 * rb.random())
+# 底层：低沉风声嗡鸣铺全片，片头 3 秒后进，图灵与细胞段稍高
+dr = loop_to(load('drone_wind'), N, 3.0)
+dr = np.stack([lp(c, 1800) for c in dr])
+denv = np.ones(N, np.float32) * 0.07
+tt_ = np.arange(N) / SR
+src_ = np.interp(tt_, [to_out(x_) for x_ in (0, 3, 6, 200, 204, 226, 268, 272, 300, 350.4, 352.8)],
+                 [0, 0, 1, 1, 1.6, 1.0, 1.0, 1.5, 1.0, 1.0, 0])
+real += dr * (denv * src_)
 
 # ———————————— 混音 ————————————
 def ir(dur=3.6, decay=2.4, lpf=5200):
@@ -258,17 +356,18 @@ music = stereo(pad_f, 0, 0.8) + stereo(arp_f, 0.15, 0.6) + stereo(bells_f, -0.1,
 music = music + verb(music, 0.55)
 fx = stereo(lp(hits, 2500), 0) + stereo(heart, 0) * 0.9 + stereo(risers, 0, 0.7) + stereo(water, 0, 0.9)
 fx = fx + verb(stereo(lp(hits, 2500) + risers, 0, 0.5), 0.25)
+fx = fx + real + verb(real, 0.18)
 # 重击时让音乐微微让位（侧链）
 duck = np.ones(N, np.float32)
 for t, s in TL['HITS']:
-    i = int(t * SR); n = int(1.2 * SR)
+    i = int(to_out(t) * SR); n = int(1.2 * SR)
     seg = 1 - 0.35 * s * np.exp(-np.arange(n) / SR * 3)
     duck[i:i + n] = np.minimum(duck[i:i + n], seg[: len(duck[i:i + n])])
 mix = music * duck + fx
 # 开头淡入、结尾淡出
 fade = np.ones(N, np.float32)
 fade[: int(0.8 * SR)] = np.linspace(0, 1, int(0.8 * SR))
-e0, e1 = int(350.4 * SR), int(352.8 * SR)
+e0, e1 = int(to_out(350.4) * SR), int(to_out(352.8) * SR)
 fade[e0:e1] = np.linspace(1, 0, e1 - e0); fade[e1:] = 0
 mix = mix * fade
 mix = np.stack([hp(mix[0], 28), hp(mix[1], 28)])   # 去掉听不见、只占动态余量的超低频

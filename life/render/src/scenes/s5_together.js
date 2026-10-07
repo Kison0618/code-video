@@ -51,6 +51,41 @@ function cristae(cx, cy, L, Wd, ang, f = 1) {
   }
   return out;
 }
+// 细胞质里的颗粒：缓慢布朗运动，让细胞像活的
+const CYTO = (() => { const r = mulberry32(55); return Array.from({ length: 320 }, () => { const rr = Math.sqrt(r()) * 0.9, th = r() * 6.283; return { rr, th, ph: r() * 6.283, sp: 0.3 + r() * 0.9, s: 0.6 + Math.pow(r(), 3) * 2.2, warm: r() < 0.12 }; }); })();
+function cytoplasm(ctx, t, mem, a) {
+  // 半透明的细胞体
+  ctx.save();
+  ctx.beginPath(); mem.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath();
+  const g = ctx.createRadialGradient(CC[0] - 40, CC[1] - 50, 10, CC[0], CC[1], CR * 1.05);
+  g.addColorStop(0, rgba(C.cyan, 0.11 * a)); g.addColorStop(0.7, rgba(C.cyan, 0.05 * a)); g.addColorStop(1, rgba(C.cyan, 0.14 * a));
+  ctx.fillStyle = g; ctx.fill();
+  ctx.clip();
+  for (const p of CYTO) {
+    const x = CC[0] + p.rr * CR * Math.cos(p.th) + 7 * Math.sin(t * p.sp + p.ph);
+    const y = CC[1] + p.rr * CR * Math.sin(p.th) + 7 * Math.cos(t * p.sp * 0.8 + p.ph * 1.3);
+    ctx.fillStyle = rgba(p.warm ? C.gold : C.ivory, (p.warm ? 0.5 : 0.22) * a);
+    ctx.beginPath(); ctx.arc(x, y, p.s, 0, 6.283); ctx.fill();
+    if (p.warm) glow(ctx, x, y, 7, C.gold, 0.25 * a);
+  }
+  // 内质网：几道绕着细胞核的细弧
+  for (let k = 0; k < 4; k++) {
+    const pts = [];
+    for (let u = 0; u <= 1; u += 0.04) { const th = 2.2 + u * 2.4 + k * 0.15, r = 92 + k * 13 + 4 * Math.sin(u * 12 + t + k); pts.push([CC[0] - 70 + r * Math.cos(th), CC[1] + 20 + r * Math.sin(th)]); }
+    line(ctx, pts, C.cyan, 0.22 * a, 1);
+  }
+  ctx.restore();
+}
+// 细菌的鞭毛：被吞进去之前，在身后摆动
+function flagellum(ctx, bp, ang, t, a) {
+  if (a <= 0) return;
+  const pts = [];
+  for (let u = 0; u <= 1; u += 0.04) {
+    const d = 56 + u * 110, w = 9 * u * Math.sin(u * 14 - t * 16);
+    pts.push([bp[0] + d * Math.cos(ang) - w * Math.sin(ang), bp[1] + d * Math.sin(ang) + w * Math.cos(ang)]);
+  }
+  glowLine(ctx, pts, C.ivory, 0.55 * a, 1.0, 0.5);
+}
 // 组织：很多细胞
 const TISSUE = (() => {
   const r = mulberry32(17), out = [];
@@ -81,6 +116,7 @@ function draw(ctx, t) {
     // 细胞内部柔光
     glow(ctx, CC[0], CC[1], CR * 1.6, C.cyan, 0.07 * cellA);
     const mem = membrane(t, CC[0], CC[1], CR, bp, bulge);
+    cytoplasm(ctx, t, mem, cellA);
     glowLine(ctx, mem, C.cyan, 0.85 * cellA, 1.5);
     line(ctx, membrane(t + 0.6, CC[0], CC[1], CR - 9, bp, bulge * 0.92), C.cyan, 0.25 * cellA, 1);
     // 细胞核
@@ -90,6 +126,7 @@ function draw(ctx, t) {
     const ignite = smooth(prog(t, 278.4, 279.6));
     const flick = t > 277.8 && t < 278.6 ? 0.5 + 0.5 * Math.sin(t * 60) : 1;
     const bcol = mix(C.ivory, C.gold, ignite);
+    flagellum(ctx, bp, ang, t, cellA * (1 - smooth(prog(t, 275.0, 277.0))));
     glowLine(ctx, capsule(bp[0], bp[1], 112, 48, ang), bcol, 0.9 * cellA * flick, 1.4);
     glow(ctx, bp[0], bp[1], 40 + 70 * ignite, C.gold, (0.15 + 0.6 * ignite) * cellA);
     for (const p of cristae(bp[0], bp[1], 112, 48, ang, easeOut(prog(t, 278.6, 280.4)))) glowLine(ctx, p, C.gold, 0.8 * cellA, 1.1, 0.5);

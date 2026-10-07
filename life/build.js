@@ -13,6 +13,7 @@ const { spawnSync, execFileSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { OUT_DURATION } = require('./render/src/timeline');
 
 const ROOT = __dirname;
 const R = path.join(ROOT, 'render');
@@ -68,7 +69,7 @@ const AUDIO = path.join(OUT, 'audio.wav');
 
 // —— 只渲染一段 ——
 if (opt('from') || opt('to')) {
-  const a = opt('from') || '0', b = opt('to') || '353';
+  const a = opt('from') || '0', b = opt('to') || String(OUT_DURATION);
   const clip = path.join(OUT, `clip_${a}-${b}.mp4`);
   run('node', [path.join(R, 'src', 'render_all.js'), clip, a, b, String(jobs)]);
   console.log(`\n✓ 片段：${clip}`);
@@ -91,7 +92,7 @@ if (!only || only === 'audio') {
 // —— 4. 画面 ——
 if (!only || only === 'video') {
   console.log(`\n▶ 渲染画面：1920×1080 60 帧，${jobs} 个进程并行（4 核约 45 分钟）`);
-  run('node', [path.join(R, 'src', 'render_all.js'), VIDEO, '0', '353', String(jobs)]);
+  run('node', [path.join(R, 'src', 'render_all.js'), VIDEO, '0', String(OUT_DURATION), String(jobs)]);
 }
 
 // —— 5. 合成成片 + 分享版 ——
