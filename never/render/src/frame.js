@@ -9,15 +9,15 @@ const LY = require('./lyrics');
 
 // 段落 → 场景
 const WORLD = {
-  intro: 'city', drift: 'rain', constel: 'attractor', tunnel: 'clouds', drop1: 'aurora',
-  crystal: 'deepsea', ascent: 'lighthouse', tunnel2: 'timelight', final: 'lanterns', outro: 'ending',
+  intro: 'city', drift: 'rain', constel: 'attractor', tunnel: 'galaxy', drop1: 'aurora',
+  crystal: 'deepsea', ascent: 'lighthouse', tunnel2: 'timelight', final: 'lanterns', outro: 'lanterns',
 };
 const MODS = {};
 function world(name) {
   if (!(name in MODS)) { try { MODS[name] = require('./world/' + name); } catch (e) { if (e.code === 'MODULE_NOT_FOUND') MODS[name] = null; else throw e; } }
   return MODS[name];
 }
-const BLOOM = { city: 0.7, rain: 0.6, memories: 0.8, clouds: 0.6, aurora: 0.9, deepsea: 0.7, lighthouse: 0.7, timelight: 0.9, lanterns: 0.9, ending: 0.8 };
+const BLOOM = { city: 0.7, rain: 0.6, memories: 0.8, galaxy: 0.8, aurora: 0.9, deepsea: 0.7, lighthouse: 0.7, timelight: 0.9, lanterns: 0.9, ending: 0.8 };
 
 function drawWorld(ctx, t, S) {
   ctx.save();
@@ -53,6 +53,16 @@ function renderFrame(ctx, t, frame) {
   if (ta > 0) {
     text(ctx, 'WE  NEVER', W / 2, H / 2 + 10, { size: 120, weight: 300, alpha: ta, spacing: 0.32 });
     text(ctx, '若 如 初 见', W / 2, H / 2 + 92, { family: 'Song', size: 34, weight: 300, alpha: 0.75 * ta * smooth(prog(t, A.barT(1.2), A.barT(2.4))), spacing: 0.5, color: C.gold });
+  }
+  // 片尾：人生若只如初见
+  const te = vis(t, A.barT(124.5), A.DUR + 1, 2.2, 0.1);
+  if (te > 0) {
+    const dg = ctx.createRadialGradient(W / 2, H * 0.42, 0, W / 2, H * 0.42, 620);
+    dg.addColorStop(0, `rgba(0,0,0,${0.5 * te})`); dg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save(); ctx.translate(W / 2, H * 0.42); ctx.scale(1, 0.4); ctx.translate(-W / 2, -H * 0.42);
+    ctx.fillStyle = dg; ctx.fillRect(0, 0, W, H * 2); ctx.restore();
+    text(ctx, '人 生 若 只 如 初 见', W / 2, H * 0.42, { family: 'Song', size: 46, weight: 300, alpha: 0.85 * te, spacing: 0.45, color: C.ivory });
+    text(ctx, 'WE  NEVER', W / 2, H * 0.42 + 78, { size: 44, weight: 400, alpha: 0.85 * te * smooth(prog(t, A.barT(125.5), A.barT(126.5))), spacing: 0.4, color: C.gold });
   }
   // 歌词：位置和颜色由场景决定
   const m = world(WORLD[S.name]);

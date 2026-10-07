@@ -35,15 +35,18 @@ function drop(ctx, x, y, rx, ry) {
   ctx.save();
   ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 6.2832); ctx.clip();
   // 整个窗外的景象被压进一颗水滴里，上下左右都颠倒（真实的雨滴就是这样折射的）
-  const sc = (2.6 * rx) / MW;
-  ctx.translate(x, y); ctx.scale(-sc, -sc * (ry / rx));
+  const sc = Math.max(2.4 * rx / MW, 2.4 * ry / MH);
+  ctx.translate(x, y); ctx.scale(-sc, -sc);
+  ctx.drawImage(MINIF, -MW / 2, -MH / 2);
+  // 水滴像一枚小透镜，把光聚起来，比玻璃上别处更亮
+  ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.85;
   ctx.drawImage(MINIF, -MW / 2, -MH / 2);
   ctx.restore();
   ctx.save();
   const g = ctx.createRadialGradient(x, y, Math.min(rx, ry) * 0.55, x, y, Math.max(rx, ry));
-  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.38)');
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.8, 'rgba(0,0,0,0.05)'); g.addColorStop(1, 'rgba(0,0,0,0.3)');
   ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 6.2832); ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
   ctx.beginPath(); ctx.ellipse(x - rx * 0.35, y - ry * 0.4, rx * 0.18, ry * 0.12, -0.5, 0, 6.2832); ctx.fill();
   ctx.restore();
 }
