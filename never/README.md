@@ -1,7 +1,7 @@
 # We Never（若如初见）· 代码视频 v2
 
 > **🆕 这是新版（v2，2026-10-07）。** 渲染出的成片文件名是 `WeNever_v2_1080p60.mp4`。
-> 旧版 v1（震动、闪白的"节拍器"版本）保留在 git 标签 `never-v1`，需要时 `git checkout never-v1 -- never/` 即可取回。
+> 旧版 v1（震动、闪白的"节拍器"版本）保留在 git 提交 `555c5c8`，需要时 `git checkout 555c5c8 -- never/` 即可取回。
 
 YAYI、freezepain《We Never（若如初见）》的纯代码视觉：1920×1080、60 帧、4 分 07 秒。
 

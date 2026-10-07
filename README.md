@@ -4,6 +4,6 @@
 
 | 目录 | 作品 | 版本 |
 |---|---|---|
-| [`never/`](never/) | **We Never（若如初见）** — YAYI、freezepain | **🆕 新版 v2**（2026-10-07）：九个 3D 场景 + 歌词层，去掉了按拍震动和闪白。成片名 `WeNever_v2_1080p60.mp4`。旧版 v1 在标签 `never-v1` |
+| [`never/`](never/) | **We Never（若如初见）** — YAYI、freezepain | **🆕 新版 v2**（2026-10-07）：九个 3D 场景 + 歌词层，去掉了按拍震动和闪白。成片名 `WeNever_v2_1080p60.mp4`。旧版 v1 在提交 `555c5c8` |
 | [`teeth/`](teeth/) | TEETH | — |
 | [`life/`](life/) | 生命之美 | — |
