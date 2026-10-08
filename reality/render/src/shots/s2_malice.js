@@ -5,7 +5,8 @@ const K = require('../core');
 const { W, H, C, rgba, mix, clamp, lerp, prog, smooth, easeOut, glow, glowLine, mulberry32 } = K;
 const A = require('../audio');
 const U = require('../ui');
-const { gauss } = require('../pop');
+const { gauss } = require('../universe');
+const T = require('../textfx');
 
 const T0 = A.beatT(80), TSTOP = A.beatT(108), T1 = A.beatT(112);
 const BOX = [300, 230, 1620, 820];
@@ -50,10 +51,12 @@ function draw(ctx, t) {
     const a = smooth(prog(t, TSTOP + 0.15, TSTOP + 0.6));
     glow(ctx, x, y, 90, C.red, 0.5 * a);
     ctx.fillStyle = rgba(C.red, a); ctx.beginPath(); ctx.arc(x, y, 5, 0, 6.2832); ctx.fill();
-    K.text(ctx, '恶', W / 2, H / 2 + 60, { family: 'Song', size: 220, weight: 700, color: C.red, alpha: 0.9 * a });
+    T.glitch(ctx, t, '恶', { t0: TSTOP + 0.15, y: H / 2 + 80, size: 260, settle: 1.2 });
   }
   // 文案
-  if (!frozen) U.caption(ctx, t, '不要低估一个人维护自己利益时，', { t0: T0 + 2, y: 120, size: 42, cps: 12 });
-  if (!frozen) U.caption(ctx, t, '能滋生出来的恶。', { t0: T0 + 5.2, y: 176, size: 42, cps: 10, hl: { '恶': C.red }, en: 'Never underestimate the evil a person grows while guarding their own interests.' });
+  if (!frozen) {
+    T.decode(ctx, t, '不要低估一个人维护自己利益时，', { t0: T0 + 1.2, y: 120, size: 42, cps: 14 });
+    T.slam(ctx, t, '能滋生出来的恶。', { t0: T0 + 4.6, y: 186, size: 52, hl: { '恶': C.red }, en: 'Never underestimate the evil a person grows while guarding their own interests.' });
+  }
 }
 module.exports = { draw, t0: T0, t1: T1 };

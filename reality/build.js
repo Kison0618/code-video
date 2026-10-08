@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// 欢迎来到现实世界（认知提醒视频）一键构建：装依赖 → 多进程渲染画面 → 合成原曲 → 出完整版和分享版
+// 欢迎来到现实世界（认知提醒视频）一键构建：装依赖 → 多进程渲染画面 → 合成 BGM → 出完整版和分享版
 // 用法：
 //   node build.js                       完整构建（成片在 render/out/）
 //   node build.js --from 46 --to 60    只渲染一段（带音乐），几分钟就能看效果
 //   node build.js --jobs 8              并行进程数（默认 = CPU 线程数，最多 12）
-//   node build.js --version v2          成片版本号（默认 v2；同名成片已存在会停下，不覆盖）
+//   node build.js --version v2          成片版本号（默认 v1；同名成片已存在会停下，不覆盖）
 'use strict';
 const { spawnSync } = require('child_process');
 const fs = require('fs');
@@ -30,7 +30,7 @@ fs.mkdirSync(OUT, { recursive: true });
 
 // 有 NVIDIA 显卡就用显卡编码
 const nv = spawnSync('ffmpeg', ['-hide_banner', '-f', 'lavfi', '-i', 'color=c=black:s=256x256:d=0.1', '-c:v', 'h264_nvenc', '-f', 'null', '-'], { stdio: 'ignore' }).status === 0;
-const env = nv ? { TEETH_ENC: 'nvenc' } : {};
+const env = nv ? { VIDEO_ENC: 'nvenc' } : {};
 console.log(`编码：${nv ? 'NVIDIA 显卡（h264_nvenc）' : 'CPU（x264）'}    并行进程：${jobs}`);
 
 function mux(video, out, from = 0, dur = null) {
