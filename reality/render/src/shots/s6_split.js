@@ -53,17 +53,14 @@ function draw(ctx, t) {
       }
       const v = sp > 0 ? s * sp * (0.55 + 0.35 * hash(pt.tw * 2.2)) : (hash(pt.tw * 4.4) - 0.5) * 0.08;
       bins[clamp(Math.round((v + 1) / 2 * (NB - 1)), 0, NB - 1)]++;
-      return { p, col: colr, a: s === 0 && sp > 0 ? 0.22 : col > 0.5 && sp < 0.5 ? 0.3 : 1, s: col > 0.5 && sp < 0.5 ? 0.6 : 1 };
+      return { p, col: colr, a: s === 0 && sp > 0 ? 0.22 : col > 0.5 && sp < 0.5 ? 0.13 : 1, s: col > 0.5 && sp < 0.5 ? 0.6 : 1 };
     },
   });
   // 光柱的辉光
   const c0 = P([0, -1400, 0]), c1 = P([0, 1400, 0]);
-  if (c0 && c1 && col > 0) {
-    ctx.save(); ctx.globalCompositeOperation = 'lighter';
-    const g = ctx.createLinearGradient(c0[0] - 60, 0, c0[0] + 60, 0);
-    g.addColorStop(0, 'rgba(200,205,220,0)'); g.addColorStop(0.5, rgba([200, 205, 220], 0.14 * col * (1 - sp))); g.addColorStop(1, 'rgba(200,205,220,0)');
-    ctx.fillStyle = g; ctx.fillRect(c0[0] - 60, Math.min(c0[1], c1[1]), 120, Math.abs(c1[1] - c0[1]));
-    ctx.restore();
+  if (c0 && c1 && col > 0) for (let k = 0; k <= 12; k++) {
+    const u = k / 12, x = lerp(c0[0], c1[0], u), y = lerp(c0[1], c1[1], u);
+    glow(ctx, x, y, 110, [200, 205, 220], 0.06 * col * (1 - sp) * Math.sin(Math.PI * (0.1 + 0.8 * u)));
   }
   // 炸开的一瞬：一道金色的冲击环
   const age = t - TSPLIT;
