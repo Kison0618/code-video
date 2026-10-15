@@ -1,6 +1,7 @@
 import React, {useMemo} from 'react';
 import {AbsoluteFill, random, useCurrentFrame} from 'remotion';
 import {SceneFrame, SceneProps, cueAt} from '../components/SceneFrame';
+import {Sfx, SfxSeq, firstFrame} from '../fx/Sfx';
 import {FxCanvas} from '../fx/Canvas';
 import {dot, glow, glowPath, rgba} from '../fx/glow';
 import {charonColor} from '../fx/palettes';
@@ -226,6 +227,18 @@ export const S11Charon: React.FC<SceneProps> = (props) => {
 					</div>
 				</div>
 			</AbsoluteFill>
+			{/* —— 音效 —— */}
+			<Sfx name="whoosh_fast" at={8} vol={0.35} />
+			<Sfx name="whoosh" at={110} vol={0.4} />
+			<Sfx name="lock" at={130} vol={0.4} />
+			<Sfx name="impact_soft" at={130} vol={0.35} />
+			<Sfx name="lock" at={c1 + 2} vol={0.4} />
+			<Sfx name="impact_soft" at={c1 + 2} vol={0.35} />
+			<Sfx name="ticks" at={c1 + 10} vol={0.18} dur={60} />
+			<Sfx name="whoosh2" at={c2 + 8} vol={0.45} />
+			<Sfx name="shimmer" at={c2 + 32} vol={0.45} />
+			<Sfx name="impact_soft" at={c2 + 32} vol={0.4} />
+			<Sfx name="ticks" at={c2 + 44} vol={0.15} dur={Math.max(10, dur - c2 - 80)} />
 		</SceneFrame>
 	);
 };

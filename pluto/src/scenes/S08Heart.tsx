@@ -1,6 +1,7 @@
 import React, {useMemo} from 'react';
 import {AbsoluteFill, random, useCurrentFrame} from 'remotion';
 import {SceneFrame, SceneProps, cueAt} from '../components/SceneFrame';
+import {Sfx, SfxSeq, firstFrame} from '../fx/Sfx';
 import {FxCanvas} from '../fx/Canvas';
 import {Flare} from '../fx/Flare';
 import {dot, glow, glowPath, rgba, trail} from '../fx/glow';
@@ -143,6 +144,16 @@ export const S08Heart: React.FC<SceneProps> = (props) => {
 				) : null}
 			</AbsoluteFill>
 			{heart > 0 ? <Flare x={CX - 10} y={hy} size={30} intensity={beat * 0.9} streak={1.2} rays={false} /> : null}
+			{/* —— 音效 —— */}
+			<Sfx name="blip_lo" at={4} vol={0.3} />
+			<Sfx name="whoosh" at={76} vol={0.5} />
+			<Sfx name="impact_soft" at={78} vol={0.3} />
+			<Sfx name="scan" at={c1 - 20} vol={0.35} dur={110} />
+			<Sfx name="data" at={c1 - 20} vol={0.25} dur={110} />
+			<Sfx name="shimmer" at={c1 + 62} vol={0.45} />
+			<Sfx name="impact" at={c1 + 62} vol={0.45} />
+			<SfxSeq name="heartbeat" vol={0.6} at={Array.from({length: 12}, (_, k) => Math.round(c1 + 9 * (Math.PI / 2 + 2 * Math.PI * (k + 1))) - 2).filter((a) => a < dur - 30)} />
+			<Sfx name="blip" at={c1 + 112} vol={0.3} />
 		</SceneFrame>
 	);
 };

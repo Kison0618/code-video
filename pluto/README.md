@@ -51,7 +51,16 @@ npm run render:4k    # 渲染 4K（--scale=2，所有图形都是矢量/高分�
 把音乐放到 `public/bgm/bgm.mp3`（或 m4a 等）即可：自动循环、开头 2 秒淡入、结尾 4 秒淡出。
 仓库里的 `reference-videos/BGM.m4a` 可以直接复制过去改名 `bgm.m4a` 试试。
 
-Studio 右侧 Props 面板可以调：`bgmVolume`（默认 0.22）、`voiceVolume`、`showEnglish`（关掉英文副字幕）。
+Studio 右侧 Props 面板可以调：`bgmVolume`（默认 0.22）、`voiceVolume`、`sfxVolume`（默认 0.7）、`showEnglish`（关掉英文副字幕）。
+
+## 音效
+
+全片音效都是 `scripts/make-sfx.py` 用 numpy 程序化合成的（`public/sfx/*.mp3`，约 2 MB，无版权问题），共 26 种：转场呼啸 + 低频撞击、片头/发射/片尾的 boom 与上扬、闪光颗粒、UI 提示音、锁定音、打字声、计数滴答、数据流、扫描声、故障声、心跳、钟音、氛围低音、曲速声等。
+
+- 每个场景的音效写在 `src/scenes/Sxx*.tsx` 末尾的 `{/* —— 音效 —— */}` 区块里，挂在和画面相同的字幕 cue 上，配音快慢变化时音效也自动跟着画面走；
+- 用法：`<Sfx name="impact" at={c2 + 98} vol={0.6} />`（`at` 是重拍帧，呼啸/上扬类会自动提前起播），循环类可加 `dur` 截断；
+- Studio Props 面板的 `sfxVolume`（默认 0.7）控制总音量，设 0 关闭全部音效；
+- 想换音色就改 `scripts/make-sfx.py` 后运行 `python3 scripts/make-sfx.py`，也可以直接用同名 mp3 替换成自己的音效素材。
 
 ## 改内容
 
@@ -61,6 +70,7 @@ Studio 右侧 Props 面板可以调：`bgmVolume`（默认 0.22）、`voiceVolum
 | 配色、字体 | `src/theme.ts` |
 | 某个场景的画面 | `src/scenes/Sxx*.tsx` |
 | 通用组件（星空、HUD、字幕、冥王星） | `src/components/` |
+| 音效编排 / 音效合成 | 各场景末尾的音效区块、`src/fx/Sfx.tsx` / `scripts/make-sfx.py` |
 | 特效库（粒子球体、发光画布、转场、乱码解码、粒子文字、故障、光斑） | `src/fx/` |
 | 轨道计算（开普勒冥王星/海王星） | `src/lib/orbit.ts` |
 | 时间轴规则（前后留白、估算语速） | `src/lib/timeline.ts` |

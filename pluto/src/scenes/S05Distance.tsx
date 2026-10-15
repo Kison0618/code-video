@@ -1,6 +1,7 @@
 import React, {useMemo} from 'react';
 import {AbsoluteFill, random, useCurrentFrame} from 'remotion';
 import {SceneFrame, SceneProps, cueAt, cueEnd} from '../components/SceneFrame';
+import {Sfx, SfxSeq, firstFrame} from '../fx/Sfx';
 import {FxCanvas} from '../fx/Canvas';
 import {Flare} from '../fx/Flare';
 import {dot, glow, glowPath, rgba, trail} from '../fx/glow';
@@ -227,6 +228,18 @@ export const S05Distance: React.FC<SceneProps> = (props) => {
 					</>
 				) : null}
 			</AbsoluteFill>
+			{/* —— 音效 —— */}
+			<Sfx name="whoosh_fast" at={22} vol={0.4} />
+			<Sfx name="ticks" at={14} vol={0.25} dur={70} />
+			<SfxSeq name="bead" vol={0.25} at={PLANETS.map((_, i) => 16 + i * 7)} rate={(i) => 0.8 + i * 0.08} />
+			<Sfx name="ping" at={c1 + 6} vol={0.4} />
+			<SfxSeq name="ping" vol={0.28} at={PLANETS.map((p) => Math.round(c1 + 6 + ((ax(p.au) - SX) / (PX - SX)) * (e1 - c1 - 6)))} rate={(i) => 0.85 + i * 0.07} />
+			<Sfx name="impact_soft" at={e1} vol={0.4} />
+			<Sfx name="whoosh" at={c2 + 4} vol={0.45} />
+			<Sfx name="impact_soft" at={c2 + 6} vol={0.35} />
+			<Sfx name="shimmer" at={c2 + 12} vol={0.35} />
+			<Sfx name="whoosh2" at={c2 + 160} vol={0.3} />
+			<Sfx name="lock" at={c2 + 178} vol={0.35} />
 		</SceneFrame>
 	);
 };

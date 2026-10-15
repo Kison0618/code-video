@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {SceneFrame, SceneProps, cueAt} from '../components/SceneFrame';
+import {Sfx, SfxSeq, firstFrame} from '../fx/Sfx';
 import {FxCanvas} from '../fx/Canvas';
 import {dot, glow, glowPath, rgba, trail} from '../fx/glow';
 import {proj} from '../fx/proj';
@@ -244,6 +245,20 @@ export const S06Orbit: React.FC<SceneProps> = (props) => {
 					海王星
 				</div>
 			</AbsoluteFill>
+			{/* —— 音效 —— */}
+			<Sfx name="whoosh_fast" at={12} vol={0.35} />
+			<Sfx name="ticks" at={22} vol={0.22} dur={c1 - 52} />
+			<Sfx name="chime" at={c1 - 30} vol={0.35} />
+			<Sfx name="scan" at={c1 + 6} vol={0.25} dur={100} />
+			<Sfx name="ticks" at={c1 + 6} vol={0.18} dur={100} />
+			<Sfx name="blip" at={c1 + 104} vol={0.3} />
+			<Sfx name="whoosh2" at={c2 + 26} vol={0.4} />
+			<Sfx name="lock" at={c2 + 52} vol={0.4} />
+			<Sfx name="impact_soft" at={c2 + 52} vol={0.35} />
+			<Sfx name="whoosh" at={c3 + 14} vol={0.4} />
+			<SfxSeq name="bead" vol={0.35} at={[1, 2, 3].map((k) => firstFrame((fr) => 495.6 * appear(fr, c3 + 20, dur - (c3 + 20) - 60, easeInOut), c3 + 20, dur, k * NEPTUNE_EL.period - 0.01))} rate={(i) => 1 + i * 0.12} />
+			<SfxSeq name="chime" vol={0.3} at={[1, 2].map((k) => firstFrame((fr) => 495.6 * appear(fr, c3 + 20, dur - (c3 + 20) - 60, easeInOut), c3 + 20, dur, k * PLUTO_EL.period - 0.01))} />
+			<Sfx name="shimmer" at={dur - 58} vol={0.35} />
 		</SceneFrame>
 	);
 };

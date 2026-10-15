@@ -1,6 +1,7 @@
 import React, {useMemo} from 'react';
 import {AbsoluteFill, random, useCurrentFrame} from 'remotion';
 import {SceneFrame, SceneProps, cueAt} from '../components/SceneFrame';
+import {Sfx, SfxSeq, firstFrame} from '../fx/Sfx';
 import {FxCanvas} from '../fx/Canvas';
 import {dot, glow, glowPath, rgba} from '../fx/glow';
 import {appear, easeInOut, inOut, lerp} from '../lib/anim';
@@ -281,6 +282,18 @@ export const S09Glacier: React.FC<SceneProps> = (props) => {
 					</div>
 				</div>
 			</AbsoluteFill>
+			{/* —— 音效 —— */}
+			<Sfx name="shimmer" at={10} vol={0.35} />
+			<Sfx name="blip" at={40} vol={0.25} />
+			<Sfx name="whoosh" at={c1 + 26} vol={0.5} />
+			<Sfx name="drone" at={c1 + 10} vol={0.4} fadeIn={30} dur={Math.max(60, c3 + 40 - c1)} rate={0.85} />
+			<Sfx name="swell" at={c1 + 70} vol={0.25} />
+			<Sfx name="lock" at={c2 + 4} vol={0.4} />
+			<Sfx name="impact_soft" at={c2 + 4} vol={0.4} />
+			<Sfx name="blip_lo" at={c2 + 24} vol={0.3} />
+			<Sfx name="whoosh2" at={c3 + 10} vol={0.35} />
+			<Sfx name="impact" at={c3 + 34} vol={0.5} />
+			<Sfx name="shimmer" at={c3 + 36} vol={0.35} />
 		</SceneFrame>
 	);
 };

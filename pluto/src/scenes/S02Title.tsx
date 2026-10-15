@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {SceneFrame, SceneProps, cueEnd} from '../components/SceneFrame';
+import {Sfx, SfxSeq, firstFrame} from '../fx/Sfx';
 import {Flare} from '../fx/Flare';
 import {TextParticles} from '../fx/TextParticles';
 import {appear, easeInOut, lerp} from '../lib/anim';
@@ -86,6 +87,13 @@ export const S02Title: React.FC<SceneProps> = (props) => {
 					</div>
 				</div>
 			</AbsoluteFill>
+			{/* —— 音效 —— */}
+			<Sfx name="swell" at={t0} vol={0.5} />
+			<Sfx name="riser" at={t0} vol={0.45} />
+			<Sfx name="boom" at={t0} vol={0.85} />
+			<Sfx name="shimmer" at={t0 + 4} vol={0.45} />
+			<Sfx name="sparkle" at={t0 + 62} vol={0.35} />
+			<Sfx name="blip_lo" at={t0 + 76} vol={0.3} />
 		</SceneFrame>
 	);
 };

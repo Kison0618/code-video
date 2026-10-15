@@ -15,6 +15,7 @@ const defaultProps: VideoProps = {
 	showEnglish: true,
 	bgmVolume: 0.22,
 	voiceVolume: 1,
+	sfxVolume: 0.7,
 };
 
 export const RemotionRoot: React.FC = () => (

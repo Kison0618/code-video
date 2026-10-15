@@ -1,6 +1,7 @@
 import React, {useMemo} from 'react';
 import {AbsoluteFill, random, useCurrentFrame} from 'remotion';
 import {SceneFrame, SceneProps, cueAt, cueEnd} from '../components/SceneFrame';
+import {Sfx, SfxSeq, firstFrame} from '../fx/Sfx';
 import {Starfield} from '../components/Starfield';
 import {plutoSample} from '../components/Pluto';
 import {FxCanvas} from '../fx/Canvas';
@@ -220,6 +221,19 @@ export const S07Voyage: React.FC<SceneProps> = (props) => {
 				</div>
 			</AbsoluteFill>
 			{launch > 0 ? <Flare x={1600 - Math.sin(rise * 1.6) * 300 * rise} y={1180 - rise * 980} size={30} intensity={launch * rise} streak={1.4} /> : null}
+			{/* —— 音效 —— */}
+			<Sfx name="scan" at={6} vol={0.3} dur={60} />
+			<Sfx name="data" at={10} vol={0.15} dur={50} />
+			<Sfx name="ticks" at={20} vol={0.2} dur={Math.max(10, c1 - 60)} />
+			<Sfx name="riser" at={c1 + 10} vol={0.5} />
+			<Sfx name="boom" at={c1 + 10} vol={0.75} />
+			<Sfx name="sparkle" at={c1 + 14} vol={0.3} />
+			<Sfx name="typing" at={c1 + 30} vol={0.3} dur={30} />
+			<Sfx name="warp" at={c2 - 16} vol={0.55} fadeIn={10} dur={c3 + 20 - (c2 - 16)} />
+			<Sfx name="ticks" at={c2} vol={0.15} dur={c3 - c2} />
+			<Sfx name="swell" at={c3 + 20} vol={0.45} />
+			<Sfx name="impact_soft" at={c3 + 20} vol={0.45} />
+			<Sfx name="lock" at={c3 + 50} vol={0.4} />
 		</SceneFrame>
 	);
 };

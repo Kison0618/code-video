@@ -1,6 +1,7 @@
 import React, {useMemo} from 'react';
 import {AbsoluteFill, random, useCurrentFrame} from 'remotion';
 import {SceneFrame, SceneProps, cueAt} from '../components/SceneFrame';
+import {Sfx, SfxSeq, firstFrame} from '../fx/Sfx';
 import {FxCanvas} from '../fx/Canvas';
 import {Flare} from '../fx/Flare';
 import {dot, glow, glowPath, rgba, trail} from '../fx/glow';
@@ -137,6 +138,13 @@ export const S10Haze: React.FC<SceneProps> = (props) => {
 					<div style={{fontFamily: SERIF, fontWeight: 600, fontSize: 18, color: C.iceDim, letterSpacing: '0.2em', marginTop: 6}}>层雾霾 · 延伸到 200 公里高空</div>
 				</div>
 			</AbsoluteFill>
+			{/* —— 音效 —— */}
+			<Sfx name="drone" at={0} vol={0.45} fadeIn={30} rate={0.75} />
+			<Sfx name="whoosh2" at={c1 - 10} vol={0.4} />
+			<Sfx name="swell" at={c1 + 45} vol={0.4} />
+			<Sfx name="impact_soft" at={c1 + 45} vol={0.45} />
+			<Sfx name="shimmer" at={c1 + 48} vol={0.5} />
+			<SfxSeq name="blip" vol={0.25} at={[c2 + 10, c2 + 22, c2 + 34]} rate={(i) => 1 + i * 0.12} />
 		</SceneFrame>
 	);
 };

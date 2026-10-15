@@ -1,6 +1,7 @@
 import React, {useMemo} from 'react';
 import {AbsoluteFill, random, useCurrentFrame} from 'remotion';
 import {SceneFrame, SceneProps, cueAt, cueEnd} from '../components/SceneFrame';
+import {Sfx, SfxSeq, firstFrame} from '../fx/Sfx';
 import {FxCanvas} from '../fx/Canvas';
 import {glow} from '../fx/glow';
 import {Flare} from '../fx/Flare';
@@ -143,6 +144,13 @@ export const S03Name: React.FC<SceneProps> = (props) => {
 					<div style={{fontFamily: MONO, fontSize: 12, color: C.gold, letterSpacing: '0.4em', marginTop: 10, opacity: merge}}>♇ · THE PL MONOGRAM</div>
 				</div>
 			</AbsoluteFill>
+			{/* —— 音效 —— */}
+			<Sfx name="whoosh_fast" at={c0 + 10} vol={0.4} />
+			<SfxSeq name="bead" vol={0.22} at={[0, 1, 2, 3, 4, 5].map((i) => c0 + 18 + i * 6)} rate={(i) => 1 + i * 0.04} />
+			<Sfx name="sparkle" at={c1 + 4} vol={0.3} />
+			<Sfx name="lock" at={c2 + 12} vol={0.4} />
+			<Sfx name="impact_soft" at={c2 + 12} vol={0.35} />
+			<Sfx name="shimmer" at={c2 + 32} vol={0.35} />
 		</SceneFrame>
 	);
 };

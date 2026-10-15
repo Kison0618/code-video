@@ -2,6 +2,7 @@ import React, {useMemo} from 'react';
 import {AbsoluteFill, random, useCurrentFrame} from 'remotion';
 import {Label} from '../components/Hud';
 import {SceneFrame, SceneProps, cueAt} from '../components/SceneFrame';
+import {Sfx, SfxSeq, firstFrame} from '../fx/Sfx';
 import {FxCanvas} from '../fx/Canvas';
 import {dot, glow, rgba} from '../fx/glow';
 import {appear, easeInOut, lerp} from '../lib/anim';
@@ -149,6 +150,13 @@ export const S01Plates: React.FC<SceneProps> = (props) => {
 				<span style={{fontFamily: MONO, fontSize: 13, letterSpacing: '0.3em', color: C.gold, opacity: blinkOn ? 0.9 : 0}}>◉ BLINK COMPARATOR</span>
 			</div>
 			<Label x={1180} y={300} zh="移动的光点" en="6 DAYS · 3.5 mm ON THE PLATE" color={C.gold} opacity={appear(f, c2 + 40, 30)} />
+			{/* —— 音效 —— */}
+			<Sfx name="drone" at={0} vol={0.4} fadeIn={20} dur={c2 + 120} />
+			<Sfx name="scan" at={6} vol={0.35} dur={72} />
+			<SfxSeq name="shutter" vol={0.45} at={Array.from({length: Math.max(0, Math.floor((c2 + 40 - (c1 + 10)) / 10))}, (_, i) => c1 + 10 + i * 10)} />
+			<Sfx name="lock" at={c2 + 2} vol={0.45} />
+			<Sfx name="whoosh_fast" at={c2 + 40} vol={0.35} />
+			<Sfx name="blip" at={c2 + 42} vol={0.3} />
 		</SceneFrame>
 	);
 };

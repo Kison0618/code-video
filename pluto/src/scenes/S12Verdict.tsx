@@ -1,6 +1,7 @@
 import React, {useMemo} from 'react';
 import {AbsoluteFill, random, useCurrentFrame} from 'remotion';
 import {SceneFrame, SceneProps, cueAt} from '../components/SceneFrame';
+import {Sfx, SfxSeq, firstFrame} from '../fx/Sfx';
 import {FxCanvas} from '../fx/Canvas';
 import {Flare} from '../fx/Flare';
 import {Glitch} from '../fx/Glitch';
@@ -302,6 +303,25 @@ export const S12Verdict: React.FC<SceneProps> = (props) => {
 				) : null}
 			</AbsoluteFill>
 			{row > 0 && demote > 0 ? <Flare x={260 + 8 * 175} y={520 + demote * 150} size={14} color="255,120,130" intensity={glitchK * 1.2} streak={2} /> : null}
+			{/* —— 音效 —— */}
+			<Sfx name="data" at={10} vol={0.3} dur={50} />
+			<Sfx name="glitch" at={12} vol={0.2} />
+			<Sfx name="lock" at={60} vol={0.35} />
+			<Sfx name="ticks" at={30} vol={0.22} dur={80} />
+			<SfxSeq name="blip_lo" vol={0.3} at={[0, 1, 2].map((i) => c1 + 8 + i * 22)} rate={(i) => 1 + i * 0.1} />
+			<SfxSeq name="chime" vol={0.35} at={[c1 + 42, c1 + 72]} />
+			<Sfx name="deny" at={c1 + 102} vol={0.5} />
+			<Sfx name="glitch" at={c1 + 102} vol={0.4} />
+			<Sfx name="whoosh" at={c2 + 2} vol={0.45} />
+			<Sfx name="lock" at={c2 + 30} vol={0.35} />
+			<Sfx name="swell" at={c2 + 150} vol={0.3} />
+			<SfxSeq name="bead" vol={0.25} at={Array.from({length: 9}, (_, i) => c3 + i * 3)} rate={(i) => 0.8 + i * 0.06} />
+			<Sfx name="glitch" at={c3 + 40} vol={0.55} />
+			<Sfx name="deny" at={c3 + 46} vol={0.4} />
+			<Sfx name="impact" at={c3 + 46} vol={0.55} />
+			<Sfx name="blip" at={c4} vol={0.3} />
+			<Sfx name="ticks" at={c4 + 10} vol={0.22} dur={80} />
+			<Sfx name="lock" at={c4 + 90} vol={0.35} />
 		</SceneFrame>
 	);
 };

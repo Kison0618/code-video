@@ -1,6 +1,7 @@
 import React, {useMemo} from 'react';
 import {AbsoluteFill, interpolate, random, useCurrentFrame} from 'remotion';
 import {SceneFrame, SceneProps, cueAt} from '../components/SceneFrame';
+import {Sfx, SfxSeq, firstFrame} from '../fx/Sfx';
 import {FxCanvas} from '../fx/Canvas';
 import {Flare} from '../fx/Flare';
 import {TextParticles} from '../fx/TextParticles';
@@ -206,6 +207,18 @@ export const S13Epilogue: React.FC<SceneProps> = (props) => {
 					<Flare x={960} y={430} size={40} intensity={end * 0.5 * (1 - appear(f, dur - 40, 30))} streak={2.2} rays={false} />
 				</>
 			) : null}
+			{/* —— 音效 —— */}
+			<Sfx name="sparkle" at={4} vol={0.35} />
+			<Sfx name="whoosh_fast" at={72} vol={0.3} />
+			<Sfx name="whoosh" at={c1 + 4} vol={0.4} />
+			<Sfx name="ticks" at={c1} vol={0.15} dur={Math.max(10, c2 - c1)} />
+			<Sfx name="shimmer" at={c2 + 2} vol={0.35} />
+			<Sfx name="typing" at={c2 + 10} vol={0.3} dur={INSCRIPTION_1.length / 2 + 6 + INSCRIPTION_2.length / 2.5} />
+			<Sfx name="warp" at={c3 - 10} vol={0.3} fadeIn={20} dur={130} rate={1.2} />
+			<Sfx name="swell" at={c3 + 150} vol={0.45} />
+			<Sfx name="boom" at={c3 + 150} vol={0.7} />
+			<Sfx name="shimmer" at={c3 + 152} vol={0.5} />
+			<Sfx name="drone" at={c3 + 150} vol={0.35} fadeIn={20} dur={Math.max(30, dur - c3 - 150)} />
 		</SceneFrame>
 	);
 };

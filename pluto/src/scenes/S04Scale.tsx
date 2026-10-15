@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {SceneFrame, SceneProps, cueAt} from '../components/SceneFrame';
+import {Sfx, SfxSeq, firstFrame} from '../fx/Sfx';
 import {FxCanvas} from '../fx/Canvas';
 import {Flare} from '../fx/Flare';
 import {dot, glow, glowPath, rgba, trail} from '../fx/glow';
@@ -275,6 +276,22 @@ export const S04Scale: React.FC<SceneProps> = (props) => {
 				</div>
 			</AbsoluteFill>
 			{hit > 0 ? <Flare x={tx} y={ty} size={22} intensity={hit * (1 - appear(f, c2 + 116, 40)) * 1.2} streak={1.4} /> : null}
+			{/* —— 音效 —— */}
+			<Sfx name="scan" at={14} vol={0.3} dur={c1 - 44} />
+			<Sfx name="data" at={14} vol={0.18} dur={c1 - 44} />
+			<Sfx name="impact_soft" at={c1 - 38} vol={0.45} />
+			<Sfx name="blip" at={c1 - 36} vol={0.3} />
+			<Sfx name="whoosh_fast" at={c1 + 4} vol={0.4} />
+			<Sfx name="lock" at={c1 + 22} vol={0.35} />
+			<Sfx name="whoosh" at={c1 + 90} vol={0.35} />
+			<Sfx name="impact_soft" at={c1 + 92} vol={0.4} />
+			<Sfx name="ticks" at={c1 + 90} vol={0.22} dur={30} />
+			<Sfx name="sparkle" at={c2 + 6} vol={0.3} />
+			<Sfx name="bead" at={c2 + 30} vol={0.45} />
+			<Sfx name="whoosh_fast" at={c2 + 88} vol={0.45} />
+			<Sfx name="impact" at={c2 + 98} vol={0.6} />
+			<Sfx name="shimmer" at={c2 + 99} vol={0.45} />
+			<Sfx name="blip_lo" at={c2 + 106} vol={0.3} />
 		</SceneFrame>
 	);
 };

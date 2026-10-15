@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Audio, Sequence, interpolate, useVideoConfig} from 'remotion';
 import type {SceneProps} from './components/SceneFrame';
+import {SceneLen, Sfx, SfxVolume} from './fx/Sfx';
 import {TransitionFlash} from './fx/Transition';
 import type {Timeline} from './lib/timeline';
 import {S01Plates} from './scenes/S01Plates';
@@ -41,18 +42,23 @@ export type VideoProps = {
 	bgmVolume: number;
 	/** 旁白音量（0–1） */
 	voiceVolume: number;
+	/** 音效总音量（0–1，设 0 关闭全部音效） */
+	sfxVolume: number;
 };
 
-export const PlutoVideo: React.FC<VideoProps> = ({timeline, showEnglish, bgmVolume, voiceVolume}) => {
+export const PlutoVideo: React.FC<VideoProps> = ({timeline, showEnglish, bgmVolume, voiceVolume, sfxVolume = 0.7}) => {
 	const {durationInFrames, fps} = useVideoConfig();
 	return (
+		<SfxVolume.Provider value={sfxVolume}>
 		<AbsoluteFill style={{background: '#000'}}>
 			{timeline.scenes.map((scene) => {
 				const Comp = SCENE_COMPONENTS[scene.id];
 				if (!Comp) return null;
 				return (
 					<Sequence key={scene.id} from={scene.from} durationInFrames={scene.duration} name={`${scene.id} · ${scene.def.chapter?.zh ?? ''}`}>
-						<Comp scene={scene} showEnglish={showEnglish} />
+						<SceneLen.Provider value={scene.duration}>
+							<Comp scene={scene} showEnglish={showEnglish} />
+						</SceneLen.Provider>
 						{scene.voiceSrc ? (
 							<Sequence from={scene.voStart} name="voiceover" layout="none">
 								<Audio src={scene.voiceSrc} volume={voiceVolume} />
@@ -69,6 +75,13 @@ export const PlutoVideo: React.FC<VideoProps> = ({timeline, showEnglish, bgmVolu
 					</AbsoluteFill>
 				</Sequence>
 			))}
+			{/* 转场音效（放在独立 Sequence 里，避免被 32 帧的转场截断） */}
+			{timeline.scenes.slice(1).map((scene, i) => (
+				<Sequence key={`trs-${scene.id}`} from={Math.max(0, scene.from - 40)} durationInFrames={200} name={`transition sfx → ${scene.id}`} layout="none">
+					<Sfx name={i % 2 === 0 ? 'whoosh' : 'whoosh2'} at={40} vol={0.5} />
+					<Sfx name="impact_soft" at={40} vol={0.22} />
+				</Sequence>
+			))}
 			{timeline.bgmSrc ? (
 				<Audio
 					src={timeline.bgmSrc}
@@ -83,5 +96,6 @@ export const PlutoVideo: React.FC<VideoProps> = ({timeline, showEnglish, bgmVolu
 				/>
 			) : null}
 		</AbsoluteFill>
+		</SfxVolume.Provider>
 	);
 };
