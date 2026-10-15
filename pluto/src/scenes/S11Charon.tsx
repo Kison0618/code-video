@@ -1,162 +1,231 @@
 import React, {useMemo} from 'react';
 import {AbsoluteFill, random, useCurrentFrame} from 'remotion';
-import {Charon} from '../components/Bodies';
-import {Label} from '../components/Hud';
-import {Pluto} from '../components/Pluto';
 import {SceneFrame, SceneProps, cueAt} from '../components/SceneFrame';
-import {appear, easeInOut, inOut} from '../lib/anim';
-import {C, MONO, SERIF} from '../theme';
+import {FxCanvas} from '../fx/Canvas';
+import {dot, glow, glowPath, rgba} from '../fx/glow';
+import {charonColor} from '../fx/palettes';
+import {proj} from '../fx/proj';
+import {drawSphere, fibSphere, plutoColor} from '../fx/sphere';
+import {appear, easeInOut, inOut, lerp} from '../lib/anim';
+import {C, MONO, RGB, Rgb, SERIF} from '../theme';
 
-const BX = 1010;
-const BY = 470;
-const P_R = 90; // Pluto radius px
-const BARY = 150; // barycentre offset from Pluto centre (outside Pluto!)
-const CH_D = 360; // Charon distance from barycentre (not to scale)
-const MOONS: [string, string, string, string][] = [
-	['卡戎', 'Charon', '1978', '1,212 km'],
-	['尼克斯', 'Nix', '2005', '~50 km'],
-	['许德拉', 'Hydra', '2005', '~51 km'],
-	['科伯罗斯', 'Kerberos', '2011', '~19 km'],
-	['斯堤克斯', 'Styx', '2012', '~16 km'],
+const KM = 0.0459; // px / km（缩放 = 1 时）
+const SEP = 19596;
+const BARY = 2110; // 质心距冥王星中心
+const MOONS: {zh: string; en: string; a: number; p: number; ph: number}[] = [
+	{zh: '冥卫五', en: 'STYX', a: 42656, p: 20.2, ph: 1.2},
+	{zh: '冥卫二', en: 'NIX', a: 48694, p: 24.9, ph: 3.1},
+	{zh: '冥卫四', en: 'KERBEROS', a: 57783, p: 32.2, ph: 4.6},
+	{zh: '冥卫三', en: 'HYDRA', a: 64738, p: 38.2, ph: 0.3},
 ];
-
-const SkyView: React.FC<{f: number; o: number}> = ({f, o}) => {
-	const stars = useMemo(
-		() =>
-			new Array(260).fill(0).map((_, i) => ({
-				r: 80 + random(`sk-r-${i}`) * 1500,
-				a: random(`sk-a-${i}`) * Math.PI * 2,
-				s: 0.5 + random(`sk-s-${i}`) * 1.4,
-				o: 0.3 + random(`sk-o-${i}`) * 0.7,
-			})),
-		[],
-	);
-	const pole = {x: 420, y: 140};
-	const rot = f * 0.0016;
-	return (
-		<AbsoluteFill style={{opacity: o}}>
-			<svg width={1920} height={1080} style={{position: 'absolute'}}>
-				{stars.map((s, i) => {
-					const a = s.a + rot;
-					const tail = 0.05;
-					const x1 = pole.x + s.r * Math.cos(a - tail);
-					const y1 = pole.y + s.r * Math.sin(a - tail);
-					const x2 = pole.x + s.r * Math.cos(a);
-					const y2 = pole.y + s.r * Math.sin(a);
-					return (
-						<path
-							key={i}
-							d={`M ${x1} ${y1} A ${s.r} ${s.r} 0 0 1 ${x2} ${y2}`}
-							stroke="#dfeaff"
-							strokeOpacity={s.o * 0.5}
-							strokeWidth={s.s}
-							fill="none"
-						/>
-					);
-				})}
-				{/* icy horizon */}
-				<path d="M 0 800 L 160 770 L 300 790 L 470 740 L 610 780 L 820 760 L 990 790 L 1180 750 L 1360 775 L 1550 745 L 1730 772 L 1920 760 L 1920 1080 L 0 1080 Z" fill="#06080c" />
-				<path d="M 0 800 L 160 770 L 300 790 L 470 740 L 610 780 L 820 760 L 990 790 L 1180 750 L 1360 775 L 1550 745 L 1730 772 L 1920 760" fill="none" stroke="rgba(227,236,245,0.35)" />
-			</svg>
-			<div style={{position: 'absolute', left: 1240, top: 330, transform: 'translate(-50%,-50%)'}}>
-				<Charon size={230} />
-			</div>
-			<Label x={1240} y={500} zh="卡戎 · 永不落下" en="CHARON · NEVER SETS" align="center" color={C.ice} />
-			<div style={{position: 'absolute', left: 1240, top: 560, transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap'}}>
-				<div style={{fontFamily: SERIF, fontSize: 15, color: C.iceDim, letterSpacing: '0.2em'}}>视直径约为地球上满月的 7 倍</div>
-			</div>
-		</AbsoluteFill>
-	);
-};
+const PL = fibSphere(3500, 'pluto-11');
+const CH = fibSphere(1800, 'charon-11');
+const CHB = fibSphere(5000, 'charon-big');
 
 export const S11Charon: React.FC<SceneProps> = (props) => {
 	const {scene} = props;
 	const f = useCurrentFrame();
 	const c1 = cueAt(scene, 1);
 	const c2 = cueAt(scene, 2);
-	const sys = inOut(f, 0, c2 + 10, 24);
-	const sky = appear(f, c2 - 4, 36, easeInOut);
-	const legend = appear(f, 20, 30);
+	const dur = scene.duration;
+	const intro = appear(f, 0, 40, easeInOut);
+	const zoom = appear(f, 70, 80, easeInOut);
+	const sky = appear(f, c2 - 12, 40, easeInOut);
+	const scale = lerp(0.24, 0.84, zoom);
+	// 时间（天）：A 快、B 慢
+	const days = useMemo(() => {
+		let d = 0;
+		for (let k = 0; k < f; k++) d += k < c1 ? 0.09 : 0.055;
+		return d;
+	}, [f, c1]);
+	const th = (days / 6.387) * Math.PI * 2;
+	const cam = {cx: 960, cy: 470, pitch: -24, yaw: 0, dist: 3000, scale};
+	const P = (x: number, y: number) => proj(x * KM, y * KM, 0, cam);
+	const pxy: [number, number] = [-Math.cos(th) * BARY, -Math.sin(th) * BARY];
+	const cxy: [number, number] = [Math.cos(th) * (SEP - BARY), Math.sin(th) * (SEP - BARY)];
+	const pS = P(pxy[0], pxy[1]);
+	const cS = P(cxy[0], cxy[1]);
+	const kP = 3000 / (3000 + pS[2]);
+	const kC = 3000 / (3000 + cS[2]);
 	const lock = appear(f, c1, 30);
-	const th = f * 0.0075 + 0.4;
-	const px = BX - BARY * Math.cos(th);
-	const py = BY - BARY * Math.sin(th);
-	const cx = BX + CH_D * Math.cos(th);
-	const cy = BY + CH_D * Math.sin(th);
-	const deg = (th * 180) / Math.PI;
+	const spin = (-th * 180) / Math.PI;
+	const trails = useMemo(() => new Array(260).fill(0).map((_, i) => ({r: 60 + Math.pow(random(`st-r${i}`), 0.8) * 1500, a: random(`st-a${i}`) * Math.PI * 2, b: random(`st-b${i}`), w: random(`st-w${i}`) > 0.8})), []);
+	const moonLabels = MOONS.map((m) => {
+		const a = (days / m.p) * Math.PI * 2 + m.ph;
+		return {m, s: P(Math.cos(a) * m.a, Math.sin(a) * m.a)};
+	});
 	return (
-		<SceneFrame {...props} stars={{opacity: 0.45 * (1 - sky), drift: 0.03}}>
-			<AbsoluteFill style={{opacity: sys}}>
-				<svg width={1920} height={1080} style={{position: 'absolute'}}>
-					{[1.75, 2.0, 2.4, 2.7].map((k, i) => (
-						<circle key={i} cx={BX} cy={BY} r={CH_D * k * 0.62} fill="none" stroke={C.iceGhost} strokeDasharray="2 8" />
-					))}
-					<circle cx={BX} cy={BY} r={CH_D} fill="none" stroke={C.iceFaint} strokeDasharray="3 6" />
-					<circle cx={BX} cy={BY} r={BARY} fill="none" stroke={C.amberDim} strokeDasharray="3 6" />
-					{/* tidal lock tether: facing points */}
-					<line x1={px} y1={py} x2={cx} y2={cy} stroke={C.amber} strokeOpacity={0.55 * lock} strokeDasharray="1 7" />
-					{/* barycentre */}
-					<g stroke={C.ice} strokeWidth={1.2}>
-						<line x1={BX - 9} x2={BX + 9} y1={BY} y2={BY} />
-						<line x1={BX} x2={BX} y1={BY - 9} y2={BY + 9} />
-					</g>
-				</svg>
-				<div style={{position: 'absolute', left: px, top: py, transform: `translate(-50%,-50%) rotate(${deg + 90}deg)`}}>
-					<Pluto size={(P_R * 2 * 220) / 200} atmosphere={0.15} />
-				</div>
-				<div style={{position: 'absolute', left: cx, top: cy, transform: `translate(-50%,-50%) rotate(${deg - 90}deg)`}}>
-					<Charon size={92} />
-				</div>
-				<Label x={BX + 14} y={BY + 26} zh="质心 · 在冥王星之外" en="BARYCENTRE" size={0.75} opacity={appear(f, 30, 30)} />
-				<Label x={cx + 60} y={cy} zh="卡戎" en="CHARON" size={0.85} />
-				<div
-					style={{
-						position: 'absolute',
-						left: 0,
-						right: 0,
-						top: 860,
-						textAlign: 'center',
-						fontFamily: SERIF,
-						fontSize: 12,
-						color: C.iceDim,
-						letterSpacing: '0.4em',
-						opacity: 0,
-					}}
-				/>
-				{/* moons legend */}
-				<div style={{position: 'absolute', left: 110, top: 320, opacity: legend}}>
-					<div style={{fontFamily: SERIF, fontSize: 15, color: C.iceDim, letterSpacing: '0.3em', marginBottom: 18}}>
-						五颗卫星 · 发现年份
+		<SceneFrame {...props} stars={{opacity: lerp(0.45, 0.1, sky), drift: 0.04}} kicker="PLUTO–CHARON · BINARY" hudRight={'SEPARATION 19,596 KM\nPERIOD 6.387 D'}>
+			<FxCanvas
+				draw={(ctx, fr) => {
+					const sysA = intro * (1 - sky);
+					ctx.globalCompositeOperation = 'lighter';
+					if (sysA > 0) {
+						// 外围小卫星轨道
+						MOONS.forEach((m, i) => {
+							const pts: [number, number][] = [];
+							for (let k = 0; k <= 120; k++) {
+								const a = (k / 120) * Math.PI * 2;
+								const s = P(Math.cos(a) * m.a, Math.sin(a) * m.a);
+								pts.push([s[0], s[1]]);
+							}
+							glowPath(ctx, pts, RGB.ice, {width: 0.8, a: sysA * 0.35 * (1 - zoom * 0.7), bloom: 4});
+							const s = moonLabels[i].s;
+							glow(ctx, s[0], s[1], 16, RGB.blueHot, sysA * (1 - zoom));
+							dot(ctx, s[0], s[1], 2, RGB.white, sysA * (1 - zoom));
+						});
+						// 冥王星与卡戎绕质心的轨道
+						for (const [r, c] of [[BARY, RGB.gold], [SEP - BARY, RGB.blue]] as const) {
+							const pts: [number, number][] = [];
+							for (let k = 0; k <= 120; k++) {
+								const a = (k / 120) * Math.PI * 2;
+								const s = P(Math.cos(a) * r, Math.sin(a) * r);
+								pts.push([s[0], s[1]]);
+							}
+							glowPath(ctx, pts, c as Rgb, {width: 1.2, a: sysA * 0.75, bloom: 10});
+						}
+						// 质心
+						const b = P(0, 0);
+						ctx.globalAlpha = sysA * zoom * 0.9;
+						ctx.strokeStyle = rgba(RGB.goldHot, 1);
+						ctx.lineWidth = 1;
+						ctx.beginPath();
+						ctx.moveTo(b[0] - 12, b[1]);
+						ctx.lineTo(b[0] + 12, b[1]);
+						ctx.moveTo(b[0], b[1] - 12);
+						ctx.lineTo(b[0], b[1] + 12);
+						ctx.stroke();
+						// 潮汐锁定的光束
+						if (lock > 0) {
+							glowPath(ctx, [[pS[0], pS[1]], [cS[0], cS[1]]], RGB.gold, {width: 1.2, a: sysA * lock * 0.8, bloom: 14});
+							for (let k = 0; k < 8; k++) {
+								const t = ((fr * 0.02 + k / 8) % 1);
+								glow(ctx, lerp(pS[0], cS[0], t), lerp(pS[1], cS[1], t), 14, RGB.goldHot, sysA * lock * Math.sin(t * Math.PI));
+							}
+						}
+						// 前后遮挡：远的先画
+						const drawP = () => {
+							drawSphere(ctx, {cx: pS[0], cy: pS[1], R: 1188 * KM * scale * kP * 1.6, spin: spin + 90, tilt: 20, points: PL, color: plutoColor(0.2), size: lerp(0.5, 1.0, zoom), alpha: sysA, base: {c: [70, 44, 32], a: 0.7}, rim: {c: RGB.gold, a: 0.5}});
+							glow(ctx, pS[0], pS[1], 130 * scale, RGB.gold, sysA * 0.35);
+						};
+						const drawC = () => {
+							drawSphere(ctx, {cx: cS[0], cy: cS[1], R: 606 * KM * scale * kC * 1.6, spin: spin - 90, tilt: 20, points: CH, color: charonColor, size: lerp(0.5, 1.0, zoom), alpha: sysA, base: {c: [50, 54, 62], a: 0.7}, rim: {c: RGB.blueHot, a: 0.5}});
+							glow(ctx, cS[0], cS[1], 80 * scale, RGB.blue, sysA * 0.35);
+						};
+						if (pS[2] > cS[2]) {
+							drawP();
+							drawC();
+						} else {
+							drawC();
+							drawP();
+						}
+					}
+					// ---------- C：站在冥王星上看天 ----------
+					if (sky > 0) {
+						const HZ = 760;
+						const pole: [number, number] = [1260, 250];
+						const span = Math.max(0, fr - c2) * 0.006; // 弧长（弧度）
+						ctx.globalCompositeOperation = 'lighter';
+						for (const t of trails) {
+							const c: Rgb = t.w ? RGB.goldHot : RGB.blueHot;
+							const a0 = t.a + span * 0.2;
+							ctx.globalAlpha = sky * (0.15 + 0.5 * t.b);
+							ctx.strokeStyle = rgba(c, 1);
+							ctx.lineWidth = 0.6 + t.b * 1.2;
+							ctx.beginPath();
+							ctx.arc(pole[0], pole[1], t.r, a0, a0 + 0.02 + span);
+							ctx.stroke();
+							const hx = pole[0] + Math.cos(a0 + 0.02 + span) * t.r;
+							const hy = pole[1] + Math.sin(a0 + 0.02 + span) * t.r;
+							if (hy < HZ) glow(ctx, hx, hy, 4 + t.b * 6, c, sky * t.b * 0.6);
+						}
+						// 地面（遮住地平线以下的星轨）
+						ctx.globalCompositeOperation = 'source-over';
+						ctx.globalAlpha = sky;
+						const g = ctx.createLinearGradient(0, HZ, 0, 1080);
+						g.addColorStop(0, '#0d1220');
+						g.addColorStop(1, '#030407');
+						ctx.fillStyle = g;
+						ctx.fillRect(0, HZ, 1920, 320);
+						ctx.globalCompositeOperation = 'lighter';
+						// 透视网格地面
+						for (let k = -24; k <= 24; k++) {
+							const x1 = 960 + k * 160;
+							glowPath(ctx, [[960 + k * 8, HZ], [x1, 1080]], RGB.gold, {width: 0.6, a: sky * 0.25, bloom: 3});
+						}
+						for (let k = 1; k < 14; k++) {
+							const y = HZ + Math.pow(k / 14, 2.2) * 320;
+							glowPath(ctx, [[0, y], [1920, y]], RGB.gold, {width: 0.6, a: sky * 0.22, bloom: 3});
+						}
+						glowPath(ctx, [[0, HZ], [1920, HZ]], RGB.blueHot, {width: 1.2, a: sky * 0.7, bloom: 18});
+						glow(ctx, 960, HZ, 700, RGB.blue, sky * 0.18);
+						// 卡戎：一动不动地挂在天上
+						const cx = 640;
+						const cy = 380;
+						glow(ctx, cx, cy, 380, RGB.blue, sky * 0.25);
+						drawSphere(ctx, {cx, cy, R: 120, spin: 0, tilt: 15, points: CHB, color: charonColor, size: 1.1, alpha: sky, base: {c: [50, 54, 62], a: 0.75}, rim: {c: RGB.blueHot, a: 0.6}});
+						// 锁定标记
+						ctx.globalAlpha = sky * 0.7;
+						ctx.strokeStyle = rgba(RGB.gold, 1);
+						ctx.lineWidth = 1.2;
+						const rr = 160 + Math.sin(fr / 10) * 4;
+						for (let q = 0; q < 4; q++) {
+							const a = (q * Math.PI) / 2 + Math.PI / 4;
+							ctx.beginPath();
+							ctx.arc(cx, cy, rr, a - 0.25, a + 0.25);
+							ctx.stroke();
+						}
+					}
+					ctx.globalAlpha = 1;
+					ctx.globalCompositeOperation = 'source-over';
+				}}
+			/>
+			<AbsoluteFill>
+				{/* 卫星名 */}
+				{moonLabels.map(({m, s}) => (
+					<div key={m.en} style={{position: 'absolute', left: s[0] + 12, top: s[1] - 8, opacity: intro * (1 - zoom), whiteSpace: 'nowrap', fontFamily: MONO, fontSize: 12, letterSpacing: '0.2em', color: C.iceDim}}>
+						<span style={{fontFamily: SERIF, fontWeight: 600, fontSize: 15, color: C.ice}}>{m.zh}</span> {m.en}
 					</div>
-					{MOONS.map(([zh, en, yr, d], i) => (
-						<div
-							key={en}
-							style={{
-								display: 'flex',
-								alignItems: 'baseline',
-								gap: 16,
-								marginTop: 12,
-								opacity: appear(f, 26 + i * 6, 20),
-							}}
-						>
-							<span style={{fontFamily: MONO, fontSize: 16, color: i === 0 ? C.amber : C.iceDim, width: 50}}>{yr}</span>
-							<span style={{fontFamily: SERIF, fontSize: i === 0 ? 24 : 18, color: i === 0 ? C.ice : C.iceDim, letterSpacing: '0.16em', width: 110}}>
-								{zh}
-							</span>
-							<span style={{fontFamily: MONO, fontSize: 13, color: C.iceDim}}>{d}</span>
-						</div>
-					))}
-					<div style={{fontFamily: SERIF, fontSize: 12, color: C.iceDim, letterSpacing: '0.3em', marginTop: 30, opacity: 0.8}}>
-						示意图 · 距离未按比例
-					</div>
+				))}
+				<div style={{position: 'absolute', left: 110, top: 360, opacity: inOut(f, 16, 112, 16), whiteSpace: 'nowrap'}}>
+					<div style={{fontFamily: MONO, fontSize: 150, lineHeight: 1, color: C.goldHot, textShadow: '0 0 40px rgba(243,196,124,0.7)'}}>5</div>
+					<div style={{fontFamily: SERIF, fontWeight: 600, fontSize: 24, color: C.ice, letterSpacing: '0.25em', marginTop: 14}}>颗卫星</div>
+					<div style={{fontFamily: MONO, fontSize: 13, color: C.iceDim, letterSpacing: '0.3em', marginTop: 10}}>CHARON · STYX · NIX · KERBEROS · HYDRA</div>
 				</div>
-				<div style={{position: 'absolute', right: 110, top: 320, textAlign: 'right', opacity: lock}}>
-					<div style={{fontFamily: MONO, fontSize: 44, color: C.ice}}>6.39 天</div>
-					<div style={{fontFamily: SERIF, fontSize: 15, color: C.iceDim, letterSpacing: '0.24em', marginTop: 8}}>自转 = 卡戎公转</div>
-					<div style={{fontFamily: SERIF, fontSize: 12, color: C.iceDim, letterSpacing: '0.3em', marginTop: 6}}>MUTUAL TIDAL LOCK</div>
+				<div style={{position: 'absolute', left: 110, top: 360, opacity: inOut(f, 104, c1 + 6, 16), whiteSpace: 'nowrap'}}>
+					<div style={{fontFamily: MONO, fontSize: 150, lineHeight: 1, color: C.blueHot, textShadow: '0 0 40px rgba(127,208,255,0.7)'}}>51%</div>
+					<div style={{fontFamily: SERIF, fontWeight: 600, fontSize: 24, color: C.ice, letterSpacing: '0.25em', marginTop: 14}}>卡戎直径 · 冥王星的一半多</div>
+					<div style={{fontFamily: MONO, fontSize: 13, color: C.iceDim, letterSpacing: '0.3em', marginTop: 10}}>1,212 KM / 2,377 KM · 天体尺寸 ×1.6</div>
+				</div>
+				{/* 卡戎、冥王星标签 */}
+				<div style={{position: 'absolute', left: cS[0], top: cS[1] + 60, transform: 'translateX(-50%)', opacity: zoom * (1 - sky) * intro, whiteSpace: 'nowrap', textAlign: 'center'}}>
+					<div style={{fontFamily: SERIF, fontWeight: 600, fontSize: 18, color: C.blueHot, letterSpacing: '0.2em'}}>卡戎</div>
+				</div>
+				<div style={{position: 'absolute', left: pS[0], top: pS[1] + 100, transform: 'translateX(-50%)', opacity: zoom * (1 - sky) * intro, whiteSpace: 'nowrap', textAlign: 'center'}}>
+					<div style={{fontFamily: SERIF, fontWeight: 600, fontSize: 18, color: C.goldHot, letterSpacing: '0.2em'}}>冥王星</div>
+				</div>
+				{/* B：潮汐锁定 */}
+				<div style={{position: 'absolute', left: 110, top: 330, opacity: inOut(f, c1 + 10, c2 + 4, 20), whiteSpace: 'nowrap'}}>
+					<div style={{fontFamily: MONO, fontSize: 14, color: C.gold, letterSpacing: '0.4em'}}>MUTUAL TIDAL LOCK</div>
+					<div style={{fontFamily: SERIF, fontWeight: 600, fontSize: 52, color: C.ice, letterSpacing: '0.12em', marginTop: 14}}>彼此锁定</div>
+					<div style={{fontFamily: MONO, fontSize: 64, color: C.goldHot, textShadow: '0 0 30px rgba(243,196,124,0.7)', marginTop: 18}}>
+						{(days % 6.387).toFixed(2)}
+						<span style={{fontSize: 22, color: C.iceDim}}> / 6.39 天</span>
+					</div>
+					<div style={{fontFamily: SERIF, fontWeight: 600, fontSize: 18, color: C.iceDim, letterSpacing: '0.2em', marginTop: 10}}>自转 = 公转 · 两颗星都是</div>
+				</div>
+				{/* C */}
+				<div style={{position: 'absolute', left: 640, top: 560, transform: 'translateX(-50%)', opacity: appear(f, c2 + 30, 30), textAlign: 'center', whiteSpace: 'nowrap'}}>
+					<div style={{fontFamily: SERIF, fontWeight: 600, fontSize: 26, color: C.blueHot, letterSpacing: '0.3em', textShadow: '0 0 20px rgba(127,208,255,0.6)'}}>卡戎 · 永不落下</div>
+					<div style={{fontFamily: MONO, fontSize: 12, color: C.iceDim, letterSpacing: '0.3em', marginTop: 8}}>≈ 7 × 地球上看到的满月</div>
+				</div>
+				<div style={{position: 'absolute', right: 110, top: 600, opacity: appear(f, c2 + 40, 30), textAlign: 'right', whiteSpace: 'nowrap'}}>
+					<div style={{fontFamily: MONO, fontSize: 12, color: C.iceDim, letterSpacing: '0.35em'}}>TIME-LAPSE · 延时</div>
+					<div style={{fontFamily: MONO, fontSize: 44, color: C.ice, marginTop: 6}}>
+						T + {(Math.max(0, f - c2) * 0.035).toFixed(2)} <span style={{fontSize: 18, color: C.iceDim}}>天</span>
+					</div>
 				</div>
 			</AbsoluteFill>
-			<SkyView f={f} o={sky} />
 		</SceneFrame>
 	);
 };

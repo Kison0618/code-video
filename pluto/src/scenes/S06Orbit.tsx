@@ -1,49 +1,19 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
-import {SunGlow} from '../components/Bodies';
-import {Label} from '../components/Hud';
-import {SceneFrame, SceneProps, cueAt, cueEnd} from '../components/SceneFrame';
-import {appear, easeInOut, inOut} from '../lib/anim';
-import {C, MONO, SERIF} from '../theme';
+import {AbsoluteFill, useCurrentFrame} from 'remotion';
+import {SceneFrame, SceneProps, cueAt} from '../components/SceneFrame';
+import {FxCanvas} from '../fx/Canvas';
+import {dot, glow, glowPath, rgba, trail} from '../fx/glow';
+import {proj} from '../fx/proj';
+import {appear, easeInOut, inOut, lerp} from '../lib/anim';
+import {NEPTUNE_EL, PLUTO_EL, neptuneAt, neptuneLon, plutoAt, plutoAtNu} from '../lib/orbit';
+import {C, MONO, RGB, SERIF} from '../theme';
 
-const CX = 960;
-const CY = 480;
-const S = 8.6; // px per AU
-const A = 39.48;
-const E = 0.2488;
-const P_PLUTO = 247.94;
-const P_NEP = 164.8;
-const PERI_YEAR = 1989.7;
-const PHI = (-35 * Math.PI) / 180; // direction of perihelion on screen
-const R_NEP = 30.07;
+const K = 9.4; // px / AU
+const CX = 1040;
+const CY = 520;
+const NOW = 2026;
 
-/** 开普勒方程：给定年份，求冥王星在屏幕上的位置 */
-const plutoAt = (year: number) => {
-	const M = (2 * Math.PI * (year - PERI_YEAR)) / P_PLUTO;
-	let En = M;
-	for (let i = 0; i < 8; i++) En = En - (En - E * Math.sin(En) - M) / (1 - E * Math.cos(En));
-	const nu = 2 * Math.atan2(Math.sqrt(1 + E) * Math.sin(En / 2), Math.sqrt(1 - E) * Math.cos(En / 2));
-	const r = A * (1 - E * Math.cos(En));
-	const ang = PHI - nu; // counter-clockwise on screen
-	return {x: CX + r * S * Math.cos(ang), y: CY + r * S * Math.sin(ang), r};
-};
-const neptuneAt = (year: number) => {
-	const ang = PHI - Math.PI / 2 - (2 * Math.PI * (year - PERI_YEAR)) / P_NEP;
-	return {x: CX + R_NEP * S * Math.cos(ang), y: CY + R_NEP * S * Math.sin(ang)};
-};
-
-const orbitPath = (y0: number, y1: number, steps = 220) => {
-	let d = '';
-	for (let i = 0; i <= steps; i++) {
-		const p = plutoAt(y0 + ((y1 - y0) * i) / steps);
-		d += `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)} `;
-	}
-	return d;
-};
-
-const FULL = orbitPath(PERI_YEAR, PERI_YEAR + P_PLUTO, 400);
-// inside-Neptune arc: 1979 → 1999
-const INSIDE = orbitPath(1979.1, 1999.1, 60);
+const ORBIT: [number, number, number][] = new Array(361).fill(0).map((_, i) => plutoAtNu((i / 360) * Math.PI * 2));
 
 export const S06Orbit: React.FC<SceneProps> = (props) => {
 	const {scene} = props;
@@ -51,113 +21,227 @@ export const S06Orbit: React.FC<SceneProps> = (props) => {
 	const c1 = cueAt(scene, 1);
 	const c2 = cueAt(scene, 2);
 	const c3 = cueAt(scene, 3);
-	const e3 = cueEnd(scene, 3);
-	const draw = appear(f, 4, 60, easeInOut);
+	const dur = scene.duration;
+	const intro = appear(f, 0, 50, easeInOut);
+	// 年份时间线
+	const lap = appear(f, 22, c1 - 30, easeInOut); // A：一整圈 248 年
+	const since = appear(f, c1 + 6, 100, easeInOut); // B：1930 → 2026
+	let year = 1930 + lap * PLUTO_EL.period;
+	if (f >= c1) year = 1930 + since * (NOW - 1930);
+	// C：侧视，展示倾角与近日段
+	const side = appear(f, c2 + 4, 50, easeInOut) * (1 - appear(f, c3 - 30, 40, easeInOut));
+	const inside = appear(f, c2 + 50, 40);
+	// D：随海王星旋转的参考系
+	const rot = appear(f, c3 - 10, 50, easeInOut);
+	const resT = appear(f, c3 + 20, dur - (c3 + 20) - 60, easeInOut); // 0..1 → 495 年
 
-	// phase A: one quick lap; phase B: 1930 → 2026; phase D: resonance
-	let year: number;
-	if (f < c1) year = interpolate(f, [10, Math.max(11, c1 - 6)], [1930, 1930 + P_PLUTO], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: easeInOut});
-	else if (f < c3) year = interpolate(f, [c1 + 6, c1 + 6 + Math.max(50, c2 - c1 - 20)], [1930, 2026], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: easeInOut});
-	else year = interpolate(f, [c3 + 4, Math.max(c3 + 60, e3)], [2026, 2026 + 3 * P_NEP], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: easeInOut});
-	const p = plutoAt(year);
-	const n = neptuneAt(f < c3 ? 2026 : year);
-	const phaseB = inOut(f, c1, c3, 16);
-	const phaseC = inOut(f, c2, c3 + 10, 16);
-	const phaseD = appear(f, c3, 20);
-	const lapA = inOut(f, 6, c1, 14);
-	const trail = f >= c1 && f < c3 ? orbitPath(1930, Math.max(1930.01, year), 120) : '';
-	const nepLaps = Math.max(0, (year - 2026) / P_NEP);
-	const pluLaps = Math.max(0, (year - 2026) / P_PLUTO);
-	const p1930 = plutoAt(1930);
+	const pitch = lerp(lerp(58, 14, side), 90, rot);
+	const yaw = -20 + f * 0.03 * (1 - rot) + lerp(0, 20, rot);
+	const cam = {cx: CX, cy: CY, pitch, yaw, dist: 2600, scale: lerp(1, 0.8, rot)};
+	const P = (p: [number, number, number]) => proj(p[0] * K, p[1] * K, p[2] * K, cam);
+
+	const res0 = 1930;
+	const resYears = 495.6 * resT;
+	const nLaps = (resYears / NEPTUNE_EL.period);
+	const pLaps = resYears / PLUTO_EL.period;
+
 	return (
-		<SceneFrame {...props} stars={{opacity: 0.3, drift: 0.03}}>
-			<AbsoluteFill>
-				<SunGlow x={CX} y={CY} r={9} intensity={draw} />
-				<svg width={1920} height={1080} style={{position: 'absolute'}}>
-					{/* inner planets (faint) */}
-					{[5.2, 9.58, 19.2].map((au) => (
-						<circle key={au} cx={CX} cy={CY} r={au * S} fill="none" stroke={C.iceGhost} strokeDasharray="2 6" opacity={draw} />
-					))}
-					{/* Neptune orbit */}
-					<circle
-						cx={CX}
-						cy={CY}
-						r={R_NEP * S}
-						fill="none"
-						stroke="rgba(143,198,255,0.45)"
-						strokeWidth={1.2}
-						strokeDasharray={`${2 * Math.PI * R_NEP * S * draw} 9999`}
-					/>
-					{/* Pluto orbit */}
-					<path d={FULL} fill="none" stroke={C.amberDim} strokeWidth={1.3} pathLength={1} strokeDasharray={`${draw} 2`} />
-					{/* 1930→now trail */}
-					{trail ? <path d={trail} fill="none" stroke={C.amber} strokeWidth={3} opacity={phaseB} /> : null}
-					{/* inside Neptune */}
-					<path d={INSIDE} fill="none" stroke={C.amberHot} strokeWidth={6} opacity={phaseC} strokeLinecap="round" />
-					{phaseB > 0 ? <circle cx={p1930.x} cy={p1930.y} r={4} fill="none" stroke={C.ice} opacity={phaseB} /> : null}
-					{/* bodies */}
-					<circle cx={n.x} cy={n.y} r={6} fill={C.haze} opacity={draw} />
-					<circle cx={n.x} cy={n.y} r={14} fill="rgba(143,198,255,0.18)" opacity={draw} />
-					<circle cx={p.x} cy={p.y} r={6} fill={C.amberHot} />
-					<circle cx={p.x} cy={p.y} r={16} fill="rgba(255,217,176,0.2)" />
-				</svg>
-				<Label x={n.x + 22} y={n.y} zh="海王星" en="NEPTUNE" opacity={draw * (1 - phaseD * 0.3)} size={0.85} />
-				<Label x={p.x + 24} y={p.y + 4} zh="冥王星" en="PLUTO" color={C.amber} opacity={draw} size={0.85} />
-				{phaseB > 0 ? <Label x={p1930.x - 16} y={p1930.y} zh="1930" align="right" opacity={phaseB} size={0.8} /> : null}
+		<SceneFrame {...props} stars={{opacity: 0.45, drift: 0.04}} kicker="P = 247.9 YR · e = 0.25 · i = 17°" hudRight={'HELIOCENTRIC\nECLIPTIC J2000'}>
+			<FxCanvas
+				draw={(ctx, fr) => {
+					ctx.globalCompositeOperation = 'lighter';
+					const base = intro * (1 - rot * 0.0);
+					// 黄道面极坐标网格
+					const gridA = base * lerp(0.5, 0.25, rot);
+					for (let r = 10; r <= 50; r += 10) {
+						const pts: [number, number][] = [];
+						for (let k = 0; k <= 120; k++) {
+							const a = (k / 120) * Math.PI * 2;
+							const s = P([r * Math.cos(a), r * Math.sin(a), 0]);
+							pts.push([s[0], s[1]]);
+						}
+						glowPath(ctx, pts, RGB.blue, {width: 0.6, a: gridA * 0.35, bloom: 2});
+					}
+					for (let k = 0; k < 12; k++) {
+						const a = (k / 12) * Math.PI * 2;
+						const s0 = P([4 * Math.cos(a), 4 * Math.sin(a), 0]);
+						const s1 = P([52 * Math.cos(a), 52 * Math.sin(a), 0]);
+						glowPath(ctx, [[s0[0], s0[1]], [s1[0], s1[1]]], RGB.blue, {width: 0.5, a: gridA * 0.2, bloom: 2});
+					}
+					// 太阳
+					const sun = P([0, 0, 0]);
+					glow(ctx, sun[0], sun[1], 200, RGB.goldHot, 0.55 * base);
+					glow(ctx, sun[0], sun[1], 36, RGB.white, base);
 
-				{/* left column readouts */}
-				<div style={{position: 'absolute', left: 120, top: 300, width: 360}}>
-					<div style={{opacity: lapA}}>
-						<div style={{fontFamily: MONO, fontSize: 84, color: C.ice}}>248</div>
-						<div style={{fontFamily: SERIF, fontSize: 18, color: C.iceDim, letterSpacing: '0.3em'}}>年 · 一个冥王星年</div>
-						<div style={{fontFamily: SERIF, fontSize: 12, color: C.iceDim, letterSpacing: '0.3em', marginTop: 6}}>ONE PLUTONIAN YEAR</div>
+					if (rot < 1) {
+						const ia = base * (1 - rot);
+						// 海王星轨道
+						const np: [number, number][] = [];
+						for (let k = 0; k <= 180; k++) {
+							const a = (k / 180) * Math.PI * 2;
+							const s = P([NEPTUNE_EL.a * Math.cos(a), NEPTUNE_EL.a * Math.sin(a), 0]);
+							np.push([s[0], s[1]]);
+						}
+						glowPath(ctx, np, RGB.blue, {width: 1.4, a: 0.8 * ia, bloom: 10});
+						// 冥王星轨道（底）
+						const op = ORBIT.map((p) => {
+							const s = P(p);
+							return [s[0], s[1]] as [number, number];
+						});
+						glowPath(ctx, op, RGB.gold, {width: 1.1, a: 0.45 * ia, bloom: 6});
+						// 倾角：投影到黄道面的垂线
+						if (side > 0) {
+							for (let k = 0; k < 360; k += 6) {
+								const p = ORBIT[k];
+								const a = P(p);
+								const b = P([p[0], p[1], 0]);
+								ctx.globalAlpha = 0.35 * side * ia;
+								ctx.strokeStyle = rgba(p[2] > 0 ? RGB.gold : RGB.blue, 1);
+								ctx.lineWidth = 1;
+								ctx.beginPath();
+								ctx.moveTo(a[0], a[1]);
+								ctx.lineTo(b[0], b[1]);
+								ctx.stroke();
+								dot(ctx, b[0], b[1], 1.2, RGB.ice, 0.4 * side * ia);
+							}
+						}
+						// 已走过的弧（B 段）
+						if (f >= c1) {
+							const arc: [number, number][] = [];
+							for (let y = 1930; y <= year; y += 0.5) {
+								const s = P(plutoAt(y));
+								arc.push([s[0], s[1]]);
+							}
+							glowPath(ctx, arc, RGB.goldHot, {width: 3, a: ia * (1 - 0.65 * inside), bloom: 18});
+							const s0 = P(plutoAt(1930));
+							glow(ctx, s0[0], s0[1], 30, RGB.gold, ia);
+						}
+						// 近日段：比海王星更近
+						if (inside > 0) {
+							const seg: [number, number][] = [];
+							for (let y = 1979; y <= 1979 + 20 * inside; y += 0.25) {
+								const s = P(plutoAt(y));
+								seg.push([s[0], s[1]]);
+							}
+							glowPath(ctx, seg, RGB.red, {width: 4, a: ia, bloom: 30});
+							if (seg.length) glow(ctx, seg[seg.length - 1][0], seg[seg.length - 1][1], 60, RGB.red, ia * (inside < 1 ? 1 : 0.5));
+						}
+						// 冥王星 + 彗尾
+						const tr: [number, number][] = [];
+						const span = f < c1 ? 40 : 18;
+						for (let k = 0; k <= 30; k++) {
+							const s = P(plutoAt(year - span + (k / 30) * span));
+							tr.push([s[0], s[1]]);
+						}
+						trail(ctx, tr, RGB.gold, 6, 0.9 * ia);
+						const pp = P(plutoAt(year));
+						glow(ctx, pp[0], pp[1], 90, RGB.gold, ia);
+						dot(ctx, pp[0], pp[1], 5, RGB.white, ia);
+						const nn = P(neptuneAt(year));
+						glow(ctx, nn[0], nn[1], 60, RGB.blue, ia);
+						dot(ctx, nn[0], nn[1], 4, RGB.blueHot, ia);
+					}
+
+					// ---------- D：共振玫瑰线（随海王星旋转的坐标系） ----------
+					if (rot > 0) {
+						const ra = rot;
+						const fix = -Math.PI / 2; // 海王星固定在屏幕上方
+						const toRot = (y: number) => {
+							const p = plutoAt(y);
+							const l = neptuneLon(y);
+							const c = Math.cos(fix - l);
+							const s = Math.sin(fix - l);
+							return [p[0] * c - p[1] * s, p[0] * s + p[1] * c, 0] as [number, number, number];
+						};
+						const pts: [number, number][] = [];
+						for (let y = res0; y <= res0 + resYears; y += 0.6) {
+							const s = P(toRot(y));
+							pts.push([s[0], s[1]]);
+						}
+						// 历史轨迹（淡）+ 最近一段（亮）
+						glowPath(ctx, pts, RGB.gold, {width: 1.2, a: 0.55 * ra, bloom: 10});
+						const recent = pts.slice(Math.max(0, pts.length - 60));
+						trail(ctx, recent, RGB.goldHot, 4, ra);
+						if (pts.length) {
+							const h = pts[pts.length - 1];
+							glow(ctx, h[0], h[1], 80, RGB.gold, ra);
+							dot(ctx, h[0], h[1], 5, RGB.white, ra);
+						}
+						// 海王星轨道与固定的海王星
+						const np: [number, number][] = [];
+						for (let k = 0; k <= 180; k++) {
+							const a = (k / 180) * Math.PI * 2;
+							const s = P([NEPTUNE_EL.a * Math.cos(a), NEPTUNE_EL.a * Math.sin(a), 0]);
+							np.push([s[0], s[1]]);
+						}
+						glowPath(ctx, np, RGB.blue, {width: 1, a: 0.4 * ra, bloom: 6});
+						const ns = P([0, -NEPTUNE_EL.a, 0]);
+						const pulse = 0.5 + 0.5 * Math.sin(fr / 6);
+						glow(ctx, ns[0], ns[1], 70 + pulse * 20, RGB.blue, ra);
+						dot(ctx, ns[0], ns[1], 6, RGB.blueHot, ra);
+						// 海王星的“禁区”
+						ctx.globalAlpha = 0.5 * ra;
+						ctx.strokeStyle = rgba(RGB.blue, 1);
+						ctx.setLineDash([3, 6]);
+						ctx.beginPath();
+						ctx.arc(ns[0], ns[1], 17 * K * cam.scale!, 0, Math.PI * 2);
+						ctx.stroke();
+						ctx.setLineDash([]);
+					}
+					ctx.globalAlpha = 1;
+					ctx.globalCompositeOperation = 'source-over';
+				}}
+			/>
+			<AbsoluteFill>
+				{/* A：248 年 */}
+				<div style={{position: 'absolute', left: 110, top: 380, opacity: inOut(f, 20, c1 + 4, 16), whiteSpace: 'nowrap'}}>
+					<div style={{fontFamily: MONO, fontSize: 150, lineHeight: 1, color: C.goldHot, textShadow: '0 0 40px rgba(243,196,124,0.7)'}}>{Math.round(248 * lap)}</div>
+					<div style={{fontFamily: SERIF, fontWeight: 600, fontSize: 26, color: C.ice, letterSpacing: '0.3em', marginTop: 16}}>年 · 一个冥王星年</div>
+					<div style={{fontFamily: MONO, fontSize: 12, color: C.iceDim, letterSpacing: '0.35em', marginTop: 10}}>ONE PLUTONIAN YEAR</div>
+				</div>
+				{/* B：1930 → 今天 */}
+				<div style={{position: 'absolute', left: 110, top: 380, opacity: inOut(f, c1, c2 + 30, 16), whiteSpace: 'nowrap'}}>
+					<div style={{fontFamily: MONO, fontSize: 14, color: C.gold, letterSpacing: '0.4em'}}>1930 → {NOW}</div>
+					<div style={{fontFamily: MONO, fontSize: 150, lineHeight: 1, color: C.ice, textShadow: '0 0 30px rgba(212,241,255,0.4)', marginTop: 12}}>{Math.floor(year)}</div>
+					<div style={{display: 'flex', alignItems: 'baseline', gap: 14, marginTop: 18}}>
+						<span style={{fontFamily: MONO, fontSize: 64, color: C.goldHot, textShadow: '0 0 30px rgba(243,196,124,0.7)'}}>{(((year - 1930) / PLUTO_EL.period) * 100).toFixed(1)}%</span>
+						<span style={{fontFamily: SERIF, fontWeight: 600, fontSize: 22, color: C.iceDim, letterSpacing: '0.2em'}}>一圈</span>
 					</div>
-					<div style={{position: 'absolute', top: 0, opacity: phaseB * (1 - phaseC * 0.6)}}>
-						<div style={{fontFamily: MONO, fontSize: 84, color: C.amberHot}}>{Math.floor(Math.min(year, 2026))}</div>
-						<div style={{fontFamily: SERIF, fontSize: 18, color: C.iceDim, letterSpacing: '0.3em'}}>
-							已走过 <span style={{fontFamily: MONO, color: C.ice}}>{((Math.max(0, Math.min(year, 2026) - 1930) / P_PLUTO) * 100).toFixed(1)}%</span>
-						</div>
-						<div style={{fontFamily: SERIF, fontSize: 12, color: C.iceDim, letterSpacing: '0.3em', marginTop: 6}}>
-							下一次回到原点：2178 年
-						</div>
-					</div>
-					<div style={{position: 'absolute', top: 0, opacity: phaseD}}>
-						<div style={{fontFamily: MONO, fontSize: 84, color: C.ice}}>3 : 2</div>
-						<div style={{fontFamily: SERIF, fontSize: 18, color: C.iceDim, letterSpacing: '0.3em'}}>轨道共振 · RESONANCE</div>
-						<div style={{display: 'flex', gap: 30, marginTop: 26}}>
-							<div>
-								<div style={{fontFamily: MONO, fontSize: 40, color: C.haze}}>{nepLaps.toFixed(2)}</div>
-								<div style={{fontFamily: SERIF, fontSize: 14, color: C.iceDim, letterSpacing: '0.2em'}}>海王星 · 圈</div>
-							</div>
-							<div>
-								<div style={{fontFamily: MONO, fontSize: 40, color: C.amber}}>{pluLaps.toFixed(2)}</div>
-								<div style={{fontFamily: SERIF, fontSize: 14, color: C.iceDim, letterSpacing: '0.2em'}}>冥王星 · 圈</div>
-							</div>
-						</div>
+					<div style={{width: 360, height: 3, background: 'rgba(227,236,245,0.12)', marginTop: 14}}>
+						<div style={{width: `${((year - 1930) / PLUTO_EL.period) * 100}%`, height: 3, background: C.gold, boxShadow: '0 0 12px #f3c47c'}} />
 					</div>
 				</div>
-				{/* inside-Neptune callout + tilt inset */}
-				<div style={{position: 'absolute', right: 120, top: 300, width: 330, opacity: phaseC, textAlign: 'right'}}>
-					<div style={{fontFamily: MONO, fontSize: 40, color: C.amberHot}}>1979 — 1999</div>
-					<div style={{fontFamily: SERIF, fontSize: 18, color: C.ice, letterSpacing: '0.2em', marginTop: 8}}>比海王星更靠近太阳</div>
-					<div style={{fontFamily: SERIF, fontSize: 12, color: C.iceDim, letterSpacing: '0.3em', marginTop: 6}}>CLOSER THAN NEPTUNE</div>
-					<svg width={330} height={140} style={{marginTop: 34}}>
-						<line x1={20} x2={310} y1={90} y2={90} stroke={C.iceFaint} />
-						<line x1={20} x2={310} y1={90 + 44} y2={90 - 44} stroke={C.amber} transform="rotate(0)" />
-						<path d="M 230 90 A 60 60 0 0 0 226 72" fill="none" stroke={C.ice} />
-						<text x={250} y={80} fill={C.ice} fontFamily="Pluto Mono, monospace" fontSize={16}>
-							17°
-						</text>
-						<text x={20} y={112} fill={C.iceDim} fontFamily="Pluto Serif, serif" fontSize={13} letterSpacing={2}>
-							黄道面
-						</text>
-						<text x={20} y={28} fill={C.amber} fontFamily="Pluto Serif, serif" fontSize={13} letterSpacing={2}>
-							冥王星轨道面 · 倾斜 17°
-						</text>
-					</svg>
-					<div style={{fontFamily: SERIF, fontSize: 15, color: C.iceDim, letterSpacing: '0.2em', marginTop: 10}}>
-						偏心率 0.25 · 近日 29.7 AU · 远日 49.3 AU
+				{/* C：1979–1999 */}
+				<div style={{position: 'absolute', right: 110, top: 200, opacity: inside * (1 - rot), textAlign: 'right', whiteSpace: 'nowrap'}}>
+					<div style={{fontFamily: MONO, fontSize: 92, lineHeight: 1, color: '#ffd0d6', textShadow: '0 0 30px rgba(255,84,104,0.8)'}}>1979—1999</div>
+					<div style={{fontFamily: SERIF, fontWeight: 600, fontSize: 24, color: C.ice, letterSpacing: '0.25em', marginTop: 16}}>比海王星更靠近太阳</div>
+					<div style={{fontFamily: MONO, fontSize: 12, color: C.iceDim, letterSpacing: '0.35em', marginTop: 10}}>CLOSER TO THE SUN THAN NEPTUNE</div>
+				</div>
+				<div style={{position: 'absolute', right: 110, top: 730, opacity: side * (1 - rot), textAlign: 'right', whiteSpace: 'nowrap'}}>
+					<div style={{fontFamily: MONO, fontSize: 64, color: C.goldHot, textShadow: '0 0 24px rgba(243,196,124,0.7)', lineHeight: 1}}>17°</div>
+					<div style={{fontFamily: SERIF, fontWeight: 600, fontSize: 20, color: C.iceDim, letterSpacing: '0.25em', marginTop: 10}}>轨道倾角 · 偏心率 0.25</div>
+					<div style={{fontFamily: MONO, fontSize: 12, color: C.iceDim, letterSpacing: '0.3em', marginTop: 8}}>29.7 AU — 49.3 AU</div>
+				</div>
+				{/* D：3 : 2 */}
+				<div style={{position: 'absolute', left: 110, top: 360, opacity: appear(f, c3 + 10, 30), whiteSpace: 'nowrap'}}>
+					<div style={{fontFamily: MONO, fontSize: 170, lineHeight: 1, color: C.ice, textShadow: '0 0 40px rgba(212,241,255,0.4)'}}>
+						<span style={{color: C.blueHot, textShadow: '0 0 40px rgba(127,208,255,0.8)'}}>3</span>
+						<span style={{color: C.iceDim, fontSize: 110, margin: '0 18px'}}>:</span>
+						<span style={{color: C.goldHot, textShadow: '0 0 40px rgba(243,196,124,0.8)'}}>2</span>
 					</div>
+					<div style={{fontFamily: SERIF, fontWeight: 600, fontSize: 24, color: C.ice, letterSpacing: '0.25em', marginTop: 20}}>轨道共振 · 永不相撞</div>
+					<div style={{marginTop: 30, fontFamily: MONO, fontSize: 20, lineHeight: 2, letterSpacing: '0.1em'}}>
+						<div style={{color: C.blueHot}}>
+							NEPTUNE <span style={{fontSize: 34}}>{nLaps.toFixed(2)}</span> 圈
+						</div>
+						<div style={{color: C.goldHot}}>
+							PLUTO&nbsp;&nbsp;&nbsp;<span style={{fontSize: 34}}>{pLaps.toFixed(2)}</span> 圈
+						</div>
+						<div style={{color: C.iceDim, fontSize: 13, letterSpacing: '0.3em'}}>{Math.round(resYears)} 年 · 随海王星旋转的视角</div>
+					</div>
+				</div>
+				<div style={{position: 'absolute', left: CX + 26, top: CY - NEPTUNE_EL.a * K * 0.8 - 14, transform: 'translateY(-50%)', opacity: rot, fontFamily: SERIF, fontWeight: 600, fontSize: 20, color: C.blueHot, letterSpacing: '0.25em', whiteSpace: 'nowrap'}}>
+					海王星
 				</div>
 			</AbsoluteFill>
 		</SceneFrame>

@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Audio, Sequence, interpolate, useVideoConfig} from 'remotion';
 import type {SceneProps} from './components/SceneFrame';
+import {TransitionFlash} from './fx/Transition';
 import type {Timeline} from './lib/timeline';
 import {S01Plates} from './scenes/S01Plates';
 import {S02Title} from './scenes/S02Title';
@@ -60,6 +61,14 @@ export const PlutoVideo: React.FC<VideoProps> = ({timeline, showEnglish, bgmVolu
 					</Sequence>
 				);
 			})}
+			{/* 场景之间的光闪转场 */}
+			{timeline.scenes.slice(1).map((scene, i) => (
+				<Sequence key={`tr-${scene.id}`} from={Math.max(0, scene.from - 16)} durationInFrames={32} name={`transition → ${scene.id}`} layout="none">
+					<AbsoluteFill>
+						<TransitionFlash len={32} warm={i % 2 === 0} />
+					</AbsoluteFill>
+				</Sequence>
+			))}
 			{timeline.bgmSrc ? (
 				<Audio
 					src={timeline.bgmSrc}

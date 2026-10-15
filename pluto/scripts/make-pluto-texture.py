@@ -67,94 +67,100 @@ def smooth(e0, e1, x):
     return t * t * (3 - 2 * t)
 
 
-warpA = noise(2.2, 4, seed=1) * 3.0
-warpB = noise(2.2, 4, seed=2) * 3.0
-broad = noise(0.9, 3, seed=3)
-mid = noise(3.5, 5, seed=4)
-fine = noise(14, 4, seed=5)
+def pluto_features():
+    """在当前全局 LON/LAT/P 网格上计算冥王星反照率（RGB）、心形遮罩、克苏鲁遮罩"""
+    warpA = noise(2.2, 4, seed=1) * 3.0
+    warpB = noise(2.2, 4, seed=2) * 3.0
+    broad = noise(0.9, 3, seed=3)
+    mid = noise(3.5, 5, seed=4)
+    fine = noise(14, 4, seed=5)
 
-WL = LON + warpA * 1.4
-WT = LAT + warpB
-
-
-def dlonw(l0):
-    return (WL - l0 + 540) % 360 - 180
+    WL = LON + warpA * 1.4
+    WT = LAT + warpB
 
 
-# ---------- 基础反照率 ----------
-col = np.ones((N, N, 3), np.float32) * np.array([194, 158, 124], np.float32)
-col *= (1 + 0.08 * broad + 0.07 * mid + 0.035 * fine)[..., None]
-polar = smooth(50, 72, WT)
-col = col * (1 - polar[..., None] * 0.5) + np.array([212, 196, 164]) * polar[..., None] * 0.5
-midband = smooth(28, 42, WT) * (1 - smooth(50, 62, WT))
-col *= (1 - 0.12 * midband * (0.7 + 0.3 * mid))[..., None]
-cap = smooth(80, 89, WT)
-col = col * (1 - cap[..., None] * 0.25) + np.array([168, 150, 128]) * cap[..., None] * 0.25
+    def dlonw(l0):
+        return (WL - l0 + 540) % 360 - 180
 
-# ---------- 克苏鲁区（暗红褐，赤道，鲸鱼形，头部贴近心形西南） ----------
-x = dlonw(100)
-u = (x + 80) / 145
-half_h = 5 + 15 * np.clip(u, 0, 1) ** 0.9
-cy = -6 + 5 * np.sin(u * 3.0)
-cth = smooth(0, 1, (half_h - np.abs(WT - cy)) / 5) * smooth(0, 0.1, u) * (1 - smooth(0.96, 1.04, u))
-cth = np.clip(cth * np.clip(0.88 + 0.22 * mid, 0, 1), 0, 1)
-dark = np.array([70, 36, 25], np.float32) * (1 + 0.14 * fine)[..., None]
-col = col * (1 - cth[..., None] * 0.92) + dark * cth[..., None] * 0.92
 
-# ---------- 汤博区（心） ----------
-# 心形隐函数（局部切平面坐标），边界加噪声；左瓣=斯普特尼克平原（光滑明亮），右瓣=东汤博区（斑驳）
-HC_LON, HC_LAT, HS = 183.0, 18.0, 27.0
-HL = LON + warpA * 0.35
-HT = LAT + warpB * 0.3
-hu = ((HL - HC_LON + 540) % 360 - 180) * np.cos(np.radians(HC_LAT)) / HS
-hv = (HT - HC_LAT) / HS
-ang = np.radians(-14)
-ru = hu * np.cos(ang) - hv * np.sin(ang)
-rv = hu * np.sin(ang) + hv * np.cos(ang)
-# Inigo Quilez 的心形 SDF（尖端在 (0,0)，两瓣在上）
-qx = np.abs(ru) * 0.56
-qy = rv * 0.56 + 0.56
-d_lobe = np.sqrt((qx - 0.25) ** 2 + (qy - 0.75) ** 2) - np.sqrt(2.0) / 4.0
-t = np.maximum(qx + qy, 0) * 0.5
-d_tip = np.sqrt(np.minimum(qx ** 2 + (qy - 1.0) ** 2, (qx - t) ** 2 + (qy - t) ** 2)) * np.sign(qx - qy)
-hd = np.where(qy + qx > 1.0, d_lobe, d_tip)
-hf = hd
-hd_n = hd + 0.016 * mid + 0.008 * fine + np.where(ru > 0, 0.02 * mid, 0)
-soft = np.where(ru > 0, 0.03, 0.008)
-heart_in = 1 - smooth(-soft, soft, hd_n)
-left = 1 - smooth(-0.12, 0.12, ru + 0.05 * mid)
-sput = heart_in * left
-east = heart_in * (1 - left)
-heart_mask = np.clip(heart_in, 0, 1)
+    # ---------- 基础反照率 ----------
+    col = np.ones(LON.shape + (3,), np.float32) * np.array([194, 158, 124], np.float32)
+    col *= (1 + 0.08 * broad + 0.07 * mid + 0.035 * fine)[..., None]
+    polar = smooth(50, 72, WT)
+    col = col * (1 - polar[..., None] * 0.5) + np.array([212, 196, 164]) * polar[..., None] * 0.5
+    midband = smooth(28, 42, WT) * (1 - smooth(50, 62, WT))
+    col *= (1 - 0.12 * midband * (0.7 + 0.3 * mid))[..., None]
+    cap = smooth(80, 89, WT)
+    col = col * (1 - cap[..., None] * 0.25) + np.array([168, 150, 128]) * cap[..., None] * 0.25
 
-bright = np.array([246, 239, 228], np.float32) * (1 + 0.01 * fine)[..., None]
-col = col * (1 - sput[..., None] * 0.95) + bright * sput[..., None] * 0.95
-eb = east * np.clip(0.86 + 0.16 * mid + 0.06 * fine, 0, 1)
-col = col * (1 - eb[..., None] * 0.88) + np.array([238, 226, 210]) * eb[..., None] * 0.88
+    # ---------- 克苏鲁区（暗红褐，赤道，鲸鱼形，头部贴近心形西南） ----------
+    x = dlonw(100)
+    u = (x + 80) / 145
+    half_h = 5 + 15 * np.clip(u, 0, 1) ** 0.9
+    cy = -6 + 5 * np.sin(u * 3.0)
+    cth = smooth(0, 1, (half_h - np.abs(WT - cy)) / 5) * smooth(0, 0.1, u) * (1 - smooth(0.96, 1.04, u))
+    cth = np.clip(cth * np.clip(0.88 + 0.22 * mid, 0, 1), 0, 1)
+    dark = np.array([70, 36, 25], np.float32) * (1 + 0.14 * fine)[..., None]
+    col = col * (1 - cth[..., None] * 0.92) + dark * cth[..., None] * 0.92
 
-# 斯普特尼克平原上的对流多边形（非常细微）
-pts = np.stack([rng.uniform(150, 190, 80), rng.uniform(-14, 44, 80)], -1)
-d1 = np.full(LON.shape, 1e9, np.float32)
-d2 = np.full(LON.shape, 1e9, np.float32)
-coslat = np.cos(np.radians(LAT))
-for px_, py_ in pts:
-    d = ((((LON - px_ + 540) % 360) - 180) * coslat) ** 2 + (LAT - py_) ** 2
-    m = d < d1
-    d2 = np.where(m, d1, np.minimum(d2, d))
-    d1 = np.where(m, d, d1)
-edge = 1 - smooth(0.0, 0.6, np.sqrt(d2) - np.sqrt(d1))
-col *= (1 - 0.045 * edge * sput * (1 - smooth(-0.12, -0.01, hf)))[..., None]
+    # ---------- 汤博区（心） ----------
+    # 心形隐函数（局部切平面坐标），边界加噪声；左瓣=斯普特尼克平原（光滑明亮），右瓣=东汤博区（斑驳）
+    HC_LON, HC_LAT, HS = 183.0, 18.0, 27.0
+    HL = LON + warpA * 0.35
+    HT = LAT + warpB * 0.3
+    hu = ((HL - HC_LON + 540) % 360 - 180) * np.cos(np.radians(HC_LAT)) / HS
+    hv = (HT - HC_LAT) / HS
+    ang = np.radians(-14)
+    ru = hu * np.cos(ang) - hv * np.sin(ang)
+    rv = hu * np.sin(ang) + hv * np.cos(ang)
+    # Inigo Quilez 的心形 SDF（尖端在 (0,0)，两瓣在上）
+    qx = np.abs(ru) * 0.56
+    qy = rv * 0.56 + 0.56
+    d_lobe = np.sqrt((qx - 0.25) ** 2 + (qy - 0.75) ** 2) - np.sqrt(2.0) / 4.0
+    t = np.maximum(qx + qy, 0) * 0.5
+    d_tip = np.sqrt(np.minimum(qx ** 2 + (qy - 1.0) ** 2, (qx - t) ** 2 + (qy - t) ** 2)) * np.sign(qx - qy)
+    hd = np.where(qy + qx > 1.0, d_lobe, d_tip)
+    hf = hd
+    hd_n = hd + 0.016 * mid + 0.008 * fine + np.where(ru > 0, 0.02 * mid, 0)
+    soft = np.where(ru > 0, 0.03, 0.008)
+    heart_in = 1 - smooth(-soft, soft, hd_n)
+    left = 1 - smooth(-0.12, 0.12, ru + 0.05 * mid)
+    sput = heart_in * left
+    east = heart_in * (1 - left)
+    heart_mask = np.clip(heart_in, 0, 1)
 
-# 心形东南的“指虎”暗斑
-for l0, t0, r in [(224, -8, 5.0), (235, -5, 4.6), (246, -3, 4.2), (257, -2, 3.4), (267, 0, 2.8)]:
-    d = np.sqrt((dlonw(l0) / r) ** 2 + ((WT - t0) / (r * 0.7)) ** 2)
-    m = 1 - smooth(0.7, 1.15, d)
-    col = col * (1 - m[..., None] * 0.8) + np.array([86, 46, 31]) * m[..., None] * 0.8
+    bright = np.array([246, 239, 228], np.float32) * (1 + 0.01 * fine)[..., None]
+    col = col * (1 - sput[..., None] * 0.95) + bright * sput[..., None] * 0.95
+    eb = east * np.clip(0.86 + 0.16 * mid + 0.06 * fine, 0, 1)
+    col = col * (1 - eb[..., None] * 0.88) + np.array([238, 226, 210]) * eb[..., None] * 0.88
 
-# 平原西侧的山脉（略暗、粗糙）
-mtn = (1 - smooth(0, 5, np.abs(dlonw(148) + 0.35 * (WT - 15)))) * smooth(-10, 0, WT) * (1 - smooth(28, 42, WT))
-col *= (1 - 0.16 * mtn * np.clip(0.5 + fine, 0, 1.5))[..., None]
+    # 斯普特尼克平原上的对流多边形（非常细微）
+    pts = np.stack([rng.uniform(150, 190, 80), rng.uniform(-14, 44, 80)], -1)
+    d1 = np.full(LON.shape, 1e9, np.float32)
+    d2 = np.full(LON.shape, 1e9, np.float32)
+    coslat = np.cos(np.radians(LAT))
+    for px_, py_ in pts:
+        d = ((((LON - px_ + 540) % 360) - 180) * coslat) ** 2 + (LAT - py_) ** 2
+        m = d < d1
+        d2 = np.where(m, d1, np.minimum(d2, d))
+        d1 = np.where(m, d, d1)
+    edge = 1 - smooth(0.0, 0.6, np.sqrt(d2) - np.sqrt(d1))
+    col *= (1 - 0.045 * edge * sput * (1 - smooth(-0.12, -0.01, hf)))[..., None]
 
+    # 心形东南的“指虎”暗斑
+    for l0, t0, r in [(224, -8, 5.0), (235, -5, 4.6), (246, -3, 4.2), (257, -2, 3.4), (267, 0, 2.8)]:
+        d = np.sqrt((dlonw(l0) / r) ** 2 + ((WT - t0) / (r * 0.7)) ** 2)
+        m = 1 - smooth(0.7, 1.15, d)
+        col = col * (1 - m[..., None] * 0.8) + np.array([86, 46, 31]) * m[..., None] * 0.8
+
+    # 平原西侧的山脉（略暗、粗糙）
+    mtn = (1 - smooth(0, 5, np.abs(dlonw(148) + 0.35 * (WT - 15)))) * smooth(-10, 0, WT) * (1 - smooth(28, 42, WT))
+    col *= (1 - 0.16 * mtn * np.clip(0.5 + fine, 0, 1.5))[..., None]
+
+    return np.clip(col, 0, 255), heart_mask, cth
+
+
+col, heart_mask, cth = pluto_features()
 disk = np.clip(col, 0, 255)
 hm = heart_mask.astype(np.float32)
 valid = rho <= 1.0
@@ -292,3 +298,23 @@ with open(out, 'a') as f:
     f.write(f"export const MOON_DISK = 'data:image/webp;base64,{b64(moon_bytes)}';\n")
     f.write(f"export const CHARON_DISK = 'data:image/webp;base64,{b64(charon_bytes)}';\n")
 print('moon', len(moon_bytes) // 1024, 'KB; charon', len(charon_bytes) // 1024, 'KB')
+
+
+# =====================================================================
+# 粒子球用的等距圆柱贴图（256×128 RGBA：RGB=反照率，A=心形遮罩）
+# =====================================================================
+MW_, MH_ = 256, 128
+_lon = (np.arange(MW_) + 0.5) / MW_ * 360.0
+_lat = 90.0 - (np.arange(MH_) + 0.5) / MH_ * 180.0
+LON, LAT = np.meshgrid(_lon, _lat)
+_lr = np.radians(LAT)
+P = np.stack([np.cos(_lr) * np.cos(np.radians(LON)), np.cos(_lr) * np.sin(np.radians(LON)), np.sin(_lr)], -1).astype(np.float32)
+mcol, mheart, _ = pluto_features()
+pmap = np.dstack([mcol, np.clip(mheart, 0, 1) * 255]).astype(np.uint8)
+Image.fromarray(pmap, 'RGBA').resize((768, 384)).save('/tmp/pluto_map.png')
+with open(os.path.join(ROOT, 'src', 'assets', 'sphereMaps.ts'), 'w') as f:
+    f.write('// 自动生成：scripts/make-pluto-texture.py —— 请勿手动编辑\n')
+    f.write('// 冥王星等距圆柱贴图 256×128 RGBA（RGB=反照率，A=心形遮罩），经度 0→360，纬度 90→-90\n')
+    f.write(f'export const PLUTO_MAP_W = {MW_};\nexport const PLUTO_MAP_H = {MH_};\n')
+    f.write(f"export const PLUTO_MAP = '{b64(pmap.tobytes())}';\n")
+print('map ok')

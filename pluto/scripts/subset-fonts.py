@@ -48,7 +48,7 @@ def sub(font: TTFont, out_name: str, var: str):
         f.write(f"export const {var} = 'data:font/woff;base64,{b64}';\n")
     print(f'{out_name}: {len(buf.getvalue()) / 1024:.0f} KB woff')
 
-for weight, fname in [(200, 'ExtraLight'), (300, 'Light'), (400, 'Regular')]:
+for weight, fname in [(200, 'ExtraLight'), (300, 'Light'), (400, 'Regular'), (600, 'SemiBold')]:
     ttc = TTCollection(os.path.join(args.cjk_dir, f'NotoSerifCJK-{fname}.ttc'))
     font = next(f for f in ttc.fonts if ' SC' in (f['name'].getDebugName(1) + ' '))
     sub(font, f'serif{weight}.ts', f'SERIF_{weight}')

@@ -24,7 +24,7 @@ export type Timeline = {
 	bgmSrc: string | null;
 };
 
-const weight = (s: string) => s.replace(/[\s，。、：；！？,.:;!?\-—]/g, '').length + 2;
+const weight = (s: string) => s.replace(/[\s，。、：；！？,.:;!?\-—【】]/g, '').length + 2;
 
 export const estimateSeconds = (def: SceneDef) => {
 	const chars = def.lines.reduce((a, l) => a + weight(l.zh), 0);
