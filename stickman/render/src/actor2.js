@@ -61,11 +61,24 @@ class Actor2 {
     this.objJiggle = o.objJiggle || null;          // t → [dy, drot]（比如敲键盘时电脑的微震）
     this.noise = o.noise ?? 1;                     // "活"的停顿强度
     this.feel = { ...FEEL, ...(o.feel || {}) };
+    this.paths = { hip: [], lean: [] };            // 精确轨迹（抛飞、空翻、跑步）：这段时间内不走弹簧
+    this.footModes = { F: [{ t: -1e9, mode: 'ground' }], B: [{ t: -1e9, mode: 'ground' }] };
+    this.sfxList = [];
   }
   hip(t, v, dur = 0, ease = 'inOut') { this.hipT.set(t, v, dur, ease); return this; }
   lean(t, v, dur = 0, ease = 'inOut') { this.leanT.set(t, v, dur, ease); return this; }
   head(t, v, dur = 0, ease = 'inOut') { this.headT.set(t, v, dur, ease); return this; }
-  foot(f, t, to, dur, lift = 16, ease = 'inOut', sfx = true) { this.feet[f].move(t, to, dur, lift, ease, sfx); return this; }
+  foot(f, t, to, dur, lift = 16, ease = 'inOut', sfx = true) {
+    this.feet[f].move(t, to, dur, lift, ease, sfx);
+    this.footModes[f].push({ t, mode: 'ground', dur }); this.footModes[f].sort((a, b) => a.t - b.t);
+    return this;
+  }
+  // 脚离地，跟着身体走（腾空收腿、躺着蹬腿）：arg = [沿身体朝前, 沿身体朝下]（单位 H，相对胯），可以是 t 的函数
+  footFree(f, t, arg) { this.footModes[f].push({ t, mode: 'free', arg }); this.footModes[f].sort((a, b) => a.t - b.t); return this; }
+  // 精确轨迹：t0–t1 之间 ch（'hip' 或 'lean'）完全按 fn(t) 走；结束时把速度交还给弹簧，落地会自然压一下
+  path(ch, t0, t1, fn) { this.paths[ch].push({ t0, t1, fn }); return this; }
+  // 和动作绑定的音效（按动画时间写，simulate 时换算成真实时间）
+  sfx(t, type, o = {}) { this.sfxList.push({ t, type, o }); return this; }
   hand(h, t, mode, arg) { this.hands[h].push({ t, mode, arg }); this.hands[h].sort((a, b) => a.t - b.t); return this; }
   obj(t, mode, arg) { this.objModes.push({ t, mode, arg }); this.objModes.sort((a, b) => a.t - b.t); return this; }
 
@@ -76,25 +89,62 @@ class Actor2 {
     const dyn = {
       hx: new Dyn(...f.hip, h0[0]), hy: new Dyn(...f.hip, h0[1]), lean: new Dyn(...f.lean, this.leanT.at(0)), head: new Dyn(...f.head, this.headT.at(0)),
       Fx: new Dyn(...f.hand, 0), Fy: new Dyn(...f.hand, 0), Bx: new Dyn(...f.hand, 0), By: new Dyn(...f.hand, 0),
+      fFx: new Dyn(...f.foot, 0), fFy: new Dyn(...f.foot, 0), fBx: new Dyn(...f.foot, 0), fBy: new Dyn(...f.foot, 0),
       ox: new Dyn(...f.obj, 0), oy: new Dyn(...f.obj, 0), or: new Dyn(...f.obj, 0),
     };
     const R = this.rec = { hip: [], lean: [], head: [], hF: [], hB: [], fF: [], fB: [], obj: [] };
     const sw = { F: -9, B: -9 }, prev = { F: null, B: null };
+    const fprev = { F: null, B: null }, fblend = { F: null, B: null };
+    const pathAt = (ch, t) => { const L = this.paths[ch]; for (let n = L.length - 1; n >= 0; n--) if (t >= L[n].t0 && t < L[n].t1) return L[n]; return null; };
+    const follow = (d, p, v, tg) => { d.y = p; d.yd = v; d.xp = tg; };
     let objInit = false;
     const LEG = (P.thigh + P.shin) * H * 0.97, nz = this.noise;
     for (let i = 0; i < N; i++) {
       const t = i * DT;
-      const ht = this.hipT.at(t), feet = { F: this.feet.F.at(t), B: this.feet.B.at(t) };
+      const ht = this.hipT.at(t);
+      // 脚的模式：ground 按弧线踩点；free 跟着身体（弹簧）；free → ground 时在这次挪脚的时间里从实际位置过渡过去
+      const fm = {};
+      for (const k of ['F', 'B']) {
+        const m = at(this.footModes[k], t);
+        if (fprev[k] !== m) { fblend[k] = fprev[k] && fprev[k].mode === 'free' && m.mode === 'ground' ? { t0: t, dur: Math.max(m.dur || 0, 0.06) } : null; fprev[k] = m; }
+        fm[k] = m;
+      }
+      const ground = { F: this.feet.F.at(t), B: this.feet.B.at(t) };
       // 胯的目标 + "活"的停顿；够得着约束加在目标上（脚踩地够不到时胯往下沉、膝盖弯，而不是脚被拖着滑）
       const tg = [ht[0] + 4.5 * nz * noise1(t * 0.9, 1), ht[1] + 2.4 * nz * noise1(t * 1.1, 2)];
-      for (const p of [feet.F, feet.B]) {
-        if (p[1] < -4) continue;
+      for (const k of ['F', 'B']) {
+        const p = ground[k];
+        if (fm[k].mode !== 'ground' || fblend[k] || p[1] < -4) continue;
         const dx = p[0] - tg[0];
         if (Math.abs(dx) < LEG) tg[1] = Math.max(tg[1], p[1] - Math.sqrt(LEG * LEG - dx * dx));
       }
-      const hip = [dyn.hx.step(DT, tg[0]), dyn.hy.step(DT, tg[1])];
-      const lean = dyn.lean.step(DT, this.leanT.at(t) + 1.8 * nz * noise1(t * 0.8, 3));
+      let hip;
+      const hp0 = pathAt('hip', t);
+      if (hp0) {
+        const a = hp0.fn(t), b = hp0.fn(Math.min(t + DT, hp0.t1 - 1e-6));
+        hip = a; follow(dyn.hx, a[0], (b[0] - a[0]) / DT, tg[0]); follow(dyn.hy, a[1], (b[1] - a[1]) / DT, tg[1]);
+      } else hip = [dyn.hx.step(DT, tg[0]), dyn.hy.step(DT, tg[1])];
+      let lean;
+      const lp0 = pathAt('lean', t), lt = this.leanT.at(t);
+      if (lp0) { const a = lp0.fn(t), b = lp0.fn(Math.min(t + DT, lp0.t1 - 1e-6)); lean = a; follow(dyn.lean, a, (b - a) / DT, lt); }
+      else lean = dyn.lean.step(DT, lt + 360 * Math.round((dyn.lean.y - lt) / 360) + 1.8 * nz * noise1(t * 0.8, 3));   // 空翻过的整圈不倒转回去
       const head = dyn.head.step(DT, this.headT.at(t) + 3.5 * nz * noise1(t * 1.0, 4));
+      const upv = [D * Math.sin(lean * Math.PI / 180), -Math.cos(lean * Math.PI / 180)], fwv = [-upv[1] * D, upv[0] * D];
+      const local = (o, a) => [o[0] + (fwv[0] * a[0] - upv[0] * a[1]) * H, o[1] + (fwv[1] * a[0] - upv[1] * a[1]) * H];
+      const feet = {};
+      for (const k of ['F', 'B']) {
+        const dx = dyn['f' + k + 'x'], dy = dyn['f' + k + 'y'];
+        // 离地的脚用"相对胯"的弹簧：整个人飞得再快，脚也不会被甩在后面
+        if (fm[k].mode === 'free') {
+          const g = local([0, 0], typeof fm[k].arg === 'function' ? fm[k].arg(t) : fm[k].arg);
+          if (i === 0) { dx.snap(g[0]); dy.snap(g[1]); }
+          feet[k] = [hip[0] + dx.step(DT, g[0]), Math.min(hip[1] + dy.step(DT, g[1]), 0)];
+        } else if (fblend[k]) {
+          const g = ground[k], u = E.inOut((t - fblend[k].t0) / fblend[k].dur), sp = [hip[0] + dx.step(DT, g[0] - hip[0]), hip[1] + dy.step(DT, g[1] - hip[1])];
+          feet[k] = [lerp(sp[0], g[0], u), Math.min(lerp(sp[1], g[1], u), 0)];
+          if (u >= 1) { fblend[k] = null; dx.snap(g[0] - hip[0]); dy.snap(g[1] - hip[1]); }
+        } else { feet[k] = ground[k]; dx.snap(ground[k][0] - hip[0]); dy.snap(ground[k][1] - hip[1]); }
+      }
       const b0 = body({ t, hip, lean, head, fF: feet.F, fB: feet.B, hF: hip, hB: hip }, H, D);
       const up = [b0.neck[0] - hip[0], b0.neck[1] - hip[1]], ul = Math.hypot(...up); up[0] /= ul; up[1] /= ul;
       const fwd = [-up[1] * D, up[0] * D];
@@ -118,6 +168,7 @@ class Actor2 {
         let g, exact = false;
         if (m.mode === 'free') g = [b0.sh[0] + D * m.arg[0] * H, b0.sh[1] + m.arg[1] * H];
         else if (m.mode === 'world') g = typeof m.arg === 'function' ? m.arg(t) : m.arg;
+        else if (m.mode === 'local') g = local(b0.sh, typeof m.arg === 'function' ? m.arg(t) : m.arg);   // 跟着身体转（空翻、躺着、跑步摆臂）
         else if (m.mode === 'strike') { g = m.arg.to; exact = m.arg.dur || 0.06; }        // 出拳：在 dur 秒内加速打到精确位置
         else if (m.mode === 'obj' && os) {
           const p = typeof m.arg === 'function' ? m.arg(t) : m.arg, c = Math.cos(os[2]), s = Math.sin(os[2]);
@@ -136,9 +187,11 @@ class Actor2 {
     this.N = N;
     // 脚步声：每次挪脚结束落地时（真实时间）
     for (const k of ['F', 'B']) for (const m of this.feet[k].m) if (m.sfx && m.t > -1e8 && m.dur > 0)
-      cues.add(this.clock ? this.clock.real(m.t + m.dur) : m.t + m.dur, 'step', { v: 0.8 });
+      cues.add(this.real(m.t + m.dur), 'step', { v: 0.8, ...(typeof m.sfx === 'object' ? m.sfx : {}) });
+    for (const e of this.sfxList) cues.add(this.real(e.t), e.type, e.o);
     return this;
   }
+  real(ta) { return this.clock ? this.clock.real(ta) : ta; }
   stateAt(ta) {
     const R = this.rec, x = clamp(ta / DT, 0, this.N - 1.001), i = Math.floor(x), u = x - i;
     const L = (a, b) => (a === null || b === null ? a || b : Array.isArray(a) ? a.map((v, n) => lerp(v, b[n], u)) : lerp(a, b, u));
@@ -150,7 +203,9 @@ class Actor2 {
   draw(ctx, ta, o = {}) {
     const H = this.H;
     for (const k of ['aF', 'aB', 'lF', 'lB']) {
-      const pts = []; for (let n = 7; n >= 0; n--) pts.push(this.jointsAt(ta - n / 160)[k][2]);
+      // 拖影只看手脚相对身体的挥动（整个人在飞、在掉的时候不画）
+      const hip = this.stateAt(ta).hip, pts = [];
+      for (let n = 7; n >= 0; n--) { const j = this.jointsAt(ta - n / 160), e = j[k][2]; pts.push([e[0] - j.hip[0] + hip[0], e[1] - j.hip[1] + hip[1]]); }
       const sp = Math.hypot(pts[7][0] - pts[0][0], pts[7][1] - pts[0][1]) / (7 / 160) / H;
       if (sp > 3.2) smear(ctx, pts, P.lw * H * 1.05, this.color, clamp((sp - 3.2) / 4, 0, 0.9));
     }

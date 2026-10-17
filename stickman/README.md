@@ -117,6 +117,8 @@ v1 把所有关节按同一条缓动插值，结果全身一起动、一起停�
 
 可复用的角色类在 `render/src/actor2.js`（`Actor2` + 停顿帧时钟 `Clock`），新场景都用它写；用法见文件顶部。
 
+成套动作在 `render/src/moves.js`（require 后直接挂在 Actor2 上）：`flinch` 小后仰、`knockback` 击退滑行、`launch` 被打飞（抛物线 + 空翻，仰面 / 脸朝下 / 双脚落地，也用来做"从天上掉下来"）、`getUp` 爬起来、`run` 跑（起跑加速、腾空期、摆臂、可刹车）、`jump` 跳（原地收腿 / 跑着跨跳 / 落地滑行）。验证片：`SCENE=react node build.js --from 0 --to 15.5`，成片 `previews/反应动作验证片_v1_1080p60.mp4`。
+
 ## 打击感系统（`render/src/impact.js`）
 
 一次 `imp.hit(时间, 位置, 力度)` 同时安排：停顿帧、震屏、推镜冲击、闪白 / 反色冲击帧、星芒、冲击环、冲击波扭曲（像素级）、火花、速度线、音效。力度分 `light / medium / heavy / huge / ground` 五档，每一项都能单独覆盖。另有 `Shatter`（一行代码被打碎，字符变成物理物体四散、落地弹跳）和 `charge`（蓄力能量球）。

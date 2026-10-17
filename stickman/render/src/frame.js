@@ -2,8 +2,8 @@
 'use strict';
 const K = require('./core');
 const FX = require('./fx');
-// 场景：默认是样片；SCENE=motion 动作验证片；SCENE=impact 打击特效样片
-const S = require({ motion: './scene_motion', impact: './scene_impact' }[process.env.SCENE] || './scene');
+// 场景：默认是样片；SCENE=motion 动作验证片；SCENE=impact 打击特效样片；SCENE=react 反应动作验证片
+const S = require({ motion: './scene_motion', impact: './scene_impact', react: './scene_react' }[process.env.SCENE] || './scene');
 
 function renderFrame(ctx, t) {
   ctx.save();
