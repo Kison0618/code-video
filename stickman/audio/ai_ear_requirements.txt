@@ -1,0 +1,15 @@
+# AI 耳朵（ai_ear.py）虚拟环境的依赖，2026-10-17 冒烟测试时实际装上的版本
+# 虚拟环境放在仓库外（~/.venvs/ai-ear），不要装进系统 Python。分两步装：
+#   1) 官方 CPU 版 torch（只从 PyTorch 的 CPU 源装，避免拉进几 GB 的 CUDA 依赖）：
+#      ~/.venvs/ai-ear/bin/pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.14.1+cpu"
+#   2) 其余依赖从 PyPI 装（都不依赖 torch，所以不会把 CPU 版换成 CUDA 版）：
+#      ~/.venvs/ai-ear/bin/pip install -r ai_ear_requirements.txt
+panns-inference==0.1.1
+torchlibrosa==0.1.0
+librosa==1.0.0
+numpy==2.5.4
+scipy==1.18.1
+matplotlib==3.11.2
+soundfile==0.14.0
+numba==0.68.0
+llvmlite==0.50.0

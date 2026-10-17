@@ -1,0 +1,1161 @@
+{
+ "disclaimer": "这是声音类别 / 匹配的辅助判断（AudioSet 527 类分类模型的输出），不是听感质量评分；好不好听、味道对不对，需要人耳判断。",
+ "created": "2026-10-17 05:22:12",
+ "model": {
+  "name": "PANNs Cnn14 (AudioSet, 527 classes, 32 kHz)",
+  "weights": "Cnn14_mAP=0.431.pth",
+  "weights_md5": "541141fa2ee191a88f24a3219fff024e",
+  "source": "https://zenodo.org/record/3987831",
+  "license": "CC-BY-4.0"
+ },
+ "short_clip_handling": "tile",
+ "items": [
+  {
+   "name": "key/原片",
+   "group": "key",
+   "source": "ref",
+   "start": 15.208,
+   "dur": 0.17,
+   "file": "v3.mp4",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.128,
+    "peak_dbfs": -10.1,
+    "rms_dbfs": -29.8
+   },
+   "top5": [
+    {
+     "label": "Scratching (performance technique)",
+     "p": 0.458
+    },
+    {
+     "label": "Music",
+     "p": 0.335
+    },
+    {
+     "label": "Scratch",
+     "p": 0.244
+    },
+    {
+     "label": "Noise",
+     "p": 0.092
+    },
+    {
+     "label": "Electronic music",
+     "p": 0.07
+    }
+   ],
+   "watch": {
+    "Music": 0.335,
+    "Scratch": 0.244
+   }
+  },
+  {
+   "name": "key/合成",
+   "group": "key",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "key.wav",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.164,
+    "peak_dbfs": -10.0,
+    "rms_dbfs": -25.2
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.112
+    },
+    {
+     "label": "Static",
+     "p": 0.061
+    },
+    {
+     "label": "Speech",
+     "p": 0.034
+    },
+    {
+     "label": "Musical instrument",
+     "p": 0.029
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.028
+    }
+   ],
+   "watch": {
+    "Music": 0.112,
+    "Rustle": 0.01
+   }
+  },
+  {
+   "name": "typing/原片",
+   "group": "typing",
+   "source": "ref",
+   "start": 15.15,
+   "dur": 1.9,
+   "file": "v3.mp4",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 1.878,
+    "peak_dbfs": -5.6,
+    "rms_dbfs": -29.5
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.074
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.073
+    },
+    {
+     "label": "Music",
+     "p": 0.046
+    },
+    {
+     "label": "Animal",
+     "p": 0.041
+    },
+    {
+     "label": "Speech",
+     "p": 0.038
+    }
+   ],
+   "watch": {
+    "Silence": 0.074,
+    "Music": 0.046
+   }
+  },
+  {
+   "name": "typing/合成",
+   "group": "typing",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "typing.wav",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.446,
+    "peak_dbfs": -8.0,
+    "rms_dbfs": -25.8
+   },
+   "top5": [
+    {
+     "label": "Tick-tock",
+     "p": 0.15
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.122
+    },
+    {
+     "label": "Tick",
+     "p": 0.091
+    },
+    {
+     "label": "Music",
+     "p": 0.055
+    },
+    {
+     "label": "Clock",
+     "p": 0.041
+    }
+   ],
+   "watch": {
+    "Tick-tock": 0.15,
+    "Tick": 0.091,
+    "Music": 0.055
+   }
+  },
+  {
+   "name": "run/原片",
+   "group": "run",
+   "source": "ref",
+   "start": 26.459,
+   "dur": 0.3,
+   "file": "v3.mp4",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.232,
+    "peak_dbfs": -4.7,
+    "rms_dbfs": -23.2
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.11
+    },
+    {
+     "label": "Knock",
+     "p": 0.076
+    },
+    {
+     "label": "Animal",
+     "p": 0.065
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.041
+    },
+    {
+     "label": "Speech",
+     "p": 0.036
+    }
+   ],
+   "watch": {
+    "Music": 0.11,
+    "Plop": 0.034,
+    "Silence": 0.019,
+    "Walk, footsteps": 0.012
+   }
+  },
+  {
+   "name": "run/合成",
+   "group": "run",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "run.wav",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.186,
+    "peak_dbfs": -5.8,
+    "rms_dbfs": -22.2
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.741
+    },
+    {
+     "label": "Musical instrument",
+     "p": 0.177
+    },
+    {
+     "label": "Drum",
+     "p": 0.1
+    },
+    {
+     "label": "Drum kit",
+     "p": 0.063
+    },
+    {
+     "label": "Electronic music",
+     "p": 0.055
+    }
+   ],
+   "watch": {
+    "Music": 0.741,
+    "Plop": 0.011
+   }
+  },
+  {
+   "name": "output/原片",
+   "group": "output",
+   "source": "ref",
+   "start": 41.68,
+   "dur": 0.35,
+   "file": "v3.mp4",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.266,
+    "peak_dbfs": 2.1,
+    "rms_dbfs": -14.4
+   },
+   "top5": [
+    {
+     "label": "Sound effect",
+     "p": 0.161
+    },
+    {
+     "label": "Whack, thwack",
+     "p": 0.131
+    },
+    {
+     "label": "Music",
+     "p": 0.088
+    },
+    {
+     "label": "Plop",
+     "p": 0.028
+    },
+    {
+     "label": "Speech",
+     "p": 0.027
+    }
+   ],
+   "watch": {
+    "Music": 0.088,
+    "Plop": 0.028,
+    "Whoosh, swoosh, swish": 0.022,
+    "Bang": 0.017,
+    "Walk, footsteps": 0.016,
+    "Thump, thud": 0.015
+   }
+  },
+  {
+   "name": "output/合成",
+   "group": "output",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "output.wav",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.178,
+    "peak_dbfs": -0.1,
+    "rms_dbfs": -13.7
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.252
+    },
+    {
+     "label": "Scratching (performance technique)",
+     "p": 0.175
+    },
+    {
+     "label": "Sound effect",
+     "p": 0.118
+    },
+    {
+     "label": "Cacophony",
+     "p": 0.079
+    },
+    {
+     "label": "Electronic music",
+     "p": 0.053
+    }
+   ],
+   "watch": {
+    "Music": 0.252,
+    "Scratch": 0.039,
+    "Boing": 0.014
+   }
+  },
+  {
+   "name": "error/原片",
+   "group": "error",
+   "source": "ref",
+   "start": 18.1,
+   "dur": 0.4,
+   "file": "v3.mp4",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.38,
+    "peak_dbfs": 2.3,
+    "rms_dbfs": -15.0
+   },
+   "top5": [
+    {
+     "label": "Plop",
+     "p": 0.19
+    },
+    {
+     "label": "Whack, thwack",
+     "p": 0.132
+    },
+    {
+     "label": "Whoosh, swoosh, swish",
+     "p": 0.094
+    },
+    {
+     "label": "Music",
+     "p": 0.079
+    },
+    {
+     "label": "Sound effect",
+     "p": 0.07
+    }
+   ],
+   "watch": {
+    "Plop": 0.19,
+    "Whoosh, swoosh, swish": 0.094,
+    "Music": 0.079,
+    "Bang": 0.018,
+    "Thump, thud": 0.015
+   }
+  },
+  {
+   "name": "error/合成",
+   "group": "error",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "error.wav",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.28,
+    "peak_dbfs": -1.1,
+    "rms_dbfs": -18.6
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.798
+    },
+    {
+     "label": "Scratching (performance technique)",
+     "p": 0.419
+    },
+    {
+     "label": "Electronic music",
+     "p": 0.164
+    },
+    {
+     "label": "Scratch",
+     "p": 0.158
+    },
+    {
+     "label": "Musical instrument",
+     "p": 0.062
+    }
+   ],
+   "watch": {
+    "Music": 0.798,
+    "Scratch": 0.158
+   }
+  },
+  {
+   "name": "touch/原片",
+   "group": "touch",
+   "source": "ref",
+   "start": 11.531,
+   "dur": 0.2,
+   "file": "v3.mp4",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.194,
+    "peak_dbfs": -14.6,
+    "rms_dbfs": -29.7
+   },
+   "top5": [
+    {
+     "label": "Zipper (clothing)",
+     "p": 0.474
+    },
+    {
+     "label": "Scratch",
+     "p": 0.215
+    },
+    {
+     "label": "Plop",
+     "p": 0.212
+    },
+    {
+     "label": "Music",
+     "p": 0.095
+    },
+    {
+     "label": "Whoosh, swoosh, swish",
+     "p": 0.066
+    }
+   ],
+   "watch": {
+    "Scratch": 0.215,
+    "Plop": 0.212,
+    "Music": 0.095,
+    "Whoosh, swoosh, swish": 0.066
+   }
+  },
+  {
+   "name": "touch/合成",
+   "group": "touch",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "touch.wav",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.176,
+    "peak_dbfs": -12.9,
+    "rms_dbfs": -24.4
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.538
+    },
+    {
+     "label": "Plop",
+     "p": 0.301
+    },
+    {
+     "label": "Boing",
+     "p": 0.051
+    },
+    {
+     "label": "Animal",
+     "p": 0.041
+    },
+    {
+     "label": "Sound effect",
+     "p": 0.033
+    }
+   ],
+   "watch": {
+    "Music": 0.538,
+    "Plop": 0.301,
+    "Boing": 0.051
+   }
+  },
+  {
+   "name": "step/原片",
+   "group": "step",
+   "source": "ref",
+   "start": 36.371,
+   "dur": 0.09,
+   "file": "v3.mp4",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.044,
+    "peak_dbfs": -13.1,
+    "rms_dbfs": -22.7
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.838
+    },
+    {
+     "label": "Synthesizer",
+     "p": 0.594
+    },
+    {
+     "label": "Musical instrument",
+     "p": 0.355
+    },
+    {
+     "label": "Electronic music",
+     "p": 0.285
+    },
+    {
+     "label": "Drum machine",
+     "p": 0.15
+    }
+   ],
+   "watch": {
+    "Music": 0.838
+   }
+  },
+  {
+   "name": "step/合成",
+   "group": "step",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "step.wav",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.044,
+    "peak_dbfs": -13.8,
+    "rms_dbfs": -26.2
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.691
+    },
+    {
+     "label": "Synthesizer",
+     "p": 0.275
+    },
+    {
+     "label": "Musical instrument",
+     "p": 0.198
+    },
+    {
+     "label": "Electronic music",
+     "p": 0.12
+    },
+    {
+     "label": "Sampler",
+     "p": 0.06
+    }
+   ],
+   "watch": {
+    "Music": 0.691,
+    "Scratch": 0.011
+   }
+  },
+  {
+   "name": "footsteps/原片",
+   "group": "footsteps",
+   "source": "ref",
+   "start": 36.33,
+   "dur": 0.9,
+   "file": "v3.mp4",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.75,
+    "peak_dbfs": -6.8,
+    "rms_dbfs": -22.3
+   },
+   "top5": [
+    {
+     "label": "Animal",
+     "p": 0.065
+    },
+    {
+     "label": "Tap",
+     "p": 0.065
+    },
+    {
+     "label": "Knock",
+     "p": 0.058
+    },
+    {
+     "label": "Music",
+     "p": 0.056
+    },
+    {
+     "label": "Speech",
+     "p": 0.038
+    }
+   ],
+   "watch": {
+    "Music": 0.056,
+    "Computer keyboard": 0.018,
+    "Silence": 0.017,
+    "Typing": 0.014,
+    "Walk, footsteps": 0.013
+   }
+  },
+  {
+   "name": "footsteps/合成",
+   "group": "footsteps",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "footsteps.wav",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.36,
+    "peak_dbfs": -11.3,
+    "rms_dbfs": -24.4
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.821
+    },
+    {
+     "label": "Drum machine",
+     "p": 0.427
+    },
+    {
+     "label": "Synthesizer",
+     "p": 0.355
+    },
+    {
+     "label": "Electronic music",
+     "p": 0.345
+    },
+    {
+     "label": "Musical instrument",
+     "p": 0.163
+    }
+   ],
+   "watch": {
+    "Music": 0.821
+   }
+  },
+  {
+   "name": "laptop/原片",
+   "group": "laptop",
+   "source": "ref",
+   "start": 34.768,
+   "dur": 0.2,
+   "file": "v3.mp4",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.11,
+    "peak_dbfs": -3.4,
+    "rms_dbfs": -22.9
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.128
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.062
+    },
+    {
+     "label": "Musical instrument",
+     "p": 0.04
+    },
+    {
+     "label": "Speech",
+     "p": 0.035
+    },
+    {
+     "label": "Rattle",
+     "p": 0.024
+    }
+   ],
+   "watch": {
+    "Music": 0.128,
+    "Scratch": 0.02
+   }
+  },
+  {
+   "name": "laptop/合成",
+   "group": "laptop",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "laptop.wav",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.12,
+    "peak_dbfs": 0.1,
+    "rms_dbfs": -20.3
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.284
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.07
+    },
+    {
+     "label": "Musical instrument",
+     "p": 0.057
+    },
+    {
+     "label": "Scratch",
+     "p": 0.043
+    },
+    {
+     "label": "Typewriter",
+     "p": 0.042
+    }
+   ],
+   "watch": {
+    "Music": 0.284,
+    "Scratch": 0.043,
+    "Tick-tock": 0.011
+   }
+  },
+  {
+   "name": "select/原片",
+   "group": "select",
+   "source": "ref",
+   "start": 54.59,
+   "dur": 0.16,
+   "file": "v3.mp4",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.16,
+    "peak_dbfs": -8.0,
+    "rms_dbfs": -34.9
+   },
+   "top5": [
+    {
+     "label": "Camera",
+     "p": 0.228
+    },
+    {
+     "label": "Scissors",
+     "p": 0.221
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.146
+    },
+    {
+     "label": "Single-lens reflex camera",
+     "p": 0.062
+    },
+    {
+     "label": "Speech",
+     "p": 0.033
+    }
+   ],
+   "watch": {
+    "Music": 0.029,
+    "Tick": 0.022,
+    "Tick-tock": 0.015,
+    "Silence": 0.013
+   }
+  },
+  {
+   "name": "select/合成",
+   "group": "select",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "select.wav",
+   "short_clip_method": "平铺（有声部分每 80 ms 重复，铺满 2 秒）",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.158,
+    "peak_dbfs": -7.3,
+    "rms_dbfs": -25.6
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.56
+    },
+    {
+     "label": "Knock",
+     "p": 0.103
+    },
+    {
+     "label": "Chink, clink",
+     "p": 0.068
+    },
+    {
+     "label": "Video game music",
+     "p": 0.039
+    },
+    {
+     "label": "Sound effect",
+     "p": 0.037
+    }
+   ],
+   "watch": {
+    "Music": 0.56,
+    "Ding": 0.024,
+    "Glass": 0.021
+   }
+  },
+  {
+   "name": "boom/原片",
+   "group": "boom",
+   "source": "ref",
+   "start": 156.8,
+   "dur": 2.5,
+   "file": "v3.mp4",
+   "short_clip_method": null,
+   "informative": true,
+   "metrics": {
+    "dur_s": 2.5,
+    "peak_dbfs": 2.1,
+    "rms_dbfs": -9.8
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.655
+    },
+    {
+     "label": "Fusillade",
+     "p": 0.327
+    },
+    {
+     "label": "Gunshot, gunfire",
+     "p": 0.286
+    },
+    {
+     "label": "Boom",
+     "p": 0.233
+    },
+    {
+     "label": "Machine gun",
+     "p": 0.197
+    }
+   ],
+   "watch": {
+    "Music": 0.655,
+    "Boom": 0.233,
+    "Thump, thud": 0.071,
+    "Explosion": 0.018
+   }
+  },
+  {
+   "name": "boom/合成",
+   "group": "boom",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "boom.wav",
+   "short_clip_method": null,
+   "informative": true,
+   "metrics": {
+    "dur_s": 2.5,
+    "peak_dbfs": 0.1,
+    "rms_dbfs": -21.4
+   },
+   "top5": [
+    {
+     "label": "Artillery fire",
+     "p": 0.346
+    },
+    {
+     "label": "Gunshot, gunfire",
+     "p": 0.235
+    },
+    {
+     "label": "Explosion",
+     "p": 0.149
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.117
+    },
+    {
+     "label": "Eruption",
+     "p": 0.099
+    }
+   ],
+   "watch": {
+    "Explosion": 0.149,
+    "Music": 0.03,
+    "Rustle": 0.017,
+    "Boom": 0.011
+   }
+  },
+  {
+   "name": "turtle/原片",
+   "group": "turtle",
+   "source": "ref",
+   "start": 197.5,
+   "dur": 3.0,
+   "file": "v3.mp4",
+   "short_clip_method": null,
+   "informative": true,
+   "metrics": {
+    "dur_s": 3.0,
+    "peak_dbfs": -2.6,
+    "rms_dbfs": -20.5
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.859
+    },
+    {
+     "label": "Musical instrument",
+     "p": 0.07
+    },
+    {
+     "label": "Cacophony",
+     "p": 0.063
+    },
+    {
+     "label": "Electronic music",
+     "p": 0.048
+    },
+    {
+     "label": "Smash, crash",
+     "p": 0.039
+    }
+   ],
+   "watch": {
+    "Music": 0.859,
+    "Scratch": 0.012
+   }
+  },
+  {
+   "name": "turtle/合成",
+   "group": "turtle",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "turtle.wav",
+   "short_clip_method": null,
+   "informative": true,
+   "metrics": {
+    "dur_s": 2.992,
+    "peak_dbfs": -0.2,
+    "rms_dbfs": -15.0
+   },
+   "top5": [
+    {
+     "label": "Rub",
+     "p": 0.745
+    },
+    {
+     "label": "Sanding",
+     "p": 0.704
+    },
+    {
+     "label": "Music",
+     "p": 0.025
+    },
+    {
+     "label": "Wood",
+     "p": 0.017
+    },
+    {
+     "label": "Speech",
+     "p": 0.014
+    }
+   ],
+   "watch": {
+    "Music": 0.025
+   }
+  }
+ ],
+ "pairs": [
+  {
+   "group": "boom",
+   "ref": "boom/原片",
+   "synth": "boom/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Gunshot, gunfire"
+   ],
+   "class_vector_cosine": 0.309,
+   "embedding_cosine": 0.716
+  },
+  {
+   "group": "error",
+   "ref": "error/原片",
+   "synth": "error/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Music"
+   ],
+   "class_vector_cosine": 0.265,
+   "embedding_cosine": 0.69
+  },
+  {
+   "group": "footsteps",
+   "ref": "footsteps/原片",
+   "synth": "footsteps/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Music"
+   ],
+   "class_vector_cosine": 0.301,
+   "embedding_cosine": 0.73
+  },
+  {
+   "group": "key",
+   "ref": "key/原片",
+   "synth": "key/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Music"
+   ],
+   "class_vector_cosine": 0.459,
+   "embedding_cosine": 0.642
+  },
+  {
+   "group": "laptop",
+   "ref": "laptop/原片",
+   "synth": "laptop/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Inside, small room",
+    "Music",
+    "Musical instrument"
+   ],
+   "class_vector_cosine": 0.943,
+   "embedding_cosine": 0.959
+  },
+  {
+   "group": "output",
+   "ref": "output/原片",
+   "synth": "output/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Music",
+    "Sound effect"
+   ],
+   "class_vector_cosine": 0.573,
+   "embedding_cosine": 0.764
+  },
+  {
+   "group": "run",
+   "ref": "run/原片",
+   "synth": "run/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Music"
+   ],
+   "class_vector_cosine": 0.666,
+   "embedding_cosine": 0.797
+  },
+  {
+   "group": "select",
+   "ref": "select/原片",
+   "synth": "select/合成",
+   "both_informative": true,
+   "top5_overlap": [],
+   "class_vector_cosine": 0.108,
+   "embedding_cosine": 0.687
+  },
+  {
+   "group": "step",
+   "ref": "step/原片",
+   "synth": "step/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Electronic music",
+    "Music",
+    "Musical instrument",
+    "Synthesizer"
+   ],
+   "class_vector_cosine": 0.963,
+   "embedding_cosine": 0.952
+  },
+  {
+   "group": "touch",
+   "ref": "touch/原片",
+   "synth": "touch/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Music",
+    "Plop"
+   ],
+   "class_vector_cosine": 0.335,
+   "embedding_cosine": 0.83
+  },
+  {
+   "group": "turtle",
+   "ref": "turtle/原片",
+   "synth": "turtle/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Music"
+   ],
+   "class_vector_cosine": 0.026,
+   "embedding_cosine": 0.449
+  },
+  {
+   "group": "typing",
+   "ref": "typing/原片",
+   "synth": "typing/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Inside, small room",
+    "Music"
+   ],
+   "class_vector_cosine": 0.543,
+   "embedding_cosine": 0.804
+  }
+ ],
+ "seconds": 8.8
+}

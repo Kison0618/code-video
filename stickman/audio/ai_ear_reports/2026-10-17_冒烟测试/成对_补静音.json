@@ -1,0 +1,1190 @@
+{
+ "disclaimer": "这是声音类别 / 匹配的辅助判断（AudioSet 527 类分类模型的输出），不是听感质量评分；好不好听、味道对不对，需要人耳判断。",
+ "created": "2026-10-17 05:22:21",
+ "model": {
+  "name": "PANNs Cnn14 (AudioSet, 527 classes, 32 kHz)",
+  "weights": "Cnn14_mAP=0.431.pth",
+  "weights_md5": "541141fa2ee191a88f24a3219fff024e",
+  "source": "https://zenodo.org/record/3987831",
+  "license": "CC-BY-4.0"
+ },
+ "short_clip_handling": "pad",
+ "items": [
+  {
+   "name": "key/原片",
+   "group": "key",
+   "source": "ref",
+   "start": 15.208,
+   "dur": 0.17,
+   "file": "v3.mp4",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.128,
+    "peak_dbfs": -10.1,
+    "rms_dbfs": -29.8
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.233
+    },
+    {
+     "label": "Music",
+     "p": 0.135
+    },
+    {
+     "label": "Speech",
+     "p": 0.051
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.047
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.027
+    }
+   ],
+   "watch": {
+    "Silence": 0.233,
+    "Music": 0.135,
+    "Tick-tock": 0.011
+   }
+  },
+  {
+   "name": "key/合成",
+   "group": "key",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "key.wav",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.164,
+    "peak_dbfs": -10.0,
+    "rms_dbfs": -25.2
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.228
+    },
+    {
+     "label": "Music",
+     "p": 0.135
+    },
+    {
+     "label": "Speech",
+     "p": 0.051
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.047
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.027
+    }
+   ],
+   "watch": {
+    "Silence": 0.228,
+    "Music": 0.135,
+    "Tick-tock": 0.011
+   }
+  },
+  {
+   "name": "typing/原片",
+   "group": "typing",
+   "source": "ref",
+   "start": 15.15,
+   "dur": 1.9,
+   "file": "v3.mp4",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": true,
+   "metrics": {
+    "dur_s": 1.878,
+    "peak_dbfs": -5.6,
+    "rms_dbfs": -29.5
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.072
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.062
+    },
+    {
+     "label": "Music",
+     "p": 0.051
+    },
+    {
+     "label": "Animal",
+     "p": 0.039
+    },
+    {
+     "label": "Speech",
+     "p": 0.036
+    }
+   ],
+   "watch": {
+    "Silence": 0.072,
+    "Music": 0.051
+   }
+  },
+  {
+   "name": "typing/合成",
+   "group": "typing",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "typing.wav",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.446,
+    "peak_dbfs": -8.0,
+    "rms_dbfs": -25.8
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.075
+    },
+    {
+     "label": "Tick-tock",
+     "p": 0.051
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.036
+    },
+    {
+     "label": "Tick",
+     "p": 0.035
+    },
+    {
+     "label": "Door",
+     "p": 0.034
+    }
+   ],
+   "watch": {
+    "Music": 0.075,
+    "Tick-tock": 0.051,
+    "Tick": 0.035
+   }
+  },
+  {
+   "name": "run/原片",
+   "group": "run",
+   "source": "ref",
+   "start": 26.459,
+   "dur": 0.3,
+   "file": "v3.mp4",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.232,
+    "peak_dbfs": -4.7,
+    "rms_dbfs": -23.2
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.199
+    },
+    {
+     "label": "Music",
+     "p": 0.156
+    },
+    {
+     "label": "Speech",
+     "p": 0.048
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.043
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.024
+    }
+   ],
+   "watch": {
+    "Silence": 0.199,
+    "Music": 0.156,
+    "Tick-tock": 0.012
+   }
+  },
+  {
+   "name": "run/合成",
+   "group": "run",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "run.wav",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.186,
+    "peak_dbfs": -5.8,
+    "rms_dbfs": -22.2
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.187
+    },
+    {
+     "label": "Music",
+     "p": 0.15
+    },
+    {
+     "label": "Speech",
+     "p": 0.048
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.043
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.025
+    }
+   ],
+   "watch": {
+    "Silence": 0.187,
+    "Music": 0.15,
+    "Tick-tock": 0.011
+   }
+  },
+  {
+   "name": "output/原片",
+   "group": "output",
+   "source": "ref",
+   "start": 41.68,
+   "dur": 0.35,
+   "file": "v3.mp4",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.266,
+    "peak_dbfs": 2.1,
+    "rms_dbfs": -14.4
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.212
+    },
+    {
+     "label": "Music",
+     "p": 0.162
+    },
+    {
+     "label": "Speech",
+     "p": 0.046
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.044
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.024
+    }
+   ],
+   "watch": {
+    "Silence": 0.212,
+    "Music": 0.162,
+    "Tick-tock": 0.011
+   }
+  },
+  {
+   "name": "output/合成",
+   "group": "output",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "output.wav",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.178,
+    "peak_dbfs": -0.1,
+    "rms_dbfs": -13.7
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.192
+    },
+    {
+     "label": "Music",
+     "p": 0.146
+    },
+    {
+     "label": "Speech",
+     "p": 0.049
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.043
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.025
+    }
+   ],
+   "watch": {
+    "Silence": 0.192,
+    "Music": 0.146,
+    "Tick-tock": 0.011
+   }
+  },
+  {
+   "name": "error/原片",
+   "group": "error",
+   "source": "ref",
+   "start": 18.1,
+   "dur": 0.4,
+   "file": "v3.mp4",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.38,
+    "peak_dbfs": 2.3,
+    "rms_dbfs": -15.0
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.228
+    },
+    {
+     "label": "Music",
+     "p": 0.149
+    },
+    {
+     "label": "Speech",
+     "p": 0.042
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.037
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.029
+    }
+   ],
+   "watch": {
+    "Silence": 0.228,
+    "Music": 0.149,
+    "Plop": 0.011
+   }
+  },
+  {
+   "name": "error/合成",
+   "group": "error",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "error.wav",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.28,
+    "peak_dbfs": -1.1,
+    "rms_dbfs": -18.6
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.219
+    },
+    {
+     "label": "Music",
+     "p": 0.156
+    },
+    {
+     "label": "Speech",
+     "p": 0.045
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.043
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.025
+    }
+   ],
+   "watch": {
+    "Silence": 0.219,
+    "Music": 0.156
+   }
+  },
+  {
+   "name": "touch/原片",
+   "group": "touch",
+   "source": "ref",
+   "start": 11.531,
+   "dur": 0.2,
+   "file": "v3.mp4",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.194,
+    "peak_dbfs": -14.6,
+    "rms_dbfs": -29.7
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.221
+    },
+    {
+     "label": "Music",
+     "p": 0.136
+    },
+    {
+     "label": "Speech",
+     "p": 0.051
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.045
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.026
+    }
+   ],
+   "watch": {
+    "Silence": 0.221,
+    "Music": 0.136,
+    "Tick-tock": 0.011
+   }
+  },
+  {
+   "name": "touch/合成",
+   "group": "touch",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "touch.wav",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.176,
+    "peak_dbfs": -12.9,
+    "rms_dbfs": -24.4
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.225
+    },
+    {
+     "label": "Music",
+     "p": 0.136
+    },
+    {
+     "label": "Speech",
+     "p": 0.051
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.046
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.027
+    }
+   ],
+   "watch": {
+    "Silence": 0.225,
+    "Music": 0.136,
+    "Tick-tock": 0.011
+   }
+  },
+  {
+   "name": "step/原片",
+   "group": "step",
+   "source": "ref",
+   "start": 36.371,
+   "dur": 0.09,
+   "file": "v3.mp4",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.044,
+    "peak_dbfs": -13.1,
+    "rms_dbfs": -22.7
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.249
+    },
+    {
+     "label": "Music",
+     "p": 0.132
+    },
+    {
+     "label": "Speech",
+     "p": 0.052
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.05
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.027
+    }
+   ],
+   "watch": {
+    "Silence": 0.249,
+    "Music": 0.132,
+    "Tick-tock": 0.01
+   }
+  },
+  {
+   "name": "step/合成",
+   "group": "step",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "step.wav",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.044,
+    "peak_dbfs": -13.8,
+    "rms_dbfs": -26.2
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.253
+    },
+    {
+     "label": "Music",
+     "p": 0.132
+    },
+    {
+     "label": "Speech",
+     "p": 0.052
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.05
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.027
+    }
+   ],
+   "watch": {
+    "Silence": 0.253,
+    "Music": 0.132,
+    "Tick-tock": 0.01
+   }
+  },
+  {
+   "name": "footsteps/原片",
+   "group": "footsteps",
+   "source": "ref",
+   "start": 36.33,
+   "dur": 0.9,
+   "file": "v3.mp4",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.75,
+    "peak_dbfs": -6.8,
+    "rms_dbfs": -22.3
+   },
+   "top5": [
+    {
+     "label": "Plop",
+     "p": 0.069
+    },
+    {
+     "label": "Knock",
+     "p": 0.066
+    },
+    {
+     "label": "Music",
+     "p": 0.058
+    },
+    {
+     "label": "Tap",
+     "p": 0.041
+    },
+    {
+     "label": "Door",
+     "p": 0.035
+    }
+   ],
+   "watch": {
+    "Plop": 0.069,
+    "Music": 0.058,
+    "Silence": 0.018,
+    "Bouncing": 0.012,
+    "Computer keyboard": 0.011
+   }
+  },
+  {
+   "name": "footsteps/合成",
+   "group": "footsteps",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "footsteps.wav",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": true,
+   "metrics": {
+    "dur_s": 0.36,
+    "peak_dbfs": -11.3,
+    "rms_dbfs": -24.4
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.157
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.043
+    },
+    {
+     "label": "Speech",
+     "p": 0.034
+    },
+    {
+     "label": "Silence",
+     "p": 0.032
+    },
+    {
+     "label": "Animal",
+     "p": 0.016
+    }
+   ],
+   "watch": {
+    "Music": 0.157,
+    "Silence": 0.032,
+    "Tick-tock": 0.014,
+    "Tick": 0.011
+   }
+  },
+  {
+   "name": "laptop/原片",
+   "group": "laptop",
+   "source": "ref",
+   "start": 34.768,
+   "dur": 0.2,
+   "file": "v3.mp4",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.11,
+    "peak_dbfs": -3.4,
+    "rms_dbfs": -22.9
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.211
+    },
+    {
+     "label": "Music",
+     "p": 0.14
+    },
+    {
+     "label": "Speech",
+     "p": 0.05
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.045
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.026
+    }
+   ],
+   "watch": {
+    "Silence": 0.211,
+    "Music": 0.14,
+    "Tick-tock": 0.011
+   }
+  },
+  {
+   "name": "laptop/合成",
+   "group": "laptop",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "laptop.wav",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.12,
+    "peak_dbfs": 0.1,
+    "rms_dbfs": -20.3
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.22
+    },
+    {
+     "label": "Music",
+     "p": 0.137
+    },
+    {
+     "label": "Speech",
+     "p": 0.051
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.045
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.026
+    }
+   ],
+   "watch": {
+    "Silence": 0.22,
+    "Music": 0.137,
+    "Tick-tock": 0.011
+   }
+  },
+  {
+   "name": "select/原片",
+   "group": "select",
+   "source": "ref",
+   "start": 54.59,
+   "dur": 0.16,
+   "file": "v3.mp4",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.16,
+    "peak_dbfs": -8.0,
+    "rms_dbfs": -34.9
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.228
+    },
+    {
+     "label": "Music",
+     "p": 0.135
+    },
+    {
+     "label": "Speech",
+     "p": 0.051
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.046
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.027
+    }
+   ],
+   "watch": {
+    "Silence": 0.228,
+    "Music": 0.135,
+    "Tick-tock": 0.011
+   }
+  },
+  {
+   "name": "select/合成",
+   "group": "select",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "select.wav",
+   "short_clip_method": "补静音到 2 秒",
+   "informative": false,
+   "metrics": {
+    "dur_s": 0.158,
+    "peak_dbfs": -7.3,
+    "rms_dbfs": -25.6
+   },
+   "top5": [
+    {
+     "label": "Silence",
+     "p": 0.227
+    },
+    {
+     "label": "Music",
+     "p": 0.136
+    },
+    {
+     "label": "Speech",
+     "p": 0.051
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.046
+    },
+    {
+     "label": "Inside, small room",
+     "p": 0.027
+    }
+   ],
+   "watch": {
+    "Silence": 0.227,
+    "Music": 0.136,
+    "Tick-tock": 0.011
+   }
+  },
+  {
+   "name": "boom/原片",
+   "group": "boom",
+   "source": "ref",
+   "start": 156.8,
+   "dur": 2.5,
+   "file": "v3.mp4",
+   "short_clip_method": null,
+   "informative": true,
+   "metrics": {
+    "dur_s": 2.5,
+    "peak_dbfs": 2.1,
+    "rms_dbfs": -9.8
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.655
+    },
+    {
+     "label": "Fusillade",
+     "p": 0.327
+    },
+    {
+     "label": "Gunshot, gunfire",
+     "p": 0.286
+    },
+    {
+     "label": "Boom",
+     "p": 0.233
+    },
+    {
+     "label": "Machine gun",
+     "p": 0.197
+    }
+   ],
+   "watch": {
+    "Music": 0.655,
+    "Boom": 0.233,
+    "Thump, thud": 0.071,
+    "Explosion": 0.018
+   }
+  },
+  {
+   "name": "boom/合成",
+   "group": "boom",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "boom.wav",
+   "short_clip_method": null,
+   "informative": true,
+   "metrics": {
+    "dur_s": 2.5,
+    "peak_dbfs": 0.1,
+    "rms_dbfs": -21.4
+   },
+   "top5": [
+    {
+     "label": "Artillery fire",
+     "p": 0.346
+    },
+    {
+     "label": "Gunshot, gunfire",
+     "p": 0.235
+    },
+    {
+     "label": "Explosion",
+     "p": 0.149
+    },
+    {
+     "label": "Vehicle",
+     "p": 0.117
+    },
+    {
+     "label": "Eruption",
+     "p": 0.099
+    }
+   ],
+   "watch": {
+    "Explosion": 0.149,
+    "Music": 0.03,
+    "Rustle": 0.017,
+    "Boom": 0.011
+   }
+  },
+  {
+   "name": "turtle/原片",
+   "group": "turtle",
+   "source": "ref",
+   "start": 197.5,
+   "dur": 3.0,
+   "file": "v3.mp4",
+   "short_clip_method": null,
+   "informative": true,
+   "metrics": {
+    "dur_s": 3.0,
+    "peak_dbfs": -2.6,
+    "rms_dbfs": -20.5
+   },
+   "top5": [
+    {
+     "label": "Music",
+     "p": 0.859
+    },
+    {
+     "label": "Musical instrument",
+     "p": 0.07
+    },
+    {
+     "label": "Cacophony",
+     "p": 0.063
+    },
+    {
+     "label": "Electronic music",
+     "p": 0.048
+    },
+    {
+     "label": "Smash, crash",
+     "p": 0.039
+    }
+   ],
+   "watch": {
+    "Music": 0.859,
+    "Scratch": 0.012
+   }
+  },
+  {
+   "name": "turtle/合成",
+   "group": "turtle",
+   "source": "synth",
+   "start": null,
+   "dur": null,
+   "file": "turtle.wav",
+   "short_clip_method": null,
+   "informative": true,
+   "metrics": {
+    "dur_s": 2.992,
+    "peak_dbfs": -0.2,
+    "rms_dbfs": -15.0
+   },
+   "top5": [
+    {
+     "label": "Rub",
+     "p": 0.745
+    },
+    {
+     "label": "Sanding",
+     "p": 0.704
+    },
+    {
+     "label": "Music",
+     "p": 0.025
+    },
+    {
+     "label": "Wood",
+     "p": 0.017
+    },
+    {
+     "label": "Speech",
+     "p": 0.014
+    }
+   ],
+   "watch": {
+    "Music": 0.025
+   }
+  }
+ ],
+ "pairs": [
+  {
+   "group": "boom",
+   "ref": "boom/原片",
+   "synth": "boom/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Gunshot, gunfire"
+   ],
+   "class_vector_cosine": 0.309,
+   "embedding_cosine": 0.716
+  },
+  {
+   "group": "error",
+   "ref": "error/原片",
+   "synth": "error/合成",
+   "both_informative": false,
+   "top5_overlap": [
+    "Inside, small room",
+    "Music",
+    "Silence",
+    "Speech",
+    "Vehicle"
+   ],
+   "class_vector_cosine": 0.998,
+   "embedding_cosine": 0.993
+  },
+  {
+   "group": "footsteps",
+   "ref": "footsteps/原片",
+   "synth": "footsteps/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Music"
+   ],
+   "class_vector_cosine": 0.536,
+   "embedding_cosine": 0.876
+  },
+  {
+   "group": "key",
+   "ref": "key/原片",
+   "synth": "key/合成",
+   "both_informative": false,
+   "top5_overlap": [
+    "Inside, small room",
+    "Music",
+    "Silence",
+    "Speech",
+    "Vehicle"
+   ],
+   "class_vector_cosine": 1.0,
+   "embedding_cosine": 1.0
+  },
+  {
+   "group": "laptop",
+   "ref": "laptop/原片",
+   "synth": "laptop/合成",
+   "both_informative": false,
+   "top5_overlap": [
+    "Inside, small room",
+    "Music",
+    "Silence",
+    "Speech",
+    "Vehicle"
+   ],
+   "class_vector_cosine": 1.0,
+   "embedding_cosine": 1.0
+  },
+  {
+   "group": "output",
+   "ref": "output/原片",
+   "synth": "output/合成",
+   "both_informative": false,
+   "top5_overlap": [
+    "Inside, small room",
+    "Music",
+    "Silence",
+    "Speech",
+    "Vehicle"
+   ],
+   "class_vector_cosine": 0.999,
+   "embedding_cosine": 0.995
+  },
+  {
+   "group": "run",
+   "ref": "run/原片",
+   "synth": "run/合成",
+   "both_informative": false,
+   "top5_overlap": [
+    "Inside, small room",
+    "Music",
+    "Silence",
+    "Speech",
+    "Vehicle"
+   ],
+   "class_vector_cosine": 1.0,
+   "embedding_cosine": 0.999
+  },
+  {
+   "group": "select",
+   "ref": "select/原片",
+   "synth": "select/合成",
+   "both_informative": false,
+   "top5_overlap": [
+    "Inside, small room",
+    "Music",
+    "Silence",
+    "Speech",
+    "Vehicle"
+   ],
+   "class_vector_cosine": 1.0,
+   "embedding_cosine": 1.0
+  },
+  {
+   "group": "step",
+   "ref": "step/原片",
+   "synth": "step/合成",
+   "both_informative": false,
+   "top5_overlap": [
+    "Inside, small room",
+    "Music",
+    "Silence",
+    "Speech",
+    "Vehicle"
+   ],
+   "class_vector_cosine": 1.0,
+   "embedding_cosine": 1.0
+  },
+  {
+   "group": "touch",
+   "ref": "touch/原片",
+   "synth": "touch/合成",
+   "both_informative": false,
+   "top5_overlap": [
+    "Inside, small room",
+    "Music",
+    "Silence",
+    "Speech",
+    "Vehicle"
+   ],
+   "class_vector_cosine": 1.0,
+   "embedding_cosine": 1.0
+  },
+  {
+   "group": "turtle",
+   "ref": "turtle/原片",
+   "synth": "turtle/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Music"
+   ],
+   "class_vector_cosine": 0.026,
+   "embedding_cosine": 0.449
+  },
+  {
+   "group": "typing",
+   "ref": "typing/原片",
+   "synth": "typing/合成",
+   "both_informative": true,
+   "top5_overlap": [
+    "Inside, small room",
+    "Music"
+   ],
+   "class_vector_cosine": 0.578,
+   "embedding_cosine": 0.764
+  }
+ ],
+ "seconds": 8.4
+}

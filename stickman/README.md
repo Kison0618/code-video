@@ -98,6 +98,42 @@ python analysis/ref_spectra.py <火柴人VS编程.mp4>              # 重新生�
 node build.js --only audio                                      # 只重做音效（约 10 秒）
 ```
 
+## AI 耳朵（声音类别辅助判断）
+
+`audio/ai_ear.py` 用 PANNs Cnn14（AudioSet 527 类）回答两件事："模型认为这段声音是哪一类、有多确定"，以及"合成音和原片在模型眼里是不是同一类"。**它不是听感质量评分**，好不好听仍以人耳为准。第一次冒烟测试的结果和局限见 `audio/ai_ear_reports/2026-10-17_冒烟测试/说明.md`。
+
+**安装**（虚拟环境和模型都放在仓库外，不入库）：
+
+```bash
+python3 -m venv ~/.venvs/ai-ear
+~/.venvs/ai-ear/bin/pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.14.1+cpu"   # 官方 CPU 版，不带 CUDA
+~/.venvs/ai-ear/bin/pip install -r audio/ai_ear_requirements.txt
+mkdir -p ~/panns_data
+# AudioSet 官方类别表（必须先放好；panns_inference 在 import 时发现缺这个文件会自己用 wget 下载）
+curl -o ~/panns_data/class_labels_indices.csv https://storage.googleapis.com/us_audioset/youtube_corpus/v1/csv/class_labels_indices.csv
+# 权重：Zenodo 10.5281/zenodo.3987831，CC-BY-4.0，327,428,481 字节，MD5 541141fa2ee191a88f24a3219fff024e
+curl -o "$HOME/panns_data/Cnn14_mAP=0.431.pth" "https://zenodo.org/api/records/3987831/files/Cnn14_mAP=0.431.pth/content"
+```
+
+Windows 上把 `~/.venvs/ai-ear/bin/` 换成 `%USERPROFILE%\.venvs\ai-ear\Scripts\`，模型同样放在 `%USERPROFILE%\panns_data\`。脚本每次运行前都会校验权重的 MD5 和类别表的 SHA-256，并只用 `weights_only=True` 安全加载；文件不对或缺失就停下，不会自动下载。
+
+**用法**：
+
+```bash
+cd audio
+~/.venvs/ai-ear/bin/python ai_ear.py --spec 片段表.json --out 报告               # 按片段分析，原片 / 合成成对比较
+~/.venvs/ai-ear/bin/python ai_ear.py 音轨.wav --windows 2.0 0.5 --out 报告       # 整段按 2 秒窗口打时间戳
+```
+
+片段表的格式写在 `ai_ear.py` 顶部。报告里的标记：
+
+- "≈先验，无信息"：输出和同样长度的静音几乎一样，不能用
+- "弱"：最高置信度低于 0.2，只能当线索
+
+短于 2 秒的片段默认平铺成 2 秒再分析（原因见脚本顶部的说明），可以用 `--short pad` 改成补静音。
+
+模型署名：Kong et al., "PANNs: Large-Scale Pretrained Audio Neural Networks for Audio Pattern Recognition", IEEE/ACM TASLP 2020；预训练权重 CC-BY-4.0。
+
 ## 需要你核对的
 
 1. **声音**：我听不到，音效是按测量对齐的。请戴耳机听一遍，重点听键盘、运行的"嘟"、打印结果的"叮—咚"、报错和爆炸。哪个不对告诉我秒数和感觉（比如"太脆""太闷""太响"），我对着测量数据改。追逐段的配乐只是占位，把你的 BGM 放成 `assets/bgm.mp3` 就会自动替换。
