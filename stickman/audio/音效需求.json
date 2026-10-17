@@ -333,6 +333,25 @@
    "notes": null
   },
   {
+   "id": "scratch",
+   "folder": "audio/samples/scratch/",
+   "name": "挠头",
+   "group": "身体与物体",
+   "used_for": "角色困惑时挠头（手在头顶来回挠），每挠一下一个声音",
+   "trigger": "手在头顶往一个方向挠的那一下；一次挠头通常连续 3–6 下，间隔约 0.2 秒（时间表里每下都有一条）",
+   "duration_ms": [
+    120,
+    200
+   ],
+   "character": "指甲 / 手指在头发上摩擦的\"沙\"，亮、轻、干，有一点点颗粒感；不是衣服的大面积摩擦",
+   "avoid": "不要太响（比脚步轻）、不要有低频、不要像撕纸",
+   "level_peak_dbfs": -27.0,
+   "variants": 6,
+   "reference": "原片编程集实测（1:04、1:20 附近角色手在头上时）：每下约 170–190 ms，频谱重心约 5.3–5.5 kHz，峰值约 -27 到 -29 dB，几乎是纯噪声（没有音高）",
+   "sync": "起音在文件第 0 ms",
+   "notes": "表演模块 acting.js 的 scratch() 会按挠的节奏自动登记"
+  },
+  {
    "id": "laptop_drop",
    "folder": "audio/samples/laptop_drop/",
    "name": "电脑落地（轻）",

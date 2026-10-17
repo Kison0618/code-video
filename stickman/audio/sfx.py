@@ -213,6 +213,11 @@ def s_rustle(v=1.0):
     d = 0.35; env = np.sin(np.linspace(0, np.pi, int(d * SR))) ** 2
     return level(bp(noise(d), 2500, 10000) * env, REF['rustle'] + 20 * np.log10(max(0.2, v)))
 
+def s_scratch(v=1.0):
+    # 挠头（占位；正式声音见 音效需求.json 的 scratch）：一下约 0.17 s 的亮摩擦声，原片实测重心约 5 kHz、约 -27 dB
+    d = 0.17; u = np.linspace(0, 1, int(d * SR)); env = np.sin(np.pi * u ** 0.6) ** 2
+    return level(bp(noise(d), 3000, 11000) * env, -27.0 + 20 * np.log10(max(0.2, v)))
+
 def s_whoosh(v=1.0):
     # 呼：中心频率先升后降的带通噪声
     d = 0.4; n = int(d * SR); u = np.linspace(0, 1, n)
@@ -390,7 +395,7 @@ GEN = {
     'output': lambda c: s_output(), 'pop': lambda c: s_output(), 'touch': lambda c: s_touch(), 'touch2': lambda c: s_touch2(), 'error': lambda c: s_error(),
     'select': lambda c: s_select(), 'click': lambda c: s_select(), 'step': lambda c: s_step(c.get('run', False), c.get('v', 1)),
     'body': lambda c: s_body(c.get('v', 1)), 'thud': lambda c: s_thud(c.get('v', 1)), 'laptop': lambda c: s_laptop(c.get('v', 1)),
-    'tick': lambda c: s_tick(c.get('v', 1)), 'rustle': lambda c: s_rustle(c.get('v', 1)), 'grab': lambda c: s_rustle(0.8),
+    'tick': lambda c: s_tick(c.get('v', 1)), 'rustle': lambda c: s_rustle(c.get('v', 1)), 'scratch': lambda c: s_scratch(c.get('v', 1)), 'grab': lambda c: s_rustle(0.8),
     'whoosh': lambda c: s_whoosh(c.get('v', 1)), 'kick': lambda c: s_kick(), 'boom': lambda c: s_boom(),
     'turtle': lambda c: s_turtle(c['dur']), 'hit': lambda c: s_hit(), 'music': lambda c: music(c['t'], c['t1'], c['bpm']),
     'key_space': lambda c: s_key(), 'key_enter': lambda c: s_key(True), 'key_back': lambda c: s_key(),

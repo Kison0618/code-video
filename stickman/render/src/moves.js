@@ -76,7 +76,7 @@ A.launch = function (t, o = {}) {
   }
   this.hip(tL, [xs, land === 'feet' ? -this.STAND + 0.16 * H : -0.026 * H], 0.25, 'out3').lean(tL, lEnd).head(tL, land === 'feet' ? 20 : 0);
   if (land === 'feet') this.hip(tL + 0.3, [xs, -this.STAND], 0.35).lean(tL + 0.3, 2, 0.3);
-  if (land !== 'feet') this.sfx(tL, 'body', { v: Math.min(1, Math.hypot(vx, vy) / 1400) });
+  if (land !== 'feet') this.sfx(tL, 'body', { v: Math.min(1, Math.hypot(vx, vy + G * tau) / 1400) });   // 落地时的速度
   return { t: tL, x: xs, lean: lEnd };
 };
 

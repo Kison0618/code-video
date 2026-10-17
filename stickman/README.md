@@ -125,6 +125,25 @@ v1 把所有关节按同一条缓动插值，结果全身一起动、一起停�
 
 `SCENE=v2 node build.js --from 0 --to 47.37`，成片 `previews/样片_v2_1080p60.mp4`。第一版（`scene.js`）原样保留，不带 SCENE 时仍然渲染第一版。
 
+## 样片 v4：探索开头（`render/src/scene_v4.js`）
+
+按原片的逻辑重做"从 0 到 1 的探索"，角色有内心过程（拆解 第 3.1 节）：看见光标 → 托腮 → 犹豫着戳一下 → 挠头 → 发现电脑 → 按一个键、抬头看到字母、反应过来 → hello 报错、吓一跳、挠头、删掉 → print() 没反应、连按、挠头 → print("hi") → hi 掉出来、吓得坐下、凑过去戳一戳 → 踢飞。
+
+- 表演模块 `render/src/acting.js`：注意到、看向某处、托腮、挠头（自动配挠头声）、吓一跳、试探着戳、反应过来、想到主意、点头
+- 动手前先用生图模型出分镜草图确认节拍：`storyboards/`
+- `SCENE=v4 node build.js --from 0 --to 42.32`，成片 `previews/样片_v4_探索开头_1080p60.mp4`
+
+## 声音的分工
+
+- 需要什么声音写在 `audio/音效需求.json`（`audio/gen_req_md.py` 生成同内容的 `.md`）；你做好放进 `audio/samples/<id>/` 自动替换
+- 每个场景的**音效时间表**（第几秒、哪个 id、力度）：`SCENE=v4 node render/src/tools/cue_sheet.js` → `audio/时间表/v4.md`；时间表里用到但需求表还没有的 id 会单独列出
+- 代码合成的声音只是占位，保证没有素材时也能出声
+
+## 动作对照工具
+
+- `analysis/ref_pose.py`：不用模型，纯图像处理从原片逐帧提取火柴人骨架（头 / 颈 / 胯 / 手 / 脚），输出数字
+- `render/src/tools/move_frames.js`：把一个成套动作按原片近景的大小单独渲染成图片序列，用同一个脚本量化对比（跑步就是这样对上的）
+
 ## 样片 v3（`render/src/scene_v3.js`）
 
 在 v2 上改了三件事：

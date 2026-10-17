@@ -45,6 +45,7 @@ class Code {
     this.vis = o.show || [-1e9, 1e9];
     this.sfx = o.sfx ?? true;
     this.moves = [];
+    this.jiggles = [];
     this.bright = o.bright ?? 1;
   }
   last() { return this.snaps[this.snaps.length - 1]; }
@@ -98,6 +99,8 @@ class Code {
   hide(t) { this.vis = [this.vis[0], t]; return this; }
   // 平移整块代码（世界坐标）
   moveTo(t0, t1, x, y, ease = 'inOut3') { this.moves.push({ t0, t1, x, y, ease }); return this; }
+  // 被碰了一下：整块抖一抖（衰减的小晃动）
+  jiggle(t, amp = 10) { this.jiggles.push({ t, amp }); return this; }
 
   snap(t) {
     const s = this.snaps;
@@ -111,6 +114,10 @@ class Code {
       if (t <= m.t0) break;
       const u = K.E[m.ease](clamp((t - m.t0) / (m.t1 - m.t0)));
       x = K.lerp(x, m.x, u); y = K.lerp(y, m.y, u);
+    }
+    for (const j of this.jiggles) {
+      const a = t - j.t;
+      if (a > 0 && a < 0.5) { const e = j.amp * Math.exp(-a * 9); x += e * Math.sin(a * 62); y += e * 0.5 * Math.sin(a * 47 + 1); }
     }
     return [x, y];
   }
