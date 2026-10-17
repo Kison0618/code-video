@@ -1,0 +1,46 @@
+B站参考视频｜特别备注
+整理日期：2026-10-17
+
+用途：作为代码视频风格与表达方式的参考素材。
+来源属性：第三方 Bilibili 视频，非本人原创；权利归原作者或相应权利人。
+画质：7 个文件均已核验为 1920×1080、30fps，H.264 视频 + AAC 音频。
+文件为平台播放版本，不是作者上传母版；下载后仅合并封装，未额外转码。
+标题保留站内原标题，BV号用于追溯；标题与视频中的事实主张未在本次下载中核实。
+归档本身不代表取得再发布、商用或改编授权。
+
+逐项来源与仓库完整路径：
+
+1. 《银牌的眼泪》｜最痛的，不是失败，是“差一点” [BV12DHQ61EhT]
+来源：https://www.bilibili.com/video/BV12DHQ61EhT/
+仓库路径：reference-videos/《银牌的眼泪》｜最痛的，不是失败，是“差一点” [BV12DHQ61EhT].mp4
+文件大小：11598963 bytes
+
+2. 今年诺奖颁给了“大脑的开关”：光遗传学到底是什么 [BV1Fbpt6qEPq]
+来源：https://www.bilibili.com/video/BV1Fbpt6qEPq/
+仓库路径：reference-videos/今年诺奖颁给了“大脑的开关”：光遗传学到底是什么 [BV1Fbpt6qEPq].mp4
+文件大小：25285482 bytes
+
+3. 《剃刀 》每一个也许都要付钱：0.8⁵ = 33% [BV1WkJk6VEqA]
+来源：https://www.bilibili.com/video/BV1WkJk6VEqA/
+仓库路径：reference-videos/《剃刀 》每一个也许都要付钱：0.8⁵ = 33% [BV1WkJk6VEqA].mp4
+文件大小：16593105 bytes
+
+4. 刷分的捷径 [BV1cvpF6fEoc]
+来源：https://www.bilibili.com/video/BV1cvpF6fEoc/
+仓库路径：reference-videos/刷分的捷径 [BV1cvpF6fEoc].mp4
+文件大小：15747968 bytes
+
+5. 2026诺贝尔物理学奖，冰立方中微子 [BV1XWp76FEZR]
+来源：https://www.bilibili.com/video/BV1XWp76FEZR/
+仓库路径：reference-videos/2026诺贝尔物理学奖，冰立方中微子 [BV1XWp76FEZR].mp4
+文件大小：23941522 bytes
+
+6. 「我爱你」说到第 1000 遍，信息量几乎为零 [BV1VVpo6gEMw]
+来源：https://www.bilibili.com/video/BV1VVpo6gEMw/
+仓库路径：reference-videos/「我爱你」说到第 1000 遍，信息量几乎为零 [BV1VVpo6gEMw].mp4
+文件大小：35039847 bytes
+
+7. 两个一模一样的地方之间，是不会起风的 [BV1zVpJ6yEk6]
+来源：https://www.bilibili.com/video/BV1zVpJ6yEk6/
+仓库路径：reference-videos/两个一模一样的地方之间，是不会起风的 [BV1zVpJ6yEk6].mp4
+文件大小：54011303 bytes
