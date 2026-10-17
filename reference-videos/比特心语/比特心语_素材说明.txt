@@ -1,0 +1,35 @@
+比特心语｜B站参考素材
+
+分组名称按用户指定：比特心语。来源账号在原页面显示为“比特新语”。
+7 个视频均为 1920×1080、30fps，包含声音；平台播放版本，非作者母版，未额外转码。
+第三方参考素材，非本人原创；权利归原作者或相应权利人。
+
+文件与来源：
+
+《银牌的眼泪》｜最痛的，不是失败，是“差一点” [BV12DHQ61EhT].mp4
+来源：https://www.bilibili.com/video/BV12DHQ61EhT/
+仓库完整路径：reference-videos/比特心语/《银牌的眼泪》｜最痛的，不是失败，是“差一点” [BV12DHQ61EhT].mp4
+
+今年诺奖颁给了“大脑的开关”：光遗传学到底是什么 [BV1Fbpt6qEPq].mp4
+来源：https://www.bilibili.com/video/BV1Fbpt6qEPq/
+仓库完整路径：reference-videos/比特心语/今年诺奖颁给了“大脑的开关”：光遗传学到底是什么 [BV1Fbpt6qEPq].mp4
+
+《剃刀 》每一个也许都要付钱：0.8⁵ = 33% [BV1WkJk6VEqA].mp4
+来源：https://www.bilibili.com/video/BV1WkJk6VEqA/
+仓库完整路径：reference-videos/比特心语/《剃刀 》每一个也许都要付钱：0.8⁵ = 33% [BV1WkJk6VEqA].mp4
+
+刷分的捷径 [BV1cvpF6fEoc].mp4
+来源：https://www.bilibili.com/video/BV1cvpF6fEoc/
+仓库完整路径：reference-videos/比特心语/刷分的捷径 [BV1cvpF6fEoc].mp4
+
+2026诺贝尔物理学奖，冰立方中微子 [BV1XWp76FEZR].mp4
+来源：https://www.bilibili.com/video/BV1XWp76FEZR/
+仓库完整路径：reference-videos/比特心语/2026诺贝尔物理学奖，冰立方中微子 [BV1XWp76FEZR].mp4
+
+「我爱你」说到第 1000 遍，信息量几乎为零 [BV1VVpo6gEMw].mp4
+来源：https://www.bilibili.com/video/BV1VVpo6gEMw/
+仓库完整路径：reference-videos/比特心语/「我爱你」说到第 1000 遍，信息量几乎为零 [BV1VVpo6gEMw].mp4
+
+两个一模一样的地方之间，是不会起风的 [BV1zVpJ6yEk6].mp4
+来源：https://www.bilibili.com/video/BV1zVpJ6yEk6/
+仓库完整路径：reference-videos/比特心语/两个一模一样的地方之间，是不会起风的 [BV1zVpJ6yEk6].mp4
