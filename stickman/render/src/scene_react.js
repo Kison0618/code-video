@@ -31,19 +31,22 @@ const KB = a.knockback(T2, { dist: 110 });
 const L1 = a.launch(T3, { vx: -520, vy: -1100, turns: 1, land: 'back' });
 cam.shake(clock.real(L1.t), 22, 0.4);
 const U1 = a.getUp(L1.t + 0.7, { from: 'back' });
-// ⑤ 跑 → 跳 → 跑着跳
-const R1 = a.run(U1.t + 0.2, U1.x + 700, { speed: 950 });
-const J1 = a.jump(R1.t + 0.5, { to: R1.x + 160, h: 140 });
-const R2 = a.run(J1.t + 0.8, J1.x + 520, { speed: 1000, stop: false });
-const J2 = a.jump(R2.t, { to: R2.x + 580, h: 170, dur: 0.6, running: true, skid: 110 });
-const ADUR = J2.t + 1.4;
+// ⑤ 跑（起跑 → 刹车）→ 再跑 → 滑铲 → 接着跑 → 跨跳 → 接着跑 → 刹车
+const V = 4.5 * HH;
+const R1 = a.run(U1.t + 0.2, U1.x + 900, { speed: V });
+const R2 = a.run(R1.t + 0.5, R1.x + 1500, { speed: V, stop: false });
+const S1 = a.slide(R2.t, { v0: R2.v, dur: 0.5 });
+const R3 = a.run(S1.t, S1.x + 700, { speed: V, v0: Math.abs(S1.v), ramp: 0.25, stop: false });
+const J2 = a.jump(R3.t, { to: R3.x + 0.5 * V, h: 150, dur: 0.5, running: true, land: 'run' });
+const R4 = a.run(J2.t, J2.x + 1000, { speed: V, v0: V, ramp: 0.2 });
+const ADUR = R4.t + 1.2;
 a.simulate(ADUR);
 const DUR = +clock.real(ADUR).toFixed(2);
 
 // 摄像机：跟着胯走
-for (let ta = 0; ta <= ADUR + 0.01; ta += 0.5) {
+for (let ta = 0; ta <= ADUR + 0.01; ta += 0.25) {
   const s = a.stateAt(ta);
-  cam.key(clock.real(ta), { x: s.hip[0] + 60, y: -300, z: ta < L0.t ? 0.8 : 1.0 });
+  cam.key(clock.real(ta), { x: s.hip[0] + 60, y: -300, z: ta < L0.t ? 0.8 : 1.0, ease: 'linear' });
 }
 
 function draw(ctx, t) {
@@ -59,4 +62,4 @@ function draw(ctx, t) {
 }
 function post(ctx, t, base) { imp.post(ctx, t, base); }
 
-module.exports = { DUR, draw, post, cam, actor: a, clock, marks: { L0, U0, KB, L1, U1, R1, J1, R2, J2 } };
+module.exports = { DUR, draw, post, cam, actor: a, clock, marks: { L0, U0, KB, L1, U1, R1, R2, S1, R3, J2, R4 } };

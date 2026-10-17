@@ -77,6 +77,8 @@ class Actor2 {
     return this;
   }
   // 脚离地，跟着身体走（腾空收腿、躺着蹬腿）：arg = [沿身体朝前, 沿身体朝下]（单位 H，相对胯），可以是 t 的函数
+  // 脚按给定的世界坐标轨迹走（跑步的步态）：fn(t) → [x, y]，切进来时从脚的实际位置过渡 0.08 秒
+  footPath(f, t, fn) { this.footModes[f].push({ t, mode: 'path', fn }); this.footModes[f].sort((a, b) => a.t - b.t); return this; }
   footFree(f, t, arg) { this.footModes[f].push({ t, mode: 'free', arg }); this.footModes[f].sort((a, b) => a.t - b.t); return this; }
   // 精确轨迹：t0–t1 之间 ch（'hip' 或 'lean'）完全按 fn(t) 走；结束时把速度交还给弹簧，落地会自然压一下
   path(ch, t0, t1, fn) { this.paths[ch].push({ t0, t1, fn }); return this; }
@@ -100,7 +102,7 @@ class Actor2 {
     const R = this.rec = { hip: [], lean: [], head: [], hF: [], hB: [], fF: [], fB: [], obj: [], dir: [] };
     let D = this.dir;
     const sw = { F: -9, B: -9 }, prev = { F: null, B: null };
-    const fprev = { F: null, B: null }, fblend = { F: null, B: null };
+    const fprev = { F: null, B: null }, fblend = { F: null, B: null }, pblend = { F: null, B: null }, lastFoot = { F: null, B: null };
     const pathAt = (ch, t) => { const L = this.paths[ch]; for (let n = L.length - 1; n >= 0; n--) if (t >= L[n].t0 && t < L[n].t1) return L[n]; return null; };
     const follow = (d, p, v, tg) => { d.y = p; d.yd = v; d.xp = tg; };
     let objInit = false;
@@ -113,7 +115,12 @@ class Actor2 {
       const fm = {};
       for (const k of ['F', 'B']) {
         const m = at(this.footModes[k], t);
-        if (fprev[k] !== m) { fblend[k] = fprev[k] && fprev[k].mode === 'free' && m.mode === 'ground' ? { t0: t, dur: Math.max(m.dur || 0, 0.06) } : null; fprev[k] = m; }
+        if (fprev[k] !== m) {
+          const off = fprev[k] && fprev[k].mode !== 'ground';
+          fblend[k] = off && m.mode === 'ground' ? { t0: t, dur: Math.max(m.dur || 0, 0.06) } : null;
+          pblend[k] = m.mode === 'path' && lastFoot[k] ? { t0: t, dur: 0.08, from: lastFoot[k] } : null;
+          fprev[k] = m;
+        }
         fm[k] = m;
       }
       const ground = { F: this.feet.F.at(t), B: this.feet.B.at(t) };
@@ -142,7 +149,11 @@ class Actor2 {
       for (const k of ['F', 'B']) {
         const dx = dyn['f' + k + 'x'], dy = dyn['f' + k + 'y'];
         // 离地的脚用"相对胯"的弹簧：整个人飞得再快，脚也不会被甩在后面
-        if (fm[k].mode === 'free') {
+        if (fm[k].mode === 'path') {
+          let g = fm[k].fn(t);
+          if (pblend[k]) { const u = E.inOut((t - pblend[k].t0) / pblend[k].dur); g = [lerp(pblend[k].from[0], g[0], u), lerp(pblend[k].from[1], g[1], u)]; if (u >= 1) pblend[k] = null; }
+          feet[k] = g; dx.snap(g[0] - hip[0]); dy.snap(g[1] - hip[1]);
+        } else if (fm[k].mode === 'free') {
           const g = local([0, 0], typeof fm[k].arg === 'function' ? fm[k].arg(t) : fm[k].arg);
           if (i === 0) { dx.snap(g[0]); dy.snap(g[1]); }
           feet[k] = [hip[0] + dx.step(DT, g[0]), Math.min(hip[1] + dy.step(DT, g[1]), 0)];
@@ -152,6 +163,7 @@ class Actor2 {
           if (u >= 1) { fblend[k] = null; dx.snap(g[0] - hip[0]); dy.snap(g[1] - hip[1]); }
         } else { feet[k] = ground[k]; dx.snap(ground[k][0] - hip[0]); dy.snap(ground[k][1] - hip[1]); }
       }
+      lastFoot.F = feet.F; lastFoot.B = feet.B;
       const b0 = body({ t, hip, lean, head, fF: feet.F, fB: feet.B, hF: hip, hB: hip }, H, D);
       const up = [b0.neck[0] - hip[0], b0.neck[1] - hip[1]], ul = Math.hypot(...up); up[0] /= ul; up[1] /= ul;
       const fwd = [-up[1] * D, up[0] * D];
