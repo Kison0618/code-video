@@ -6,7 +6,7 @@ function add(t, type, o = {}) { list.push({ t: +t.toFixed(4), type, ...o }); }
 module.exports = { add, list };
 
 if (require.main === module) {
-  const { DUR } = require('./scene');
+  const { DUR } = require('./frame');
   list.sort((a, b) => a.t - b.t);
   process.stdout.write(JSON.stringify({ dur: DUR, cues: list }, null, 0));
 }

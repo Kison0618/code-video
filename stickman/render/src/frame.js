@@ -2,7 +2,8 @@
 'use strict';
 const K = require('./core');
 const FX = require('./fx');
-const S = require('./scene');
+// 场景：默认是样片；SCENE=motion 渲染动作验证片
+const S = require(process.env.SCENE === 'motion' ? './scene_motion' : './scene');
 
 function renderFrame(ctx, t) {
   ctx.save();

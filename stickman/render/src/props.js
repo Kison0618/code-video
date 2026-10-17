@@ -15,7 +15,8 @@ function laptop(ctx, x, y, w, ang = 0, open = 1, dir = 1) {
   ctx.closePath(); ctx.fill();
   if (open > 0.02) {
     // 盖子：往后仰的四边形，看到的是背面（银色 + logo）
-    const h = 0.6 * w * open, sk = 0.14 * w * open;
+    // 实测原片：盖子宽 0.5H、高只有 0.21H（透视压扁，宽大于高）
+    const h = 0.42 * w * open, sk = 0.12 * w * open;
     ctx.fillStyle = rgba(C.laptop);
     ctx.strokeStyle = rgba(C.laptopEdge);
     ctx.lineWidth = 0.035 * w;
