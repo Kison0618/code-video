@@ -1,0 +1,13 @@
+{
+  "name": "stickman-video-render",
+  "version": "1.0.0",
+  "private": true,
+  "description": "火柴人风格代码动画的画面渲染器",
+  "dependencies": {
+    "@expo-google-fonts/inconsolata": "^0.4.2",
+    "@expo-google-fonts/jetbrains-mono": "^0.4.1",
+    "@expo-google-fonts/noto-sans-sc": "^0.4.1",
+    "@expo-google-fonts/open-sans": "^0.4.2",
+    "skia-canvas": "^3.0.8"
+  }
+}
