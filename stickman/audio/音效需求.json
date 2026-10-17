@@ -1,0 +1,678 @@
+{
+ "title": "火柴人系列 · 音效需求",
+ "how_to_deliver": {
+  "folder": "每个声音放进 stickman/audio/samples/<id>/ 文件夹（文件夹名就是下面的 id）。同一个 id 放多个文件 = 多个变体，管线会轮流、轻微变调地使用，避免机关枪效应。",
+  "format": "WAV，48 kHz，24 bit（16 bit 也行），单声道或立体声都可以",
+  "sync": "起音放在文件最开头（前面不要留静音），管线按\"文件第 0 ms = 画面事件那一帧\"放置",
+  "level": "level_peak_dbfs 是原片同类声音的峰值（256 点 RMS 的最大值）。你按自己的听感做就行，管线放进去时会自动把峰值对齐到这个值，所以各声音之间的比例和原片一致",
+  "fallback": "某个 id 的文件夹为空或不存在时，自动用代码合成的版本，不会报错",
+  "license": "如果用了第三方素材，请确认可以用于商业作品"
+ },
+ "sounds": [
+  {
+   "id": "key",
+   "folder": "audio/samples/key/",
+   "name": "普通按键",
+   "group": "代码界面",
+   "used_for": "敲代码时每一个普通字符",
+   "trigger": "手指点下键盘的那一帧（画面里手往下点、电脑微震）",
+   "duration_ms": [
+    90,
+    140
+   ],
+   "character": "机械键盘或笔记本键盘的\"嗒\"，清脆、短，有按下和松开两个小瞬态；轻、细，偏中高频",
+   "avoid": "不要冲击感太强、不要低频重击——AI 耳朵把现在的合成版认成了\"枪声 / 机关枪\"",
+   "level_peak_dbfs": -18.7,
+   "variants": 8,
+   "reference": "原片实测：约 130 ms，主峰 2296 Hz、频谱重心约 3.4 kHz；按下 → ~20 ms 触底 → ~60 ms 松开；另有 87 / 1101 / 1453 / 3738 / 8050 Hz 共振",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "key_space",
+   "folder": "audio/samples/key_space/",
+   "name": "空格键",
+   "group": "代码界面",
+   "used_for": "敲到空格",
+   "trigger": "同上",
+   "duration_ms": [
+    100,
+    160
+   ],
+   "character": "比普通键更低、更\"空\"一点的长键声",
+   "avoid": "同上",
+   "level_peak_dbfs": -19.5,
+   "variants": 4,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "key_enter",
+   "folder": "audio/samples/key_enter/",
+   "name": "回车键",
+   "group": "代码界面",
+   "used_for": "敲回车（换行、运行前）",
+   "trigger": "同上",
+   "duration_ms": [
+    110,
+    170
+   ],
+   "character": "比普通键更重、更确定的一下",
+   "avoid": "同上",
+   "level_peak_dbfs": -16.5,
+   "variants": 4,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "key_back",
+   "folder": "audio/samples/key_back/",
+   "name": "退格 / 删除",
+   "group": "代码界面",
+   "used_for": "删除字符（可能连续快速很多下）",
+   "trigger": "同上",
+   "duration_ms": [
+    80,
+    130
+   ],
+   "character": "和普通键接近，略短；连按时不能刺耳",
+   "avoid": "连按时像枪声",
+   "level_peak_dbfs": -19.5,
+   "variants": 6,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "blink_on",
+   "folder": "audio/samples/blink_on/",
+   "name": "光标亮",
+   "group": "代码界面",
+   "used_for": "安静段落里光标\"_\"出现",
+   "trigger": "光标亮起那一帧",
+   "duration_ms": [
+    20,
+    40
+   ],
+   "character": "极短的\"嘀\"，两个音高分音",
+   "avoid": "不要拖尾",
+   "level_peak_dbfs": -19.2,
+   "variants": 2,
+   "reference": "原片实测：2050 Hz + 1289 Hz，约 28 ms 内衰减 60 dB",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "blink_off",
+   "folder": "audio/samples/blink_off/",
+   "name": "光标灭",
+   "group": "代码界面",
+   "used_for": "光标消失",
+   "trigger": "光标熄灭那一帧",
+   "duration_ms": [
+    15,
+    35
+   ],
+   "character": "极短的\"嗒\"，比\"亮\"高一点",
+   "avoid": "不要拖尾",
+   "level_peak_dbfs": -22.7,
+   "variants": 2,
+   "reference": "原片实测：2871 Hz + 1792 Hz",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "run",
+   "folder": "audio/samples/run/",
+   "name": "运行（没有输出）",
+   "group": "代码界面",
+   "used_for": "代码块被灰色高亮闪一下（运行），没有打印结果",
+   "trigger": "灰色高亮出现那一帧",
+   "duration_ms": [
+    200,
+    260
+   ],
+   "character": "木质、温和的\"嘟—嘟\"：第一下 585 Hz，~70 ms 后沉到 445 Hz 再回到 585 Hz",
+   "avoid": "不要电子味太重",
+   "level_peak_dbfs": -12.5,
+   "variants": 3,
+   "reference": "原片实测主频走向（每 10 ms）：回车键 → 585 585 585 585 → 468 445 445 → 562 585；分音 351 / 1078 Hz",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "output",
+   "folder": "audio/samples/output/",
+   "name": "打印结果出现",
+   "group": "代码界面",
+   "used_for": "print 出的东西（hi、数字）从代码里掉出来",
+   "trigger": "结果文字出现那一帧",
+   "duration_ms": [
+    140,
+    200
+   ],
+   "character": "明亮的\"叮—咚\"：1250 Hz 的叮（带 35 Hz 快速颤音），紧接着低八度往下滑的\"咚\"",
+   "avoid": "不要像游戏金币声",
+   "level_peak_dbfs": -5.5,
+   "variants": 3,
+   "reference": "原片实测：全片最响的界面音；主频走向 1617 → 1265 1242 1242 … 539 → 1218 → 609 632 → 421 → 257",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "error",
+   "folder": "audio/samples/error/",
+   "name": "报错",
+   "group": "代码界面",
+   "used_for": "代码变红（NameError 等）",
+   "trigger": "代码变红那一帧",
+   "duration_ms": [
+    280,
+    360
+   ],
+   "character": "四段：\"叮\"（1010→1250 Hz）→ 刺耳的亮噪声（2.5–6 kHz，40 ms 处 7.6 kHz 尖点）→ 750 Hz 的音 → 很轻的 5.6 kHz 余音",
+   "avoid": "不要像系统提示音",
+   "level_peak_dbfs": -5.0,
+   "variants": 2,
+   "reference": "原片实测，约 300 ms，峰值约 -5 dB",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "touch",
+   "folder": "audio/samples/touch/",
+   "name": "碰到代码 / 捡起东西",
+   "group": "代码界面",
+   "used_for": "角色戳光标、捡起打印出来的字",
+   "trigger": "手碰到的那一帧",
+   "duration_ms": [
+    130,
+    200
+   ],
+   "character": "\"啵～\"上滑：60 ms 内 445 → 720 Hz，85 ms 处掉到 375 Hz 的短尾巴",
+   "avoid": "不要卡通弹簧声",
+   "level_peak_dbfs": -18.8,
+   "variants": 3,
+   "reference": "原片实测走向：445 515 515 609 679 703 703 726 726 375 375 398（每 10 ms）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "touch2",
+   "folder": "audio/samples/touch2/",
+   "name": "碰到东西（另一种）",
+   "group": "代码界面",
+   "used_for": "蹲下摸电脑、抓住电脑",
+   "trigger": "手碰到的那一帧",
+   "duration_ms": [
+    110,
+    170
+   ],
+   "character": "445 → 632 Hz 上滑，80 ms 处落到 328 Hz",
+   "avoid": "同上",
+   "level_peak_dbfs": -20.3,
+   "variants": 3,
+   "reference": "原片实测走向：445 539 585 585 609 632 632 632 328 328",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "select",
+   "folder": "audio/samples/select/",
+   "name": "选中文字",
+   "group": "代码界面",
+   "used_for": "白色选中框出现",
+   "trigger": "选中框出现那一帧",
+   "duration_ms": [
+    100,
+    160
+   ],
+   "character": "40 ms 的高频\"嚓\"（约 6.2 kHz）+ 2.1 kHz 和 609 Hz 的短尾巴；像相机快门 / 剪刀的干脆",
+   "avoid": "不要太尖",
+   "level_peak_dbfs": -18.7,
+   "variants": 3,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "step",
+   "folder": "audio/samples/step/",
+   "name": "走路脚步",
+   "group": "身体与物体",
+   "used_for": "每一步脚落地",
+   "trigger": "脚落地那一帧",
+   "duration_ms": [
+    40,
+    80
+   ],
+   "character": "很轻的超低频闷点（约 58 Hz）",
+   "avoid": "不要皮鞋硬底声",
+   "level_peak_dbfs": -16.1,
+   "variants": 6,
+   "reference": "原片实测：58 Hz + 105 Hz 泛音，约 45 ms，走路约每秒 6 步",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "step_run",
+   "folder": "audio/samples/step_run/",
+   "name": "跑步脚步",
+   "group": "身体与物体",
+   "used_for": "跑步时脚落地",
+   "trigger": "脚落地那一帧",
+   "duration_ms": [
+    50,
+    100
+   ],
+   "character": "比走路更重、更快的闷点",
+   "avoid": "同上",
+   "level_peak_dbfs": -14.0,
+   "variants": 6,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "body",
+   "folder": "audio/samples/body/",
+   "name": "身体着地",
+   "group": "身体与物体",
+   "used_for": "跪下、蹲下、坐下、手撑地",
+   "trigger": "膝盖 / 身体触地那一帧",
+   "duration_ms": [
+    50,
+    140
+   ],
+   "character": "更响、更长一点的超低频闷点 + 一点点衣服声",
+   "avoid": "不要拍打声",
+   "level_peak_dbfs": -13.0,
+   "variants": 4,
+   "reference": "原片实测：约 70 Hz，40–70 ms，峰值约 -12 dB",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "thud",
+   "folder": "audio/samples/thud/",
+   "name": "整个人摔地上",
+   "group": "身体与物体",
+   "used_for": "从天上掉下来、被炸飞后落地",
+   "trigger": "身体触地那一帧",
+   "duration_ms": [
+    300,
+    700
+   ],
+   "character": "沉的身体落地：超低频 + 闷响 + 衣服摩擦",
+   "avoid": "不要骨头碎裂",
+   "level_peak_dbfs": -9.5,
+   "variants": 3,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "rustle",
+   "folder": "audio/samples/rustle/",
+   "name": "衣服摩擦",
+   "group": "身体与物体",
+   "used_for": "起身、转身、大幅度动作",
+   "trigger": "动作开始",
+   "duration_ms": [
+    200,
+    450
+   ],
+   "character": "很轻的布料沙沙（重心约 5 kHz）",
+   "avoid": "不要太响",
+   "level_peak_dbfs": -28.0,
+   "variants": 4,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "laptop_drop",
+   "folder": "audio/samples/laptop_drop/",
+   "name": "电脑落地（轻）",
+   "group": "身体与物体",
+   "used_for": "电脑从手里掉下、从低处落地",
+   "trigger": "电脑触地那一帧",
+   "duration_ms": [
+    90,
+    200
+   ],
+   "character": "塑料\"咔哒\"：先一个闷响，40 ms 起一串塑料共振 + 亮的\"咔\"",
+   "avoid": "不要金属声",
+   "level_peak_dbfs": -11.2,
+   "variants": 4,
+   "reference": "原片实测：70–140 Hz 闷响 → 1054–2039 Hz 塑料共振 + 4 kHz\"咔\"，约 107 ms",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "laptop_slam",
+   "folder": "audio/samples/laptop_slam/",
+   "name": "电脑重砸地",
+   "group": "身体与物体",
+   "used_for": "特效样片：电脑从高处砸到地上",
+   "trigger": "电脑触地那一帧",
+   "duration_ms": [
+    400,
+    900
+   ],
+   "character": "重的塑料 + 机身撞地，带一点地面震动的低频",
+   "avoid": "不要玻璃碎",
+   "level_peak_dbfs": -6.0,
+   "variants": 2,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "tick",
+   "folder": "audio/samples/tick/",
+   "name": "小字落地",
+   "group": "身体与物体",
+   "used_for": "打印出来的 hi 掉到地上、弹跳",
+   "trigger": "每次触地",
+   "duration_ms": [
+    30,
+    90
+   ],
+   "character": "很短的低频闷点 + 一点亮的\"嗒\"",
+   "avoid": "不要太响",
+   "level_peak_dbfs": -15.0,
+   "variants": 6,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "char_bounce",
+   "folder": "audio/samples/char_bounce/",
+   "name": "碎字符落地",
+   "group": "身体与物体",
+   "used_for": "特效样片：被打碎的代码字符一颗颗落地弹跳",
+   "trigger": "每颗字符触地",
+   "duration_ms": [
+    20,
+    70
+   ],
+   "character": "比 tick 更轻、更碎的小颗粒声（像小塑料片、骰子）",
+   "avoid": "不要整齐划一",
+   "level_peak_dbfs": -20.0,
+   "variants": 10,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "whoosh_short",
+   "folder": "audio/samples/whoosh_short/",
+   "name": "出拳 / 出脚的呼",
+   "group": "打击与特效",
+   "used_for": "出拳、出脚（打中前 50–150 ms 开始）",
+   "trigger": "动作开始，声音峰值落在打中前",
+   "duration_ms": [
+    120,
+    250
+   ],
+   "character": "短、快、上扬的风声",
+   "avoid": "不要长",
+   "level_peak_dbfs": -16.0,
+   "variants": 4,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "whoosh",
+   "folder": "audio/samples/whoosh/",
+   "name": "大物体呼啸",
+   "group": "打击与特效",
+   "used_for": "人被炸飞、电脑飞过、身体大动作",
+   "trigger": "动作开始",
+   "duration_ms": [
+    300,
+    600
+   ],
+   "character": "中心频率先升后降的风声",
+   "avoid": "不要太尖",
+   "level_peak_dbfs": -15.0,
+   "variants": 4,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "impact_light",
+   "folder": "audio/samples/impact_light/",
+   "name": "轻击",
+   "group": "打击与特效",
+   "used_for": "踢飞 hi 这种轻的打击",
+   "trigger": "打中那一帧（随后有 0.06–0.1 秒停顿帧）",
+   "duration_ms": [
+    150,
+    300
+   ],
+   "character": "干脆、有弹性的\"啪\"",
+   "avoid": "不要像枪声",
+   "level_peak_dbfs": -8.0,
+   "variants": 3,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "impact_medium",
+   "folder": "audio/samples/impact_medium/",
+   "name": "中击",
+   "group": "打击与特效",
+   "used_for": "中等力度的打击",
+   "trigger": "打中那一帧（随后有约 0.1 秒停顿帧）",
+   "duration_ms": [
+    250,
+    450
+   ],
+   "character": "更厚的\"砰\"，有一点低频",
+   "avoid": "不要爆炸感",
+   "level_peak_dbfs": -6.0,
+   "variants": 3,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "impact_heavy",
+   "folder": "audio/samples/impact_heavy/",
+   "name": "重击",
+   "group": "打击与特效",
+   "used_for": "特效样片：一拳把代码打碎",
+   "trigger": "打中那一帧（随后有约 0.16 秒停顿帧、反色冲击帧）",
+   "duration_ms": [
+    400,
+    900
+   ],
+   "character": "厚重的打击 + 低频下潜，像动画里的重拳",
+   "avoid": "不要拖成爆炸",
+   "level_peak_dbfs": -4.0,
+   "variants": 2,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "impact_frame",
+   "folder": "audio/samples/impact_frame/",
+   "name": "冲击帧脆响",
+   "group": "打击与特效",
+   "used_for": "叠在中击 / 重击上，对应画面反色的 1–2 帧",
+   "trigger": "冲击帧那一帧",
+   "duration_ms": [
+    60,
+    150
+   ],
+   "character": "极短、极亮的\"咔\"（像电火花、鞭子尖）",
+   "avoid": "不要长",
+   "level_peak_dbfs": -12.0,
+   "variants": 2,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "shatter",
+   "folder": "audio/samples/shatter/",
+   "name": "代码被打碎",
+   "group": "打击与特效",
+   "used_for": "特效样片：一行代码被打碎成字符四散",
+   "trigger": "打中那一帧",
+   "duration_ms": [
+    500,
+    1200
+   ],
+   "character": "一大把小塑料 / 玻璃片四散的碎裂声，偏亮、颗粒感强",
+   "avoid": "不要真的玻璃窗碎裂那么尖锐",
+   "level_peak_dbfs": -9.0,
+   "variants": 2,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "ground_shock",
+   "folder": "audio/samples/ground_shock/",
+   "name": "地面冲击波",
+   "group": "打击与特效",
+   "used_for": "重物砸地时地面扩散的冲击环",
+   "trigger": "触地那一帧",
+   "duration_ms": [
+    500,
+    1200
+   ],
+   "character": "低频的\"轰\"往外扩散，有尾音",
+   "avoid": "不要高频",
+   "level_peak_dbfs": -6.0,
+   "variants": 2,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "charge",
+   "folder": "audio/samples/charge/",
+   "name": "蓄力",
+   "group": "打击与特效",
+   "used_for": "特效样片：角色蓄力 2 秒，能量在手中聚集",
+   "trigger": "蓄力开始，持续到释放前一刻",
+   "duration_ms": [
+    1800,
+    2400
+   ],
+   "character": "逐渐升高、变亮、变密的能量嗡鸣，最后半秒最紧张",
+   "avoid": "不要科幻激光枪",
+   "level_peak_dbfs": -14.0,
+   "variants": 1,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": "长度按画面 2.0 秒做；结尾不要自己收掉，释放音会接上"
+  },
+  {
+   "id": "release",
+   "folder": "audio/samples/release/",
+   "name": "蓄力释放",
+   "group": "打击与特效",
+   "used_for": "蓄力后一下爆发出去",
+   "trigger": "释放那一帧",
+   "duration_ms": [
+    600,
+    1500
+   ],
+   "character": "一下爆发的冲击 + 能量呼啸出去",
+   "avoid": "不要像枪",
+   "level_peak_dbfs": -4.0,
+   "variants": 1,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "boom",
+   "folder": "audio/samples/boom/",
+   "name": "大爆炸",
+   "group": "打击与特效",
+   "used_for": "print(*bomb)、能量命中",
+   "trigger": "爆炸那一帧",
+   "duration_ms": [
+    2400,
+    3200
+   ],
+   "character": "持续约 2.6 秒的轰鸣（不是一下就没的\"砰\"），宽频、重心约 2.5 kHz，里面夹着一串小爆点",
+   "avoid": "不要电影大爆炸那种过分低频",
+   "level_peak_dbfs": -6.0,
+   "variants": 2,
+   "reference": "原片实测：RMS 约 -13 dB，持续约 2.6 秒后随转场切断",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "debris",
+   "folder": "audio/samples/debris/",
+   "name": "碎屑落下",
+   "group": "打击与特效",
+   "used_for": "爆炸后碎片、字符落下",
+   "trigger": "爆炸后 0.3–2 秒",
+   "duration_ms": [
+    800,
+    2000
+   ],
+   "character": "稀疏的小碎块落地声",
+   "avoid": "不要连成一片",
+   "level_peak_dbfs": -18.0,
+   "variants": 2,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "recoil_slide",
+   "folder": "audio/samples/recoil_slide/",
+   "name": "后坐力滑行",
+   "group": "打击与特效",
+   "used_for": "特效样片：角色被反冲力推得脚底擦地往后滑",
+   "trigger": "滑行开始",
+   "duration_ms": [
+    300,
+    700
+   ],
+   "character": "鞋底擦地的摩擦声",
+   "avoid": "不要刹车尖叫",
+   "level_peak_dbfs": -16.0,
+   "variants": 2,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "turtle",
+   "folder": "audio/samples/turtle/",
+   "name": "turtle 画线",
+   "group": "打击与特效",
+   "used_for": "白色折线在屏幕上画",
+   "trigger": "画线开始，持续到结束",
+   "duration_ms": [
+    3000,
+    9000
+   ],
+   "character": "明亮的沙沙声（重心约 4.3 kHz），随折线每一折起伏",
+   "avoid": "不要像砂纸太粗糙",
+   "level_peak_dbfs": -8.0,
+   "variants": 1,
+   "reference": null,
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": "长度不固定：做成可以无缝循环的 3 秒左右，管线会按需要的长度拼接"
+  }
+ ]
+}

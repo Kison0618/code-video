@@ -266,6 +266,61 @@ def s_hit():
     x = osc(38 + 32 * np.exp(-t / 0.06)) * np.exp(-t * 5) + lp(noise(d), 1200) * np.exp(-t * 9) * 0.5 + hp(noise(d), 6000) * np.exp(-t * 6) * 0.15
     return level(att(x, 0.001), REF['hit'])
 
+# ———————————————— 特效样片用到的新声音：合成占位（你按 音效需求.json 做好放进 samples/<id>/ 就会替换）————————————————
+def s_whoosh_short(v=1.0):
+    d = 0.2; n = int(d * SR); u = np.linspace(0, 1, n)
+    x = bp(noise(d), 900, 5000) * np.sin(np.pi * u ** 0.6) ** 2
+    return level(x, -16.0 + 20 * np.log10(max(0.2, v)))
+def s_impact(kind):
+    d = {'light': 0.25, 'medium': 0.4, 'heavy': 0.8}[kind]; t = tt(d)
+    f0 = {'light': 140, 'medium': 110, 'heavy': 90}[kind]
+    x = lp(noise(d), {'light': 3500, 'medium': 2500, 'heavy': 1800}[kind]) * np.exp(-t * {'light': 45, 'medium': 28, 'heavy': 14}[kind])
+    x += osc(f0 * 0.45 + f0 * 0.55 * np.exp(-t / 0.04)) * np.exp(-t * {'light': 25, 'medium': 12, 'heavy': 5}[kind]) * 1.2
+    return level(att(x, 0.001), {'light': -8.0, 'medium': -6.0, 'heavy': -4.0}[kind])
+def s_impact_frame():
+    d = 0.1; t = tt(d)
+    return level(att(hp(noise(d), 3000) * np.exp(-t * 80) + np.sin(2 * np.pi * 7600 * t) * np.exp(-t * 120) * 0.4, 0.0005), -12.0)
+def s_shatter():
+    d = 1.0; n = int(d * SR); x = np.zeros(n)
+    for _ in range(90):
+        i = int(min(n - 3000, rng.random() ** 2 * 0.7 * SR)); f = rng.uniform(1800, 7000); dd = rng.uniform(0.01, 0.04); tp = tt(dd)
+        x[i:i + len(tp)] += (np.sin(2 * np.pi * f * tp) * 0.6 + bp(noise(dd), 2500, 10000)) * np.exp(-tp * 120) * rng.uniform(0.2, 1)
+    x += bp(noise(d), 2000, 9000) * np.exp(-tt(d) * 9) * 0.5
+    return level(x, -9.0)
+def s_char_bounce(v=1.0):
+    d = 0.05; t = tt(d); f = rng.uniform(2200, 5200)
+    x = np.sin(2 * np.pi * f * t) * np.exp(-t * 160) + bp(noise(d), 3000, 9000) * np.exp(-t * 220) * 0.5
+    return level(att(x, 0.0005), -20.0 + 20 * np.log10(max(0.15, v)) + vary())
+def s_laptop_slam():
+    d = 0.8; t = tt(d)
+    x = pad(s_laptop(1) * 1.0, len(t))[:len(t)] + osc(35 + 40 * np.exp(-t / 0.05)) * np.exp(-t * 6) * 1.2 + lp(noise(d), 800) * np.exp(-t * 10) * 0.5
+    return level(att(x, 0.001), -6.0)
+def s_ground_shock():
+    d = 1.1; t = tt(d)
+    x = osc(28 + 30 * np.exp(-t / 0.12)) * np.exp(-t * 3.5) + lp(noise(d), 500) * np.exp(-t * 5) * 0.6
+    return level(att(x, 0.002), -6.0)
+def s_charge(dur=2.0):
+    t = tt(dur); u = t / dur
+    f = 110 * 2 ** (u * 2.2)
+    x = osc(f, ((1, 1.0), (2, 0.5), (3, 0.25), (5, 0.12))) * (0.25 + 0.75 * u ** 1.5)
+    x += bp(noise(dur), 1500, 9000) * u ** 2.5 * 0.6
+    x *= 1 + 0.3 * np.sin(2 * np.pi * (6 + 18 * u) * t)
+    return level(x * np.minimum(1, t / 0.1), -14.0)
+def s_release():
+    d = 1.2; t = tt(d)
+    x = s_impact('heavy')[: len(t)]; x = pad(x, len(t))[:len(t)]
+    x += bp(noise(d), 600, 6000) * np.exp(-t * 4) * 0.8 + osc(60 + 300 * np.exp(-t / 0.08)) * np.exp(-t * 6) * 0.6
+    return level(x, -4.0)
+def s_debris():
+    d = 1.6; n = int(d * SR); x = np.zeros(n)
+    for _ in range(26):
+        i = int(rng.uniform(0.05, 1.4) * SR); dd = 0.05; tp = tt(dd)
+        x[i:i + len(tp)] += (lp(noise(dd), 3000) * np.exp(-tp * 90) + np.sin(2 * np.pi * rng.uniform(300, 1500) * tp) * np.exp(-tp * 70) * 0.5) * rng.uniform(0.2, 1)
+    return level(x, -18.0)
+def s_recoil_slide(dur=0.5):
+    t = tt(dur); x = bp(noise(dur), 400, 3500) * (1 + 0.5 * np.sin(2 * np.pi * 37 * t)) * np.minimum(1, t / 0.03) * np.exp(-t * 3)
+    return level(x, -16.0)
+
 # ———————————————— 追逐段配乐（占位：150 BPM，E 小调）————————————————
 def music(t0, t1, bpm):
     # 有 assets/bgm.* 就用你的配乐，否则用这段占位的鼓 + 贝斯 + 和弦垫。原片动作段配乐 RMS 约 -22 dB。
@@ -320,6 +375,16 @@ def sample(kind, idx):
     return resample_poly(x, up, dn)
 
 # ———————————————— 按时间表放置 ————————————————
+# 每个 cue 先找 samples/<id>/ 里的素材（id 见 音效需求.json），没有才用合成音；音量按需求文件里的目标峰值对齐
+_REQ = json.load(open(os.path.join(HERE, '音效需求.json'), encoding='utf-8')) if os.path.exists(os.path.join(HERE, '音效需求.json')) else {'sounds': []}
+LEVELS = {x['id']: x['level_peak_dbfs'] for x in _REQ['sounds']}
+LOOPABLE = {'turtle', 'charge'}
+ALIAS = {'enter': 'key_enter', 'laptop': 'laptop_drop', 'kick': 'impact_light', 'click': 'select', 'pop': 'output', 'grab': 'rustle', 'hit': 'ground_shock'}
+def sample_id(c):
+    ty = c['type']
+    if ty == 'blink': return 'blink_on' if c.get('on', True) else 'blink_off'
+    if ty == 'step' and c.get('run'): return 'step_run'
+    return ALIAS.get(ty, ty)
 GEN = {
     'blink': lambda c: s_blink(c.get('on', True)), 'key': lambda c: s_key(), 'enter': lambda c: s_key(True), 'run': lambda c: s_run(),
     'output': lambda c: s_output(), 'pop': lambda c: s_output(), 'touch': lambda c: s_touch(), 'touch2': lambda c: s_touch2(), 'error': lambda c: s_error(),
@@ -328,6 +393,12 @@ GEN = {
     'tick': lambda c: s_tick(c.get('v', 1)), 'rustle': lambda c: s_rustle(c.get('v', 1)), 'grab': lambda c: s_rustle(0.8),
     'whoosh': lambda c: s_whoosh(c.get('v', 1)), 'kick': lambda c: s_kick(), 'boom': lambda c: s_boom(),
     'turtle': lambda c: s_turtle(c['dur']), 'hit': lambda c: s_hit(), 'music': lambda c: music(c['t'], c['t1'], c['bpm']),
+    'key_space': lambda c: s_key(), 'key_enter': lambda c: s_key(True), 'key_back': lambda c: s_key(),
+    'laptop_drop': lambda c: s_laptop(c.get('v', 1)), 'whoosh_short': lambda c: s_whoosh_short(c.get('v', 1)),
+    'impact_light': lambda c: s_impact('light'), 'impact_medium': lambda c: s_impact('medium'), 'impact_heavy': lambda c: s_impact('heavy'),
+    'impact_frame': lambda c: s_impact_frame(), 'shatter': lambda c: s_shatter(), 'char_bounce': lambda c: s_char_bounce(c.get('v', 1)),
+    'laptop_slam': lambda c: s_laptop_slam(), 'ground_shock': lambda c: s_ground_shock(), 'charge': lambda c: s_charge(c.get('dur', 2.0)),
+    'release': lambda c: s_release(), 'debris': lambda c: s_debris(), 'recoil_slide': lambda c: s_recoil_slide(c.get('dur', 0.5)),
 }
 # 有素材时替换合成音的类型（音量仍按实测值）
 SAMPLE_KINDS = {'key': 'key', 'enter': 'key', 'step': 'step', 'body': 'body', 'thud': 'thud', 'laptop': 'laptop', 'tick': 'tick',
@@ -346,13 +417,18 @@ def main():
     for idx, c in enumerate(sorted(CU['cues'], key=lambda c: c['t'])):
         ty = c['type']
         if SOLO and ty != SOLO: continue
-        if ty not in GEN: print('（未知音效类型，跳过）', ty); continue
+        if ty not in GEN and sample_id(c) not in GEN: print('（未知音效类型，跳过）', ty); continue
+        if ty not in GEN: ty = sample_id(c)
         sig = None
-        if ty in SAMPLE_KINDS:
-            s = sample(SAMPLE_KINDS[ty], idx)
-            if s is not None:
-                target = REF.get(ty, REF.get(SAMPLE_KINDS[ty], -18)) + 20 * np.log10(max(0.15, c.get('v', 1)))
-                sig = level(s, target); from_samples[ty] = from_samples.get(ty, 0) + 1
+        sid = sample_id(c)
+        s = sample(sid, idx) if ty != 'music' else None
+        if s is None and ty in SAMPLE_KINDS: s = sample(SAMPLE_KINDS[ty], idx)       # 兼容旧的文件夹名
+        if s is not None:
+            if sid in LOOPABLE and c.get('dur'):                                    # 可循环的声音按需要的长度拼接
+                n = int(c['dur'] * SR); s = np.tile(s, n // max(1, len(s)) + 1)[:n]
+                s = s * np.minimum(1, np.arange(n) / (0.05 * SR)) * np.minimum(1, (n - np.arange(n)) / (0.1 * SR))
+            target = LEVELS.get(sid, REF.get(ty, -18)) + 20 * np.log10(max(0.15, c.get('v', 1)))
+            sig = level(s, target); from_samples[sid] = from_samples.get(sid, 0) + 1
         if sig is None: sig = GEN[ty](c)
         counts[ty] = counts.get(ty, 0) + 1
         i = int(c['t'] * SR); j = min(N, i + len(sig))

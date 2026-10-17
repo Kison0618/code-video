@@ -59,7 +59,7 @@ class Code {
       t += (1 / cps) * (0.55 + this.rand() * 0.9) * (ch === ' ' ? 0.7 : 1);
       text = text.slice(0, cur) + ch + text.slice(cur); cur += ch.length;
       this.push(t, { text, cur, typing: true });
-      this.key(t, ch === '\n' ? 'enter' : 'key');
+      this.key(t, ch === '\n' ? 'key_enter' : ch === ' ' ? 'key_space' : 'key');   // 声音 id 见 audio/音效需求.json
     }
     this.push(t + 0.35, { typing: false });
     this.tEnd = t;
@@ -71,7 +71,7 @@ class Code {
       t += 1 / cps;
       text = text.slice(0, cur - 1) + text.slice(cur); cur--;
       this.push(t, { text, cur, typing: true, err: null, sel: null });
-      this.key(t, 'key');
+      this.key(t, 'key_back');
     }
     this.push(t + 0.35, { typing: false });
     this.tEnd = t;
