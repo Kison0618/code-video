@@ -64,9 +64,12 @@ class Actor2 {
     this.paths = { hip: [], lean: [] };            // 精确轨迹（抛飞、空翻、跑步）：这段时间内不走弹簧
     this.footModes = { F: [{ t: -1e9, mode: 'ground' }], B: [{ t: -1e9, mode: 'ground' }] };
     this.sfxList = [];
+    this.dirs = [{ t: -1e9, d: this.dir }];         // 朝向（转身是瞬间的，和原片一样 1 帧翻过去，弹簧负责之后的动作）
   }
   hip(t, v, dur = 0, ease = 'inOut') { this.hipT.set(t, v, dur, ease); return this; }
-  lean(t, v, dur = 0, ease = 'inOut') { this.leanT.set(t, v, dur, ease); return this; }
+  lean(t, v, dur = 0, ease = 'inOut') {         // 空翻过的整圈不算：新目标就近取（-356° 之后写 8° 就是往前 12°，而不是倒转一圈）
+    const p = this.leanT.at(t); this.leanT.set(t, v + 360 * Math.round((p - v) / 360), dur, ease); return this;
+  }
   head(t, v, dur = 0, ease = 'inOut') { this.headT.set(t, v, dur, ease); return this; }
   foot(f, t, to, dur, lift = 16, ease = 'inOut', sfx = true) {
     this.feet[f].move(t, to, dur, lift, ease, sfx);
@@ -79,11 +82,13 @@ class Actor2 {
   path(ch, t0, t1, fn) { this.paths[ch].push({ t0, t1, fn }); return this; }
   // 和动作绑定的音效（按动画时间写，simulate 时换算成真实时间）
   sfx(t, type, o = {}) { this.sfxList.push({ t, type, o }); return this; }
+  turn(t, d) { this.dirs.push({ t, d }); this.dirs.sort((a, b) => a.t - b.t); return this; }
+  dirAt(t) { let d = this.dirs[0].d; for (const x of this.dirs) if (x.t <= t) d = x.d; return d; }
   hand(h, t, mode, arg) { this.hands[h].push({ t, mode, arg }); this.hands[h].sort((a, b) => a.t - b.t); return this; }
   obj(t, mode, arg) { this.objModes.push({ t, mode, arg }); this.objModes.sort((a, b) => a.t - b.t); return this; }
 
-  simulate(dur) {
-    const H = this.H, D = this.dir, f = this.feel, N = Math.ceil(dur / DT) + 2;
+  simulate(dur, opt = {}) {
+    const H = this.H, f = this.feel, N = Math.ceil(dur / DT) + 2;
     const at = (list, t) => { let m = list[0]; for (const x of list) if (x.t <= t) m = x; return m; };
     const h0 = this.hipT.at(0);
     const dyn = {
@@ -92,7 +97,8 @@ class Actor2 {
       fFx: new Dyn(...f.foot, 0), fFy: new Dyn(...f.foot, 0), fBx: new Dyn(...f.foot, 0), fBy: new Dyn(...f.foot, 0),
       ox: new Dyn(...f.obj, 0), oy: new Dyn(...f.obj, 0), or: new Dyn(...f.obj, 0),
     };
-    const R = this.rec = { hip: [], lean: [], head: [], hF: [], hB: [], fF: [], fB: [], obj: [] };
+    const R = this.rec = { hip: [], lean: [], head: [], hF: [], hB: [], fF: [], fB: [], obj: [], dir: [] };
+    let D = this.dir;
     const sw = { F: -9, B: -9 }, prev = { F: null, B: null };
     const fprev = { F: null, B: null }, fblend = { F: null, B: null };
     const pathAt = (ch, t) => { const L = this.paths[ch]; for (let n = L.length - 1; n >= 0; n--) if (t >= L[n].t0 && t < L[n].t1) return L[n]; return null; };
@@ -101,6 +107,7 @@ class Actor2 {
     const LEG = (P.thigh + P.shin) * H * 0.97, nz = this.noise;
     for (let i = 0; i < N; i++) {
       const t = i * DT;
+      D = this.dirAt(t);
       const ht = this.hipT.at(t);
       // 脚的模式：ground 按弧线踩点；free 跟着身体（弹簧）；free → ground 时在这次挪脚的时间里从实际位置过渡过去
       const fm = {};
@@ -182,9 +189,10 @@ class Actor2 {
           if (u >= 1) { dyn[h + 'x'].snap(g[0]); dyn[h + 'y'].snap(g[1]); }
         } else hp[h] = [sx, sy];
       }
-      R.hip.push(hip); R.lean.push(lean); R.head.push(head); R.hF.push(hp.F); R.hB.push(hp.B); R.fF.push(feet.F); R.fB.push(feet.B); R.obj.push(os);
+      R.hip.push(hip); R.lean.push(lean); R.head.push(head); R.hF.push(hp.F); R.hB.push(hp.B); R.fF.push(feet.F); R.fB.push(feet.B); R.obj.push(os); R.dir.push(D);
     }
     this.N = N;
+    if (opt.sfx === false) return this;              // 预演（只为了算出某个时刻的位置）：不登记音效
     // 脚步声：每次挪脚结束落地时（真实时间）
     for (const k of ['F', 'B']) for (const m of this.feet[k].m) if (m.sfx && m.t > -1e8 && m.dur > 0)
       cues.add(this.real(m.t + m.dur), 'step', { v: 0.8, ...(typeof m.sfx === 'object' ? m.sfx : {}) });
@@ -196,9 +204,9 @@ class Actor2 {
     const R = this.rec, x = clamp(ta / DT, 0, this.N - 1.001), i = Math.floor(x), u = x - i;
     const L = (a, b) => (a === null || b === null ? a || b : Array.isArray(a) ? a.map((v, n) => lerp(v, b[n], u)) : lerp(a, b, u));
     const g = k => L(R[k][i], R[k][i + 1]);
-    return { t: ta, hip: g('hip'), lean: g('lean'), head: g('head'), hF: g('hF'), hB: g('hB'), fF: g('fF'), fB: g('fB'), obj: g('obj') };
+    return { t: ta, hip: g('hip'), lean: g('lean'), head: g('head'), hF: g('hF'), hB: g('hB'), fF: g('fF'), fB: g('fB'), obj: g('obj'), dir: R.dir[u < 0.5 ? i : i + 1] };
   }
-  jointsAt(ta) { return body(this.stateAt(ta), this.H, this.dir); }
+  jointsAt(ta) { const s = this.stateAt(ta); return body(s, this.H, s.dir); }
   // 画：先拖影（手脚快速移动时沿轨迹的带子），再画人
   draw(ctx, ta, o = {}) {
     const H = this.H;

@@ -119,6 +119,12 @@ v1 把所有关节按同一条缓动插值，结果全身一起动、一起停�
 
 成套动作在 `render/src/moves.js`（require 后直接挂在 Actor2 上）：`flinch` 小后仰、`knockback` 击退滑行、`launch` 被打飞（抛物线 + 空翻，仰面 / 脸朝下 / 双脚落地，也用来做"从天上掉下来"）、`getUp` 爬起来、`run` 跑（起跑加速、腾空期、摆臂、可刹车）、`jump` 跳（原地收腿 / 跑着跨跳 / 落地滑行）。验证片：`SCENE=react node build.js --from 0 --to 15.5`，成片 `previews/反应动作验证片_v1_1080p60.mp4`。
 
+## 样片 v2（`render/src/scene_v2.js`）
+
+情节和第一版一样（掉下来 → 捡电脑 → hello 报错 → print("hi") → 踢飞 → 三个 hi → 爆炸被炸飞 → 敲 turtle → 被白线追着跑 → 跳），换成 v2 动作系统 + 打击感系统：单膝跪在电脑旁边捡，夹着电脑踢，被炸飞时抛物线 + 后空翻仰面落地，爬起来、晕乎乎、转身走过去，跑步有起跑和腾空，跑着跨跳落地滑行。电脑被炸飞、hi 掉落都是物理模拟。
+
+`SCENE=v2 node build.js --from 0 --to 47.37`，成片 `previews/样片_v2_1080p60.mp4`。第一版（`scene.js`）原样保留，不带 SCENE 时仍然渲染第一版。
+
 ## 打击感系统（`render/src/impact.js`）
 
 一次 `imp.hit(时间, 位置, 力度)` 同时安排：停顿帧、震屏、推镜冲击、闪白 / 反色冲击帧、星芒、冲击环、冲击波扭曲（像素级）、火花、速度线、音效。力度分 `light / medium / heavy / huge / ground` 五档，每一项都能单独覆盖。另有 `Shatter`（一行代码被打碎，字符变成物理物体四散、落地弹跳）和 `charge`（蓄力能量球）。
