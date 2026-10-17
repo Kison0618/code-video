@@ -32,7 +32,7 @@ const L1 = a.launch(T3, { vx: -520, vy: -1100, turns: 1, land: 'back' });
 cam.shake(clock.real(L1.t), 22, 0.4);
 const U1 = a.getUp(L1.t + 0.7, { from: 'back' });
 // ⑤ 跑（起跑 → 刹车）→ 再跑 → 滑铲 → 接着跑 → 跨跳 → 接着跑 → 刹车
-const V = 4.5 * HH;
+const V = 5 * HH;
 const R1 = a.run(U1.t + 0.2, U1.x + 900, { speed: V });
 const R2 = a.run(R1.t + 0.5, R1.x + 1500, { speed: V, stop: false });
 const S1 = a.slide(R2.t, { v0: R2.v, dur: 0.5 });

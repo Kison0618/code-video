@@ -185,8 +185,9 @@ class Actor2 {
         const m = at(this.hands[h], t);
         if (prev[h] !== m) { sw[h] = t; prev[h] = m; }
         let g, exact = false;
-        if (m.mode === 'free') g = [b0.sh[0] + D * m.arg[0] * H, b0.sh[1] + m.arg[1] * H];
+        if (m.mode === 'free') { const q = typeof m.arg === 'function' ? m.arg(t) : m.arg; g = [b0.sh[0] + D * q[0] * H, b0.sh[1] + q[1] * H]; }
         else if (m.mode === 'world') g = typeof m.arg === 'function' ? m.arg(t) : m.arg;
+        else if (m.mode === 'pose') { const q = typeof m.arg === 'function' ? m.arg(t) : m.arg; g = [b0.sh[0] + D * q[0] * H, b0.sh[1] + q[1] * H]; exact = true; }   // 同 free，但不走弹簧（跑步摆臂这种快速循环）
         else if (m.mode === 'local') g = local(b0.sh, typeof m.arg === 'function' ? m.arg(t) : m.arg);   // 跟着身体转（空翻、躺着、跑步摆臂）
         else if (m.mode === 'strike') { g = m.arg.to; exact = m.arg.dur || 0.06; }        // 出拳：在 dur 秒内加速打到精确位置
         else if (m.mode === 'obj' && os) {

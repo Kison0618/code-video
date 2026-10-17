@@ -111,12 +111,10 @@ A.getUp = function (t, o = {}) {
   return { t: T(1.15), x: xs };
 };
 
-// 跑：按经典跑步周期生成（接触 → 下压 → 蹬地 → 腾空），不是"走得快一点"
-//   胯按精确轨迹（起跑加速 / 可从 v0 接着跑 / 可刹车），高度随步子一起一伏；
-//   每只脚：落地时踩在胯前 0.27H（前腿几乎伸直、胯压到最低），支撑期钉在地上不动，蹬到胯后 0.25H 离地；
-//   摆动期：蹬完的腿先在身后伸直停一下 → 迅速折起（脚跟踢向屁股）→ 提膝往前送 → 伸出去落地。
-//   手肘弯成直角，和对侧腿同步前后摆。参数按原片近景逐帧实测：上身几乎直立（前倾不到 10°）、
-//   两腿前后劈得很开、每步只有 3–4 帧（约 0.15 秒）、步幅约 0.7H。
+// 跑：步态直接取自原片（analysis/ref_pose.py 从编程集 3:23 的近景逐帧提取骨架，见 拆解 第 3 节）
+//   原片每步约 0.17 秒，四张姿势：蹬地（后脚在胯后下方、前腿提膝，停 2 帧）→ 腾空劈腿（后脚踢到身后膝盖高、前脚伸到前方）
+//   → 前脚落地 → 两腿在身下交错。上身是往后仰的（平均约 -10°，腾空时到 -28°），胯很高，前拳举到下巴、后手垂在胯后。
+//   下面的数都是原片测量值按我们的腿长（0.45H，原片约 0.5H）缩放过的；支撑期脚钉在地上不动。
 const catmull = (pts, u) => {          // pts: [[knot, value]...]，knot 递增；u 在 0..1
   let i = 0; while (i < pts.length - 2 && u > pts[i + 1][0]) i++;
   const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
@@ -127,64 +125,73 @@ const catmull = (pts, u) => {          // pts: [[knot, value]...]，knot 递增�
 };
 A.run = function (t0, x1, o = {}) {
   const D = this.dirAt(t0), H = this.H, c = cur(this, t0), x0 = c.hip[0];
-  const v = o.speed ?? 4.5 * H, v0 = o.v0 ?? 0, ramp = o.ramp ?? 0.35, stop = o.stop ?? true, sg = Math.sign(x1 - x0) || D;
+  const v = o.speed ?? 5 * H, v0 = o.v0 ?? 0, ramp = o.ramp ?? 0.35, stop = o.stop ?? true, sg = Math.sign(x1 - x0) || D;
   const dist = Math.abs(x1 - x0), da = (v0 + v) / 2 * ramp, dd = stop ? v * ramp / 2 : 0;
   const cruise = Math.max(0, dist - da - dd), dur = ramp + cruise / v + (stop ? ramp : 0), t1 = t0 + dur;
   const vel = s => { const a = s - t0; if (a < ramp) return lerp(v0, v, a / ramp); if (stop && s > t1 - ramp) return v * Math.max(0, t1 - s) / ramp; return v; };
-  const S = s => {                                             // 跑过的距离
+  const S = s => {
     const a = clamp(s - t0, 0, dur);
     let d = a < ramp ? v0 * a + (v - v0) * a * a / (2 * ramp) : da + v * (a - ramp);
     if (stop && s > t1 - ramp) { const b = Math.max(0, t1 - s); d = dist - v * b * b / (2 * ramp); }
     return d;
   };
   const X = s => x0 + sg * S(s);
-  const T = clamp(0.15 * Math.sqrt(4.5 * H / v), 0.12, 0.3);  // 每一步的时间
-  const k = s => clamp(vel(s) / v, 0.3, 1);                    // 速度系数：起跑和刹车时步子小
-  const h0 = this.STAND - 0.095 * H;
-  // 落地时刻：两只脚轮流，第一步 0.4T 之后
-  const first = (c.fF[0] - c.fB[0]) * sg < 0 ? 'F' : 'B';     // 后面那只脚先迈
+  const T = clamp(0.167 * Math.sqrt(5.4 * H / v), 0.14, 0.3);  // 每一步（原片 5 帧 @30fps）
+  const k = s => clamp(vel(s) / v, 0.3, 1);                    // 起跑 / 刹车时动作幅度小
+  const first = (c.fF[0] - c.fB[0]) * sg < 0 ? 'F' : 'B';
   const plan = { F: [], B: [] };
   let side = first;
   for (let tc = t0 + 0.4 * T; tc < t1 - (stop ? 0.5 * T : 0); tc += T) { plan[side].push(tc); side = side === 'F' ? 'B' : 'F'; }
   const tcs = [...plan.F, ...plan.B].sort((a, b) => a - b);
+  // 摆动期的脚（相对胯，单位 H，抬高量相对地面）：原片 B 后脚 → 交错 → A 提膝 → B 前脚伸出
+  const SWX = [[0.2, -0.40], [0.43, -0.02], [0.64, 0.07], [0.86, 0.31]];
+  const SWY = [[0.2, 0.27], [0.43, 0.18], [0.64, 0.16], [0.86, 0.17]];
   for (const f of ['F', 'B']) {
-    const ev = [{ tc: t0 - 1, to: t0, x: c['f' + f][0] }];     // 起跑前：脚在原地
-    if (f !== first) ev[0].to = Math.min(t0 + 0.4 * T + 0.5 * T, (plan[f][0] ?? t1) - 0.12);
+    const ev = [{ tc: t0 - 1, to: t0, x: c['f' + f][0] }];
+    if (f !== first) ev[0].to = Math.min(t0 + 0.9 * T, (plan[f][0] ?? t1) - 0.12);
     for (const tc of plan[f]) {
-      const kk = k(tc), x = X(tc) + sg * 0.27 * H * kk;
-      let to = tc + 0.02; while (to < tc + 2 * T - 0.12 && (X(to) - x) * sg < 0.25 * H * kk) to += 1 / 240;
+      const kk = k(tc), a = 0.2 * H * kk, x = X(tc) + sg * a;     // 落地踩在胯前 0.2H、蹬到胯后 0.2H 离地（蹬地时后腿正好伸直）
+      let to = tc + 0.02; while (to < tc + 2 * T - 0.12 && (X(to) - x) * sg < a) to += 1 / 240;
       ev.push({ tc, to: Math.min(to, tc + 2 * T - 0.12), x, kk });
     }
     const fn = s => {
       let i = ev.length - 1; while (i > 0 && s < ev[i].tc) i--;
       const e = ev[i], nx = ev[i + 1];
-      if (s <= e.to || !nx) return [e.x, 0];                    // 支撑：钉在地上
+      if (s <= e.to || !nx) return [e.x, 0];
       const u = clamp((s - e.to) / (nx.tc - e.to)), kk = nx.kk;
-      const r0 = e.x - X(e.to), r1 = nx.x - X(nx.tc);            // 相对胯：离地时在后面，落地时在前面
-      const rx = catmull([[0, r0], [0.25, r0 - sg * 0.07 * H * kk], [0.5, -sg * 0.04 * H * kk], [0.78, r1 + sg * 0.05 * H * kk], [1, r1]], u);
-      const lift = Math.max(0, H * kk * catmull([[0, 0], [0.25, 0.1], [0.5, 0.27], [0.78, 0.12], [1, 0]], u));
+      const r0 = e.x - X(e.to), r1 = nx.x - X(nx.tc);
+      const rx = catmull([[0, r0], ...SWX.map(([q, x]) => [q, sg * x * H * kk]), [1, r1]], u);
+      const lift = Math.max(0, H * kk * catmull([[0, 0], ...SWY, [1, 0]], u));
       return [X(s) + rx, -lift];
     };
     this.footPath(f, t0, fn);
   }
   for (const tc of tcs) this.sfx(tc, 'step', { run: 1, v: 0.45 + 0.4 * k(tc) });
-  // 胯：落地后压到最低、腾空时最高
-  const tc0 = tcs[0] ?? t0;
-  const yRun = s => -h0 + 0.035 * H * k(s) * Math.cos(2 * Math.PI * (s - tc0) / T);   // 落地那一刻最低（前腿伸出去够地）
+  // 一步之内（从落地算）：胯的高度、上身前后仰（负 = 往后仰）
+  const ph = s => { let i = tcs.length - 1; while (i > 0 && s < tcs[i]) i--; return clamp((s - (tcs[i] ?? t0)) / T, 0, 1); };
+  const HIP = [[0, 0.39], [0.25, 0.4], [0.55, 0.405], [0.8, 0.44], [1, 0.39]];
+  const LEAN = [[0, -15], [0.2, -3], [0.5, -4], [0.8, -24], [1, -15]];
+  const yRun = s => -H * lerp(this.STAND / H, catmull(HIP, ph(s)), k(s));
   this.path('hip', t0, t1, s => [X(s), lerp(c.hip[1], yRun(s), E.out(clamp((s - t0) / 0.2)))]);
-  this.lean(t0, (o.lean ?? 8) * sg * D).head(t0, -4);
-  // 手：直角摆臂；F 脚在前时 B 手在前
+  const l0 = c.lean;
+  this.path('lean', t0, t1, s => lerp(l0, catmull(LEAN, ph(s)) * k(s) * (o.leanScale ?? 0.7), E.out(clamp((s - t0) / 0.2))));
+  this.lean(t1, 2).head(t0, 6);
+  // 手（相对肩，世界坐标方向）：前拳举到下巴、后手垂到胯后，和对侧腿同步
   const tF = plan.F[0] ?? t0;
-  const front = [0.14, 0.1], back = [-0.1, 0.2];
-  const arm = (ph, amp) => [lerp(back[0], front[0], ph) * amp + 0.02 * (1 - amp), lerp(back[1], front[1], ph) * amp + 0.3 * (1 - amp)];
-  this.hand('F', t0, 'local', s => arm((1 - Math.cos(Math.PI * (s - tF) / T)) / 2, k(s)));
-  this.hand('B', t0, 'local', s => arm((1 + Math.cos(Math.PI * (s - tF) / T)) / 2, k(s)));
-  if (!stop) this.hip(t1, [x1, yRun(t1)]);                     // 不刹车：之后的动作（起跳、滑铲）从这里接
-  else {                                                        // 刹住：脚收到身子下面
+  const HF = [0.14, -0.12], HM = [0.17, 0.03], HB = [-0.2, 0.16];
+  const arm = (q, kk) => {                                    // q = 0 在后，1 在前
+    const p = q < 0.5 ? [lerp(HB[0], HM[0], q * 2), lerp(HB[1], HM[1], q * 2)] : [lerp(HM[0], HF[0], q * 2 - 1), lerp(HM[1], HF[1], q * 2 - 1)];
+    return [lerp(0.04, p[0], kk), lerp(0.33, p[1], kk)];
+  };
+  const swing = s => (1 - Math.cos(Math.PI * (s - tF) / T)) / 2;
+  this.hand('F', t0, 'pose', s => arm(swing(s), k(s)));
+  this.hand('B', t0, 'pose', s => arm(1 - swing(s), k(s)));
+  if (!stop) this.hip(t1, [x1, yRun(t1)]);
+  else {
     const last = tcs[tcs.length - 1] ?? t0, lf = plan.F.includes(last) ? 'B' : 'F';
     this.foot(lf, Math.max(last + 0.04, t1 - 0.18), [x1 + sg * 0.09 * H, 0], 0.16, 10, 'inOut', { run: 1, v: 0.8 });
     this.foot(lf === 'F' ? 'B' : 'F', t1 + 0.04, [x1 - sg * 0.07 * H, 0], 0.16, 10);
-    this.hip(t1, [x1, -this.STAND + 0.05 * H]).lean(t1, -6 * sg * D).hip(t1 + 0.25, [x1, -this.STAND], 0.25).lean(t1 + 0.25, 2, 0.25).head(t1, 0);
+    this.hip(t1, [x1, -this.STAND + 0.05 * H]).lean(t1, 6).hip(t1 + 0.25, [x1, -this.STAND], 0.25).lean(t1 + 0.25, 2, 0.25).head(t1, 0);
     this.hand('F', t1, 'free', [0.08, 0.3]).hand('B', t1, 'free', [-0.02, 0.33]);
   }
   return { t: t1, x: x1, v: sg * v, X };
