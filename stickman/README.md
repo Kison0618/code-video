@@ -125,6 +125,16 @@ v1 把所有关节按同一条缓动插值，结果全身一起动、一起停�
 
 `SCENE=v2 node build.js --from 0 --to 47.37`，成片 `previews/样片_v2_1080p60.mp4`。第一版（`scene.js`）原样保留，不带 SCENE 时仍然渲染第一版。
 
+## 完整短片《火柴人 VS 循环》（`render/src/scene_loop.js`，约 107 秒）
+
+按 `制作手册.md` 的顺序做：先写剧本（`剧本/火柴人VS循环.md`：讲什么知识、每一步怎么学到、角色每一刻在想什么），再用生图模型出分镜草图（`storyboards/循环_*`），再补工具，最后逐幕做画面、体检、渲染。
+
+- 第一幕：醒来 → 光标 → 按键出字 → hello 报错 → print() 没反应 → print("hi") 掉出实物 → 戳一戳、捡起来端详
+- 第二幕：手敲三行（越敲越累）→ for → IndentationError → Tab 缩进 → 3 / 10 / 100 → 100 个 hi 下成雨把自己埋了 → 钻出来
+- 第三幕：print(i) → 0–9 排成一排 → while True → 停不下来 → 抓着电脑逃命（滑铲、跨跳）→ 被字海埋住 → Ctrl+C → KeyboardInterrupt，一切定住、碎成灰 → 躺倒 → print("bye") 掉在脸上
+
+`SCENE=loop node build.js --from 0 --to 106.86`；体检 `SCENE=loop node render/src/tools/qa.js`；音效时间表 `audio/时间表/loop.md`。
+
 ## 样片 v4：探索开头（`render/src/scene_v4.js`）
 
 按原片的逻辑重做"从 0 到 1 的探索"，角色有内心过程（拆解 第 3.1 节）：看见光标 → 托腮 → 犹豫着戳一下 → 挠头 → 发现电脑 → 按一个键、抬头看到字母、反应过来 → hello 报错、吓一跳、挠头、删掉 → print() 没反应、连按、挠头 → print("hi") → hi 掉出来、吓得坐下、凑过去戳一戳 → 踢飞。

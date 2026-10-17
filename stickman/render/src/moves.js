@@ -147,7 +147,9 @@ A.run = function (t0, x1, o = {}) {
   const SWX = [[0.2, -0.40], [0.43, -0.02], [0.64, 0.07], [0.86, 0.31]];
   const SWY = [[0.2, 0.27], [0.43, 0.18], [0.64, 0.16], [0.86, 0.17]];
   for (const f of ['F', 'B']) {
-    const ev = [{ tc: t0 - 1, to: t0, x: c['f' + f][0] }];
+    const modeAt = this.footModes[f].filter(m => m.t <= t0).pop();
+    const sx = modeAt && modeAt.mode !== 'ground' ? x0 + sg * (f === first ? -0.15 : 0.1) * H : c['f' + f][0];   // 从滑铲 / 跳接着跑：脚的旧目标早就过时了，按胯的位置起步
+    const ev = [{ tc: t0 - 1, to: t0, x: sx }];
     if (f !== first) ev[0].to = Math.min(t0 + 0.9 * T, (plan[f][0] ?? t1) - 0.12);
     for (const tc of plan[f]) {
       const kk = k(tc), a = 0.2 * H * kk, x = X(tc) + sg * a;     // 落地踩在胯前 0.2H、蹬到胯后 0.2H 离地（蹬地时后腿正好伸直）
@@ -206,7 +208,7 @@ A.slide = function (t, o = {}) {
   const Y = s => { const a = s - t; return a < 0.12 ? lerp(c.hip[1], yLow, E.out(a / 0.12)) : a > dur - 0.08 ? lerp(yLow, -0.3 * H, E.in((a - dur + 0.08) / 0.08)) : yLow; };
   this.path('hip', t, t + dur, s => [X(s), Y(s)]);
   this.lean(t, -38 * sg * D).head(t, 18);
-  this.footPath('F', t, s => [X(s) + sg * 0.36 * H, 0]).footPath('B', t, s => [X(s) - sg * 0.1 * H, 0]);
+  this.footPath('F', t, s => [X(s) + sg * 0.36 * H, 0], 0.2).footPath('B', t, s => [X(s) - sg * 0.1 * H, 0], 0.2);
   this.hand('F', t, 'local', [-0.18, -0.06]).hand('B', t + 0.03, 'local', [0.12, 0.24]);
   this.sfx(t + 0.06, 'recoil_slide', { dur: dur - 0.1 });
   this.hip(t + dur, [X(t + dur), -0.3 * H]).lean(t + dur - 0.1, 14 * sg * D);
@@ -272,12 +274,13 @@ A.walk = function (t, x1, o = {}) {
 // 单膝跪：前脚踩在 front，胯在前脚后面 0.2H、高度正好让后膝着地（小腿平放在地上）
 A.kneel = function (t, o = {}) {
   const D = this.dirAt(t), H = this.H, front = o.front, hx = front - D * 0.2 * H;
-  this.foot('F', t, [front, 0], 0.2, 12);
-  this.hip(t + 0.05, [hx, -0.235 * H]).lean(t + 0.05, o.lean ?? 24).head(t + 0.05, o.head ?? 30);
-  this.foot('B', t + 0.08, [hx - D * 0.23 * H, 0], 0.18, 8, 'inOut', false);
-  this.sfx(t + 0.26, 'body', { v: 0.6 });
+  const md = o.dur ?? 0;                                       // 离得远时（跪着挪过去）给一个移动时长，不然弹簧会甩过去
+  this.foot('F', t + md * 0.3, [front, 0], 0.2 + md * 0.5, 12);
+  this.hip(t + 0.05, [hx, -0.235 * H], md, 'inOut').lean(t + 0.05, o.lean ?? 24, md * 0.5).head(t + 0.05, o.head ?? 30);
+  this.foot('B', t + 0.08 + md * 0.6, [hx - D * 0.23 * H, 0], 0.18 + md * 0.3, 8, 'inOut', false);
+  this.sfx(t + 0.26 + md, 'body', { v: 0.6 });
   this._kneel = { front, hx, D };
-  return { t: t + 0.3, x: hx };
+  return { t: t + 0.3 + md, x: hx };
 };
 A.rise = function (t, o = {}) {
   const { front, D } = this._kneel, H = this.H, x = front - D * 0.07 * H;

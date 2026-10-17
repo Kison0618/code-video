@@ -39,6 +39,7 @@ class Foot {
   move(t, to, dur, lift = 16, ease = 'inOut', sfx = true) {
     this.m.push({ t, to, dur, lift, ease, sfx }); this.m.sort((a, b) => a.t - b.t); return this;
   }
+  target(t) { let i = 0; while (i < this.m.length - 1 && this.m[i + 1].t <= t) i++; return this.m[i].to; }   // 这一步的最终落脚点
   at(t) {
     let i = 0; while (i < this.m.length - 1 && this.m[i + 1].t <= t) i++;
     const c = this.m[i], p = this.m[Math.max(0, i - 1)].to;
@@ -78,7 +79,7 @@ class Actor2 {
   }
   // 脚离地，跟着身体走（腾空收腿、躺着蹬腿）：arg = [沿身体朝前, 沿身体朝下]（单位 H，相对胯），可以是 t 的函数
   // 脚按给定的世界坐标轨迹走（跑步的步态）：fn(t) → [x, y]，切进来时从脚的实际位置过渡 0.08 秒
-  footPath(f, t, fn) { this.footModes[f].push({ t, mode: 'path', fn }); this.footModes[f].sort((a, b) => a.t - b.t); return this; }
+  footPath(f, t, fn, blend = 0.08) { this.footModes[f].push({ t, mode: 'path', fn, blend }); this.footModes[f].sort((a, b) => a.t - b.t); return this; }
   footFree(f, t, arg) { this.footModes[f].push({ t, mode: 'free', arg }); this.footModes[f].sort((a, b) => a.t - b.t); return this; }
   // 精确轨迹：t0–t1 之间 ch（'hip' 或 'lean'）完全按 fn(t) 走；结束时把速度交还给弹簧，落地会自然压一下
   path(ch, t0, t1, fn) { this.paths[ch].push({ t0, t1, fn }); return this; }
@@ -118,7 +119,7 @@ class Actor2 {
         if (fprev[k] !== m) {
           const off = fprev[k] && fprev[k].mode !== 'ground';
           fblend[k] = off && m.mode === 'ground' ? { t0: t, dur: Math.max(m.dur || 0, 0.06) } : null;
-          pblend[k] = m.mode === 'path' && lastFoot[k] ? { t0: t, dur: 0.08, from: lastFoot[k] } : null;
+          pblend[k] = m.mode === 'path' && lastFoot[k] ? { t0: t, dur: m.blend || 0.08, from: lastFoot[k] } : null;
           fprev[k] = m;
         }
         fm[k] = m;
@@ -158,7 +159,7 @@ class Actor2 {
           if (i === 0) { dx.snap(g[0]); dy.snap(g[1]); }
           feet[k] = [hip[0] + dx.step(DT, g[0]), Math.min(hip[1] + dy.step(DT, g[1]), 0)];
         } else if (fblend[k]) {
-          const g = ground[k], u = E.inOut((t - fblend[k].t0) / fblend[k].dur), sp = [hip[0] + dx.step(DT, g[0] - hip[0]), hip[1] + dy.step(DT, g[1] - hip[1])];
+          const g = this.feet[k].target(t), u = E.inOut((t - fblend[k].t0) / fblend[k].dur), sp = [hip[0] + dx.step(DT, g[0] - hip[0]), hip[1] + dy.step(DT, g[1] - hip[1])];   // 从实际位置直接过渡到这一步的落脚点（旧的起点早就过时了）
           feet[k] = [lerp(sp[0], g[0], u), Math.min(lerp(sp[1], g[1], u), 0)];
           if (u >= 1) { fblend[k] = null; dx.snap(g[0] - hip[0]); dy.snap(g[1] - hip[1]); }
         } else { feet[k] = ground[k]; dx.snap(ground[k][0] - hip[0]); dy.snap(ground[k][1] - hip[1]); }

@@ -86,6 +86,44 @@
    "notes": null
   },
   {
+   "id": "tab",
+   "folder": "audio/samples/tab/",
+   "name": "Tab 键",
+   "group": "代码界面",
+   "used_for": "按 Tab 把一行代码缩进（整行往右一挪）",
+   "trigger": "手指按下 Tab 的那一帧",
+   "duration_ms": [
+    100,
+    160
+   ],
+   "character": "比普通键稍大、稍闷的一下\"哒\"（大键），后面可以带一点点很轻的\"嗖\"表示整行滑过去",
+   "avoid": "不要像回车那么重",
+   "level_peak_dbfs": -17.0,
+   "variants": 2,
+   "reference": "原片没有这个声音（我们新加的），参照普通按键和回车之间",
+   "sync": "起音在文件第 0 ms",
+   "notes": null
+  },
+  {
+   "id": "interrupt",
+   "folder": "audio/samples/interrupt/",
+   "name": "Ctrl+C 强行停止",
+   "group": "代码界面",
+   "used_for": "角色按下 Ctrl+C 停止死循环（全片最关键的一下按键）",
+   "trigger": "手指按下 C 的那一帧（Ctrl 在它前面约 0.12 秒，时间表里是两条 key + 这一条）",
+   "duration_ms": [
+    150,
+    400
+   ],
+   "character": "一下很果断的按键 + 紧接着一个\"咔哒\"的锁定感 / 电路切断感，短促有力",
+   "avoid": "不要做成爆炸，后面紧跟报错音和整个世界定住的安静",
+   "level_peak_dbfs": -10.0,
+   "variants": 1,
+   "reference": "原片没有这个声音（我们新加的）",
+   "sync": "起音在文件第 0 ms",
+   "notes": null
+  },
+  {
    "id": "blink_on",
    "folder": "audio/samples/blink_on/",
    "name": "光标亮",
@@ -409,6 +447,25 @@
    "notes": null
   },
   {
+   "id": "word_rain",
+   "folder": "audio/samples/word_rain/",
+   "name": "字雨（很多小字一起落地）",
+   "group": "身体与物体",
+   "used_for": "for 循环 100 次、while True 时，成百上千个 hi 像下雨一样落下来堆起来",
+   "trigger": "持续的声音，时间表里给出开始时间、持续时长和密度（v：0–1）",
+   "duration_ms": [
+    3000,
+    10000
+   ],
+   "character": "大量很轻的小塑料块 / 小积木落在一堆积木上的哗啦声，像冰雹落在塑料上；密度越大越像一片连续的哗哗声",
+   "avoid": "不要像真的雨水（水声）、不要有低频轰鸣",
+   "level_peak_dbfs": -14.0,
+   "variants": 1,
+   "reference": "原片没有完全一样的段落；单个小字落地见 tick",
+   "sync": "可循环（首尾能接上），管线会按时长平铺、按密度调音量",
+   "notes": "如果做成几档密度（稀 / 中 / 密）分别放 3 个文件也可以，文件名里写 sparse / mid / dense"
+  },
+  {
    "id": "char_bounce",
    "folder": "audio/samples/char_bounce/",
    "name": "碎字符落地",
@@ -653,6 +710,25 @@
    "variants": 2,
    "reference": null,
    "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "dissolve",
+   "folder": "audio/samples/dissolve/",
+   "name": "所有字碎成灰消散",
+   "group": "打击与特效",
+   "used_for": "Ctrl+C 之后，定在半空的所有 hi 一起碎成字母、化成灰散掉",
+   "trigger": "开始碎的那一帧，持续约 1 秒",
+   "duration_ms": [
+    800,
+    1400
+   ],
+   "character": "一大片细碎的\"沙——\"往上飘散的声音，轻、亮、慢慢变弱，带一点点闪光感（像沙子被风吹走）",
+   "avoid": "不要有爆炸感、不要低频",
+   "level_peak_dbfs": -14.0,
+   "variants": 1,
+   "reference": "原片没有这个声音（我们新加的）",
+   "sync": "起音在文件第 0 ms",
    "notes": null
   },
   {

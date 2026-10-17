@@ -236,4 +236,4 @@ function draw(ctx, tr) {
 }
 function post(ctx, tr, base) { imp.post(ctx, tr, base); }
 
-module.exports = { DUR, draw, post, cam, hero, clock, marks: { L0, U0, Wk, TP1, TP2, TN, K1, TK1, TK2, TH, TR1, TR3, TR4, TO, TKICK } };
+module.exports = { DUR, draw, post, cam, hero, clock, codes: [code], heroFrom: clock.real(T_FALL + 0.05), marks: { L0, U0, Wk, TP1, TP2, TN, K1, TK1, TK2, TH, TR1, TR3, TR4, TO, TKICK } };

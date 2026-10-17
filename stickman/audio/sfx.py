@@ -218,6 +218,30 @@ def s_scratch(v=1.0):
     d = 0.17; u = np.linspace(0, 1, int(d * SR)); env = np.sin(np.pi * u ** 0.6) ** 2
     return level(bp(noise(d), 3000, 11000) * env, -27.0 + 20 * np.log10(max(0.2, v)))
 
+def s_tab(v=1.0):
+    # Tab（占位）：比普通键大一点的"哒"
+    d = 0.12; u = np.linspace(0, 1, int(d * SR)); env = np.exp(-u * 30)
+    return level(bp(noise(d), 900, 5000) * env, -17.0)
+
+def s_interrupt(v=1.0):
+    # Ctrl+C（占位）：果断的一下 + 咔哒
+    a = s_tab(1); d = 0.3; n = int(d * SR); out = np.zeros(n); out[:len(a)] += a
+    k = bp(noise(0.05), 2000, 8000) * np.exp(-np.linspace(0, 1, int(0.05 * SR)) * 20); o = int(0.06 * SR); out[o:o + len(k)] += k
+    return level(out, -10.0)
+
+def s_word_rain(dur=4.0, v=1.0):
+    # 字雨（占位）：大量随机的小 tick 叠在一起
+    n = int(dur * SR); out = np.zeros(n); rng = np.random.default_rng(7)
+    t1 = s_tick(0.5); m = int(dur * (25 + 120 * v))
+    for k in rng.integers(0, max(1, n - len(t1)), m): out[k:k + len(t1)] += t1 * rng.uniform(0.2, 0.8)
+    fade = np.minimum(1, np.minimum(np.arange(n), n - np.arange(n)) / (0.3 * SR))
+    return level(out * fade, -14.0 + 20 * np.log10(max(0.3, v)))
+
+def s_dissolve(v=1.0):
+    # 消散（占位）：往上飘的亮沙沙声
+    d = 1.1; u = np.linspace(0, 1, int(d * SR)); env = np.exp(-u * 3) * np.minimum(1, u * 30)
+    return level(bp(noise(d), 4000, 14000) * env, -14.0)
+
 def s_whoosh(v=1.0):
     # 呼：中心频率先升后降的带通噪声
     d = 0.4; n = int(d * SR); u = np.linspace(0, 1, n)
@@ -383,7 +407,7 @@ def sample(kind, idx):
 # 每个 cue 先找 samples/<id>/ 里的素材（id 见 音效需求.json），没有才用合成音；音量按需求文件里的目标峰值对齐
 _REQ = json.load(open(os.path.join(HERE, '音效需求.json'), encoding='utf-8')) if os.path.exists(os.path.join(HERE, '音效需求.json')) else {'sounds': []}
 LEVELS = {x['id']: x['level_peak_dbfs'] for x in _REQ['sounds']}
-LOOPABLE = {'turtle', 'charge'}
+LOOPABLE = {'turtle', 'charge', 'word_rain'}
 ALIAS = {'enter': 'key_enter', 'laptop': 'laptop_drop', 'kick': 'impact_light', 'click': 'select', 'pop': 'output', 'grab': 'rustle', 'hit': 'ground_shock'}
 def sample_id(c):
     ty = c['type']
@@ -395,7 +419,8 @@ GEN = {
     'output': lambda c: s_output(), 'pop': lambda c: s_output(), 'touch': lambda c: s_touch(), 'touch2': lambda c: s_touch2(), 'error': lambda c: s_error(),
     'select': lambda c: s_select(), 'click': lambda c: s_select(), 'step': lambda c: s_step(c.get('run', False), c.get('v', 1)),
     'body': lambda c: s_body(c.get('v', 1)), 'thud': lambda c: s_thud(c.get('v', 1)), 'laptop': lambda c: s_laptop(c.get('v', 1)),
-    'tick': lambda c: s_tick(c.get('v', 1)), 'rustle': lambda c: s_rustle(c.get('v', 1)), 'scratch': lambda c: s_scratch(c.get('v', 1)), 'grab': lambda c: s_rustle(0.8),
+    'tick': lambda c: s_tick(c.get('v', 1)), 'rustle': lambda c: s_rustle(c.get('v', 1)), 'scratch': lambda c: s_scratch(c.get('v', 1)), 'tab': lambda c: s_tab(), 'interrupt': lambda c: s_interrupt(),
+    'word_rain': lambda c: s_word_rain(c.get('dur', 4), c.get('v', 1)), 'dissolve': lambda c: s_dissolve(), 'grab': lambda c: s_rustle(0.8),
     'whoosh': lambda c: s_whoosh(c.get('v', 1)), 'kick': lambda c: s_kick(), 'boom': lambda c: s_boom(),
     'turtle': lambda c: s_turtle(c['dur']), 'hit': lambda c: s_hit(), 'music': lambda c: music(c['t'], c['t1'], c['bpm']),
     'key_space': lambda c: s_key(), 'key_enter': lambda c: s_key(True), 'key_back': lambda c: s_key(),

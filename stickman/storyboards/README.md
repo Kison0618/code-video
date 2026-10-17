@@ -5,3 +5,6 @@
 | 文件 | 对应 |
 |---|---|
 | `v4_探索开头_分镜草图.png` | `render/src/scene_v4.js` 开头的 9 个节拍 |
+| `循环_第一幕_分镜草图.png` | 《火柴人 VS 循环》第一幕（和 v4 开头相同） |
+| `循环_第二幕_分镜草图.png` | 第二幕：手敲三行 → for → IndentationError → Tab → 3 / 10 / 100 → 被 hi 埋了 |
+| `循环_第三幕_分镜草图.png` | 第三幕：print(i) → while True → 逃命 → Ctrl+C → 消散 → bye |

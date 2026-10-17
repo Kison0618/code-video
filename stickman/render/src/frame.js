@@ -2,8 +2,8 @@
 'use strict';
 const K = require('./core');
 const FX = require('./fx');
-// 场景：默认是样片；SCENE=motion 动作验证片；SCENE=impact 打击特效样片；SCENE=react 反应动作验证片；SCENE=v2 样片 v2；SCENE=v3 样片 v3；SCENE=v4 探索开头
-const S = require({ motion: './scene_motion', impact: './scene_impact', react: './scene_react', v2: './scene_v2', v3: './scene_v3', v4: './scene_v4' }[process.env.SCENE] || './scene');
+// 场景：默认是样片；SCENE=motion 动作验证片；SCENE=impact 打击特效样片；SCENE=react 反应动作验证片；SCENE=v2 样片 v2；SCENE=v3 样片 v3；SCENE=v4 探索开头；SCENE=loop 火柴人VS循环
+const S = require({ motion: './scene_motion', impact: './scene_impact', react: './scene_react', v2: './scene_v2', v3: './scene_v3', v4: './scene_v4', loop: './scene_loop' }[process.env.SCENE] || './scene');
 
 function renderFrame(ctx, t) {
   ctx.save();
