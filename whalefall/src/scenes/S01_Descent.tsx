@@ -119,8 +119,8 @@ export const S01Descent: React.FC = () => {
 			<MarineSnow t={t} cam={cam} ambient={lerp(0.5, 0.06, Math.min(1, D / 900))} lamp={lampOn} lampPos={lampPos} lampDir={lampDir} count={7000} box={34} />
 			{t > 12 ? <Seabed y={FLOOR} center={[0, 0]} /> : null}
 			{t >= LAND ? <SiltPlume t={t} at={[0, restY, 0]} /> : null}
-			{lampOn > 0 ? <Lamp pos={lampPos} target={lampTarget} intensity={lampOn} length={30} angle={0.42} shadow /> : null}
-			{lampOn > 0 ? <Spot pos={[cam[0] - 3, cam[1] + 2.5, cam[2] + 1]} target={[0, restY, 0]} intensity={lampOn * 140} /> : null}
+			{lampOn > 0 ? <Lamp pos={lampPos} target={lampTarget} intensity={lampOn} length={30} angle={0.42} cone={0} shadow /> : null}
+			{lampOn > 0 ? <Spot pos={[cam[0] - 3, cam[1] + 2.5, cam[2] + 1]} target={[0, restY + 0.5, 0]} intensity={lampOn * 260} /> : null}
 			{lampOn > 0 ? <ambientLight intensity={0.05} color="#9fc4d8" /> : null}
 		</Stage>
 	);

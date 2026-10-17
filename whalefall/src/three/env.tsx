@@ -129,7 +129,7 @@ varying float vL; varying vec3 vN; varying vec3 vV;
 void main(){
 	float edge = pow(abs(dot(vN, vV)), 2.2);
 	float along = pow(vL, 1.6);
-	gl_FragColor = vec4(uColor, uI * edge * along * 0.22);
+	gl_FragColor = vec4(uColor, uI * edge * along * 0.08);
 }`;
 
 /** 从 pos 指向 target 的一束光：SpotLight + 半透明光锥 */
@@ -169,7 +169,7 @@ export const Lamp: React.FC<{pos: Vec3; target: Vec3; intensity?: number; length
 				shadow-mapSize-height={2048}
 				shadow-bias={-0.0005}
 			/>
-			<mesh geometry={geo} material={mat} position={pos} quaternion={q} renderOrder={5} />
+			{cone > 0 ? <mesh geometry={geo} material={mat} position={pos} quaternion={q} renderOrder={5} /> : null}
 		</>
 	);
 };

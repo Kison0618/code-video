@@ -45,7 +45,7 @@ export const S03Desert: React.FC = () => {
 		const cam: Vec3 = [lerp(-9, -7, k), GROUND + lerp(4.2, 3.4, k), lerp(9, 7, k)];
 		const look: Vec3 = [lerp(-2, 0, k), GROUND + 0.2, 0];
 		return (
-			<DeepSet t={t} cam={cam} look={look} fov={40}>
+			<DeepSet t={t} cam={cam} look={look} fov={40} lamp={0.55} fill={0.6}>
 				<WhaleFallSite t={t} s={{bones: 1, mats: 0.75, shells: 0.75, lobsters: 0.4}} />
 			</DeepSet>
 		);

@@ -29,7 +29,7 @@ export const DeepSet: React.FC<{
 			<CameraRig pos={cam} look={look} fov={fov} />
 			<Fog color={fog} density={fogDensity} />
 			<ambientLight intensity={ambient} color="#7fa6c0" />
-			{lamp > 0 ? <Lamp pos={lampPos} target={tgt} intensity={lamp} length={34} angle={0.45} shadow /> : null}
+			{lamp > 0 ? <Lamp pos={lampPos} target={tgt} intensity={lamp} length={34} angle={0.45} cone={0} shadow /> : null}
 			{fill > 0 ? <Spot pos={[cam[0] - 3.5, cam[1] + 2.2, cam[2] + 0.5]} target={tgt} intensity={90 * fill} angle={0.55} /> : null}
 			{snow > 0 ? <MarineSnow t={t} cam={cam} ambient={0.05 * snow} lamp={lamp * snow} lampPos={lampPos} lampDir={dir} count={6000} box={30} /> : null}
 			{children}
