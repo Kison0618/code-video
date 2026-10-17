@@ -8,20 +8,20 @@
 
 火柴人 VS 数学(Math) [BV1ph4y1g75E]
 来源：https://www.bilibili.com/video/BV1ph4y1g75E/
-仓库完整路径：reference-videos/火柴人 VS 数学(Math) [BV1ph4y1g75E].mp4
+仓库完整路径：reference-videos/火柴人系列/火柴人 VS 数学(Math) [BV1ph4y1g75E].mp4
 参数：1920x1080；平均帧率 323152000/13478123；h264 + aac；时长 842.490000 秒
 
 火柴人 VS 物理 (Physics) [BV1cG411e75o]
 来源：https://www.bilibili.com/video/BV1cG411e75o/
-仓库完整路径：reference-videos/火柴人 VS 物理 (Physics) [BV1cG411e75o].mp4
+仓库完整路径：reference-videos/火柴人系列/火柴人 VS 物理 (Physics) [BV1cG411e75o].mp4
 参数：1920x1080；平均帧率 371168000/15480811；av1 + aac；时长 967.646000 秒
 
 火柴人 VS 几何（Geometry） [BV1hs421T7g8]
 来源：https://www.bilibili.com/video/BV1hs421T7g8/
-仓库完整路径：reference-videos/火柴人 VS 几何（Geometry） [BV1hs421T7g8].mp4
+仓库完整路径：reference-videos/火柴人系列/火柴人 VS 几何（Geometry） [BV1hs421T7g8].mp4
 参数：1920x1080；平均帧率 213344000/8898219；h264 + aac；时长 556.258000 秒
 
 火柴人 VS 编程（Coding) [BV11RXRYuEdL]
 来源：https://www.bilibili.com/video/BV11RXRYuEdL/
-仓库完整路径：reference-videos/火柴人 VS 编程（Coding) [BV11RXRYuEdL].mp4
+仓库完整路径：reference-videos/火柴人系列/火柴人 VS 编程（Coding) [BV11RXRYuEdL].mp4
 参数：1920x1080；平均帧率 241952000/8065061；hevc + aac；时长 504.082000 秒
