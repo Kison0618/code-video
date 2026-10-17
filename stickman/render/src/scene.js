@@ -45,7 +45,8 @@ cam.key(0, { x: 0, y: -330, z: 1 })
 // ———————————————— 代码 ————————————————
 const code = new Code({ x: -430, y: -640, size: 66, seed: 3 });
 // B. hello → NameError
-code.type(8.7, 'hello', 6.5).run(10.0).error(10.15, 0, 5, 'NameError').back(12.0, 5, 12);
+code.blinkSound(0, 1.7).blinkSound(5.0, 6.2);                              // 安静时光标的"嘀嗒"
+code.type(8.7, 'hello', 6.5).run(10.0, 0.32, 'touch2').error(10.15, 0, 5, 'NameError').back(12.0, 5, 12);
 // C. print("hi")
 code.type(12.7, 'print()', 8).cursor(13.9, 6).type(14.05, '"hi"', 7).cursor(14.75, 11).run(15.0);
 // D. 三行 print
@@ -189,16 +190,19 @@ const HI = { r: 12, bounce: 0.42, friction: 0.7, sfx: 'tick' };
 const hi1 = new Body({ t0: 15.08, x: 205, y: -470, vy: -260, vrot: 0.8, ...HI, hits: [{ t: 16.62, vx: 2300, vy: -1250, vrot: 22 }] });
 const TB0 = 27.55;   // 爆炸时刻（下面的 TB）
 const pile = [0, 1, 2].map(k => new Body({ t0: 20.58 + k * 0.07, x: 120 + k * 75, y: -560 - k * 30, vx: 0, vy: -200, vrot: (k - 1) * 3, ...HI, hits: [{ t: TB0, vx: (k - 1) * 900 - 300, vy: -1800 - k * 300, vrot: (k - 1) * 25 + 10 }] }));
-cues.add(15.08, 'pop'); cues.add(20.58, 'pop'); cues.add(20.65, 'pop'); cues.add(20.72, 'pop');
+cues.add(15.08, 'output'); cues.add(20.58, 'output');                       // 打印结果"叮—咚"地掉出来
 
 // ———————————————— 其他音效 ————————————————
 cues.add(1.75, 'thud', { v: 1 });
-cues.add(3.4, 'rustle'); cues.add(4.5, 'rustle', { v: 0.6 });
-cues.add(7.3, 'rustle', { v: 0.5 }); cues.add(7.8, 'grab');
+cues.add(2.85, 'rustle', { v: 0.6 }); cues.add(3.4, 'body', { v: 0.7 });     // 手撑地
+cues.add(3.95, 'body', { v: 0.9 }); cues.add(4.5, 'rustle', { v: 0.6 });     // 膝盖着地、站起来
+cues.add(7.3, 'body', { v: 0.6 }); cues.add(7.45, 'touch2');                 // 蹲下、碰到电脑
 cues.add(16.5, 'whoosh', { v: 0.7 }); cues.add(16.62, 'kick');
-cues.add(18.4, 'rustle', { v: 0.5 }); cues.add(18.8, 'grab');
-cues.add(TB, 'boom', { v: 1 }); cues.add(TB + 0.1, 'whoosh', { v: 1 });
+cues.add(18.35, 'body', { v: 0.6 }); cues.add(18.5, 'touch2');
+cues.add(TB - 0.1, 'output'); cues.add(TB, 'boom', { v: 1 }); cues.add(TB + 0.1, 'whoosh', { v: 1 });
 cues.add(TB + 1.05, 'thud', { v: 0.9 });
+cues.add(30.9, 'rustle', { v: 0.7 }); cues.add(31.6, 'body', { v: 0.8 });   // 撑起来、坐下
+cues.add(32.55, 'body', { v: 0.7 }); cues.add(33.75, 'body', { v: 0.6 }); cues.add(33.8, 'touch2');
 cues.add(36.2, 'turtle', { dur: 8.1 });
 cues.add(36.6, 'whoosh', { v: 0.5 });
 cues.add(44.0, 'whoosh', { v: 0.8 }); cues.add(44.9, 'thud', { v: 0.8 });

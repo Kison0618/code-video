@@ -8,6 +8,7 @@
 'use strict';
 const K = require('./core');
 const { clamp, lerp, E, D2R, rgba, mix } = K;
+const cues = require('./cues');
 
 const P = {
   headR: 0.115, lw: 0.052, torso: 0.29, shoulderDrop: 0.035,
@@ -122,7 +123,26 @@ class Actor {
     return this;
   }
   // 循环动作：在 [t0, t1] 内从 x0 走/跑到 x1，前后各 blend 秒和关键帧姿势过渡
-  cycle(t0, t1, kind, x0, x1, blend = 0.18) { this.cycles.push({ t0, t1, kind, x0, x1, blend }); return this; }
+  // 每一步脚落地时自动登记脚步声（原片：58 Hz 的超低频闷点，走路约每秒 6 步）
+  cycle(t0, t1, kind, x0, x1, blend = 0.18, steps = true) {
+    const c = { t0, t1, kind, x0, x1, blend };
+    this.cycles.push(c);
+    if (steps) {
+      let last = null;
+      for (let t = t0; t <= t1; t += 1 / 240) {
+        const ph = this.cyclePhase(c, t), k = Math.floor((ph - Math.PI / 2) / Math.PI);
+        if (last !== null && k > last) cues.add(t, 'step', { run: kind === 'run', v: kind === 'sneak' ? 0.5 : 1 });
+        last = k;
+      }
+    }
+    return this;
+  }
+  cyclePhase(c, t) {
+    const cfg = CYCLE[c.kind], tt = clamp(t, c.t0, c.t1), span = c.t1 - c.t0, acc = Math.min(0.25, span / 3);
+    const vmax = 1 / (span - acc), s = tt - c.t0;
+    const k = s < acc ? 0.5 * vmax * s * s / acc : s > span - acc ? 1 - 0.5 * vmax * (span - s) ** 2 / acc : vmax * (s - acc / 2);
+    return Math.abs(lerp(c.x0, c.x1, k) - c.x0) / (cfg.stride * this.H) * Math.PI;
+  }
   // 手里拿东西：draw(ctx, pt, ang, actor) 画在手的位置
   hold(t0, t1, hand, draw) { this.holds.push({ t0, t1, hand, draw }); return this; }
 

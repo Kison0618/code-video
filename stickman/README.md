@@ -38,7 +38,14 @@ cd render && node src/tools/posesheet.js poses.png       # 姿势库总览
 stickman/
   build.js              一键构建
   拆解_火柴人系列.md    原片拆解
-  audio/sfx.py          按时间表合成全部音效 + 追逐段的占位配乐
+  audio/sfx.py          按时间表合成全部音效（每类按原片实测对齐）+ 追逐段的占位配乐；有素材时自动用素材
+  audio/ref_spectra.json 原片每类声音的频谱包络和长度、亮度（测量数字）
+  analysis/ref_events.py   参考音频逐事件测量
+  analysis/ref_times.json  原片里每类声音的时间点（对照画面确认过）
+  analysis/ref_spectra.py  生成 ref_spectra.json
+  analysis/compare_sfx.py  合成音 vs 原片逐类对比
+  analysis/pick_samples.py 从素材库按实测指纹自动挑声音
+  analysis/sfx_profile.py  整集的声音结构（起音密度、静音段、配乐占比）
   render/src/
     core.js             画布、字体、配色（实测值）、缓动、随机数
     rig.js              火柴人骨骼：姿势 = 关节角；关键帧插值、走/跑循环、自动落地、残影
@@ -66,7 +73,32 @@ code.type(5, 'print("hi")').run(6.2).error(7, 0, 5, 'NameError');   // 每个按
 V.explosion(ctx, x, y, t - 8, { words: ['BOOM'] });                  // 特效都是 (ctx, 位置, 年龄) 的纯函数
 ```
 
+## 音效
+
+音效全部按《火柴人 VS 编程》原片实测合成，详见 [`拆解_火柴人系列.md`](拆解_火柴人系列.md) 第 5 节。
+
+**用你本地的素材包（推荐，键盘、脚步、落地这类真实录音会更自然）**
+
+1. 下载免费、可商用的音效包，放进任意一个文件夹。推荐（以各官网说明的授权为准）：
+   - Kenney 的 *Interface Sounds*、*UI Audio*、*Impact Sounds*（CC0，kenney.nl）
+   - Sonniss 每年的 *GameAudioGDC* 免费合集（量很大，爆炸、呼呼声、拟音都有）
+   - freesound.org 上勾选 CC0 搜：mechanical keyboard single key、footstep soft、plastic drop、cloth rustle
+2. 先出报告试听：`python analysis/pick_samples.py <素材文件夹>`，结果写在 `audio/samples/挑选报告.md`，每类候选按"像原片的程度"排好序。
+3. 满意就加 `--apply`：每类前 6 名复制进 `audio/samples/<类型>/`，`node build.js` 会自动用它们代替合成音，音量仍按原片实测值。
+   够不上门槛的类型继续用合成音。运行、打印结果、报错、光标这些原片设计出来的界面音不需要素材，合成版已经按实测对齐。
+
+`audio/samples/` 不进 git（素材授权各不相同，只留在你本地）。
+
+**核对音效的工具**
+
+```bash
+python analysis/compare_sfx.py <火柴人VS编程.mp4> 对比图.png   # 逐类对比原片和合成音（谱形、包络、主频走向）
+python analysis/ref_events.py <音频.wav> 0 100 events.json      # 把任意参考音频切成事件并测量
+python analysis/ref_spectra.py <火柴人VS编程.mp4>              # 重新生成 audio/ref_spectra.json
+node build.js --only audio                                      # 只重做音效（约 10 秒）
+```
+
 ## 需要你核对的
 
-1. **声音**：我听不到，音效是按频谱和波形设计的。请戴耳机听一遍，尤其是键盘声、爆炸声和追逐段的配乐（配乐只是占位的鼓 + 贝斯，后面可以换成你的 BGM）。
+1. **声音**：我听不到，音效是按测量对齐的。请戴耳机听一遍，重点听键盘、运行的"嘟"、打印结果的"叮—咚"、报错和爆炸。哪个不对告诉我秒数和感觉（比如"太脆""太闷""太响"），我对着测量数据改。追逐段的配乐只是占位，把你的 BGM 放成 `assets/bgm.mp3` 就会自动替换。
 2. **动作手感**：姿势和时间是一帧帧调出来的，和原片的手绘动画相比还偏"机械"，哪里别扭直接指出来，我按秒数改。

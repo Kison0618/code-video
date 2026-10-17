@@ -40,16 +40,18 @@ fs.mkdirSync(OUT, { recursive: true });
 if (spawnSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', 'color=c=black:s=256x256:d=0.1', '-c:v', 'h264_nvenc', '-f', 'null', '-'], { stdio: 'ignore' }).status === 0) process.env.VIDEO_ENC = 'nvenc';
 console.log(`编码：${process.env.VIDEO_ENC ? 'NVIDIA 显卡（h264_nvenc）' : 'CPU（x264）'}    并行进程：${jobs}    帧率：${process.env.FPS || 60}`);
 
-// —— 1. 音效：画面代码登记的时间表 → Python 合成 → 两遍 loudnorm 到 -14 LUFS ——
+// —— 1. 音效：画面代码登记的时间表 → Python 合成（各类声音的音量比例按原片实测）→ 整体只调增益到 -16 LUFS ——
+// 原片《火柴人 VS 编程》整体 -17 LUFS、响度范围 LRA 16（安静的地方很安静，爆的地方很响）。
+// 这里用 linear 模式、LRA 上限放到 20：只整体加减音量，不压缩动态，保留这种对比。
 const CUES = path.join(OUT, 'cues.json'), RAW = path.join(OUT, 'sfx_raw.wav'), AUDIO = path.join(OUT, 'sfx.wav');
 if (only !== 'video') {
   console.log('\n▶ 合成音效');
   fs.writeFileSync(CUES, execFileSync('node', [path.join('src', 'cues.js')], { cwd: R }));
   run(PY, [path.join(ROOT, 'audio', 'sfx.py'), CUES, RAW]);
-  const m = spawnSync('ffmpeg', ['-hide_banner', '-i', RAW, '-af', 'loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json', '-f', 'null', '-'], { encoding: 'utf8' });
+  const m = spawnSync('ffmpeg', ['-hide_banner', '-i', RAW, '-af', 'loudnorm=I=-16:TP=-1.5:LRA=20:print_format=json', '-f', 'null', '-'], { encoding: 'utf8' });
   const js = JSON.parse(m.stderr.slice(m.stderr.lastIndexOf('{'), m.stderr.lastIndexOf('}') + 1));
   run('ffmpeg', ['-y', '-loglevel', 'error', '-i', RAW, '-af',
-    `loudnorm=I=-14:TP=-1.5:LRA=11:measured_I=${js.input_i}:measured_TP=${js.input_tp}:measured_LRA=${js.input_lra}:measured_thresh=${js.input_thresh}:offset=${js.target_offset}:linear=true`,
+    `loudnorm=I=-16:TP=-1.5:LRA=20:measured_I=${js.input_i}:measured_TP=${js.input_tp}:measured_LRA=${js.input_lra}:measured_thresh=${js.input_thresh}:offset=${js.target_offset}:linear=true`,
     '-ar', '48000', AUDIO]);
   if (only === 'audio') { console.log(`✓ ${AUDIO}`); process.exit(0); }
 }

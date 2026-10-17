@@ -81,8 +81,18 @@ class Code {
   cursor(t, cur) { this.push(t, { cur, sel: null }); return this; }
   // 选中一段（深灰块）；之后的 type 会替换它
   select(t, a, b) { this.push(t, { sel: [a, b], cur: b }); this.key(t, 'click'); return this; }
-  // 运行：整块盖一层浅灰，dur 秒
-  run(t, dur = 0.32) { this.runs.push({ t, dur }); cues.add(t, 'run'); this.push(t, { typing: false }); return this; }
+  // 运行：整块盖一层浅灰，dur 秒；sound 默认是原片的"运行"音，跑出错的代码用 'touch2'（只有回车的"啵"，紧接着报错）
+  run(t, dur = 0.32, sound = 'run') { this.runs.push({ t, dur }); if (sound) cues.add(t, sound); this.push(t, { typing: false }); return this; }
+  // 光标闪烁的"嘀嗒"：原片只在安静的段落里听得到（开头那几秒），所以只在给定时段登记
+  blinkSound(t0, t1) {
+    let prev = null;
+    for (let t = t0; t <= t1; t += 1 / 240) {
+      const s = this.snap(t), on = !s.typing && Math.floor((t - s.t) / 0.53) % 2 === 0;
+      if (prev !== null && on !== prev) cues.add(t, 'blink', { on });
+      prev = on;
+    }
+    return this;
+  }
   error(t, a, b, label = 'NameError') { this.push(t, { err: { a, b, label } }); cues.add(t, 'error'); return this; }
   clearErr(t) { this.push(t, { err: null }); return this; }
   hide(t) { this.vis = [this.vis[0], t]; return this; }
@@ -148,7 +158,7 @@ class Code {
       }
     });
     // 光标：白色下划线，打字时常亮，空闲时 1 秒一闪
-    const blinkOn = s.typing || Math.floor((t - s.t) / 0.53) % 2 === 0;
+    const blinkOn = s.typing || Math.floor((t - s.t) / 0.53) % 2 === 0;   // 和 blinkSound 用同一个公式
     if (blinkOn && this.cursorOn !== false) {
       const [r, c] = this.rc(s.text, s.cur);
       ctx.fillStyle = rgba(C.white);
