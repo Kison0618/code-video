@@ -5,7 +5,7 @@ const K = require('./core');
 const { W, H, clamp, lerp, E, noise1 } = K;
 
 class Camera {
-  constructor() { this.keys = []; this.shakes = []; }
+  constructor() { this.keys = []; this.shakes = []; this.punches = []; }
   // o: { x, y, z, ease }   z = 缩放（1 = 一个世界像素对应一个屏幕像素）
   key(t, o) {
     const p = this.keys[this.keys.length - 1] || { x: 0, y: -300, z: 1 };
@@ -15,6 +15,8 @@ class Camera {
   }
   // 震屏：amp 像素（屏幕空间），dur 秒，指数衰减
   shake(t, amp = 20, dur = 0.35) { this.shakes.push({ t, amp, dur }); return this; }
+  // 推镜冲击：打中瞬间镜头猛地推近 amt（0.1 = 推近 10%），再带一点回弹地退回
+  punch(t, amt = 0.08, dur = 0.5) { this.punches.push({ t, amt, dur }); return this; }
   at(t) {
     const ks = this.keys;
     let i = 0;
@@ -31,7 +33,14 @@ class Camera {
       sx += noise1(age * 38, s.t * 7) * d; sy += noise1(age * 38, s.t * 7 + 3) * d;
       rot += noise1(age * 20, s.t * 7 + 9) * d * 0.0006;
     }
-    return { x: lerp(a.x, b.x, u), y: lerp(a.y, b.y, u), z, sx, sy, rot };
+    let zp = 1;
+    for (const p of this.punches) {
+      const age = t - p.t;
+      if (age < 0 || age > p.dur) continue;
+      const k = age < 0.035 ? age / 0.035 : Math.exp(-(age - 0.035) * 9) * Math.cos((age - 0.035) * 14);
+      zp *= 1 + p.amt * k;
+    }
+    return { x: lerp(a.x, b.x, u), y: lerp(a.y, b.y, u), z: z * zp, sx, sy, rot };
   }
   apply(ctx, c) {
     ctx.translate(W / 2 + c.sx, H / 2 + c.sy);

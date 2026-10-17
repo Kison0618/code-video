@@ -8,7 +8,7 @@ const G = 2600;          // 重力（世界像素 / 秒²）
 const STEP = 1 / 240;
 
 class Body {
-  // o: { t0, x, y, vx, vy, rot, vrot, r(碰撞半径), bounce, friction, ground, hits:[{t, vx, vy, vrot}], sfx, until }
+  // o: { t0, x, y, vx, vy, rot, vrot, r(碰撞半径), bounce, friction, ground, hits:[{t, vx, vy, vrot}], sfx, until, defer }
   constructor(o) {
     Object.assign(this, { vx: 0, vy: 0, rot: 0, vrot: 0, r: 10, bounce: 0.35, friction: 0.75, ground: 0, hits: [], sfx: 'tick', until: o.t0 + 20 }, o);
     this.sim();
@@ -17,6 +17,7 @@ class Body {
     let { x, y, vx, vy, rot, vrot } = this;
     const hits = [...this.hits].sort((a, b) => a.t - b.t);
     let hi = 0, rest = false;
+    this.events = [];
     this.track = [];
     for (let t = this.t0; t <= this.until; t += STEP) {
       while (hi < hits.length && hits[hi].t <= t) {
@@ -34,7 +35,8 @@ class Body {
       if (y > gy) {
         y = gy;
         if (vy > 140) {
-          cues.add(t, this.sfx, { v: Math.min(1, vy / 1600), x });
+          if (this.defer) this.events.push({ t, type: this.sfx, v: Math.min(1, vy / 1600) });   // 有停顿帧的场景：先记下，最后换算成真实时间再登记
+          else cues.add(t, this.sfx, { v: Math.min(1, vy / 1600), x });
           vy = -vy * this.bounce; vx *= this.friction; vrot *= 0.6;
         } else {
           vy = 0; vx *= 0.9; vrot = 0;
@@ -53,4 +55,8 @@ class Body {
   }
 }
 
-module.exports = { Body, G };
+// 把延后登记（defer: true）的落地音效按时钟换算成真实时间再登记
+function flushSfx(bodies, clock) {
+  for (const b of bodies) for (const e of b.events || []) cues.add(clock.real(e.t), e.type, { v: e.v });
+}
+module.exports = { Body, G, flushSfx };

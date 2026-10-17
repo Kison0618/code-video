@@ -115,6 +115,16 @@ v1 把所有关节按同一条缓动插值，结果全身一起动、一起停�
 
 动作体检：`node render/src/tools/motion_check.js`，同一套量法比较 v1 和 v2 的脚滑、死停帧和速度突变。
 
+可复用的角色类在 `render/src/actor2.js`（`Actor2` + 停顿帧时钟 `Clock`），新场景都用它写；用法见文件顶部。
+
+## 打击感系统（`render/src/impact.js`）
+
+一次 `imp.hit(时间, 位置, 力度)` 同时安排：停顿帧、震屏、推镜冲击、闪白 / 反色冲击帧、星芒、冲击环、冲击波扭曲（像素级）、火花、速度线、音效。力度分 `light / medium / heavy / huge / ground` 五档，每一项都能单独覆盖。另有 `Shatter`（一行代码被打碎，字符变成物理物体四散、落地弹跳）和 `charge`（蓄力能量球）。
+
+样片：`SCENE=impact node build.js --from 0 --to 18.31`（`render/src/scene_impact.js`，约 18 秒：轻踢 → 重拳打碎代码 → 电脑砸地 → 蓄力爆炸），成片在 `previews/打击特效样片_v1_1080p60.mp4`。
+
+写场景的规矩：所有 `imp.hit` 要在 `actor.simulate()` 和任何 `clock.real()` 换算之前登记（停顿帧会推后之后的所有真实时间）；带 `defer: true` 的物理物体最后用 `flushSfx` 登记落地声。
+
 ## AI 耳朵（声音类别辅助判断）
 
 `audio/ai_ear.py` 用 PANNs Cnn14（AudioSet 527 类）回答两件事："模型认为这段声音是哪一类、有多确定"，以及"合成音和原片在模型眼里是不是同一类"。**它不是听感质量评分**，好不好听仍以人耳为准。第一次冒烟测试的结果和局限见 `audio/ai_ear_reports/2026-10-17_冒烟测试/说明.md`。
