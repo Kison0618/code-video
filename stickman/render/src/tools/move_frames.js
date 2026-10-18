@@ -2,11 +2,12 @@
 //   node src/tools/move_frames.js 动作 输出 [起始秒 时长]
 //   输出以 .png 结尾：直接拼成一张动作条（和 analysis/ref_strip.py 的格式一样，每格写帧号和秒数）
 //   否则是一个目录：30fps 的图片序列（可以喂给 analysis/ref_pose.py 量化）
-// 动作：run 跑、walk 走、walkarms 走（摆臂）、startle 吓一跳、bonk 被砸到头、knock 被打飞落地滚一圈坐起来、jump 原地跳上台子
+// 动作：run 跑、walk 走、walkarms 走（摆臂）、startle 吓一跳、bonk 被砸到头、knock 被打飞落地滚一圈坐起来、jump 原地跳上台子；
+//       以及 analysis/fight_moves.json 里的任何招式（先摆架势，1.0 秒出招），例如 jab、front_kick、hurt_high
 'use strict';
 const fs = require('fs'), path = require('path');
 const { Canvas } = require('skia-canvas');
-const { Actor2 } = require('../acting');
+const { Actor2, MOVES: FIGHT } = require('../fight');
 const [, , move = 'run', out = 'out/move_frames', a0 = '1.2', len = '0.7'] = process.argv;
 const W = 960, H = 540, HH = 256;                          // 原片近景：身高约 256 px（960 宽时）
 const a = new Actor2({ H: HH, x0: 0 });
@@ -19,7 +20,7 @@ const MOVES = {
   knock: () => a.launch(1.0, { vx: -620, vy: -600, land: 'back', roll: true }).t + 1,
   jump: () => a.jump(1.0, { to: 0.3 * HH, gy: -0.3 * HH, h: 46, dur: 0.34 }).t + 1,
 };
-const T = (MOVES[move] || MOVES.run)();
+const T = MOVES[move] ? MOVES[move]() : FIGHT[move] ? (a.move(0.3, 'guard'), a.move(1.0, move).t + 0.8) : MOVES.run();
 a.simulate(T + 0.2, { sfx: false });
 const c = new Canvas(W, H), ctx = c.getContext('2d');
 const frames = [];
