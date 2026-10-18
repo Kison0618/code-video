@@ -2,7 +2,7 @@
   "name": "wuzhu-demo",
   "private": true,
   "scripts": {
-    "frames": "node render.js frames 0:62.3:30:0:1"
+    "frames": "node render.js frames 0:63.8:30:0:1"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.0.0",
