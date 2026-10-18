@@ -8,6 +8,8 @@
 //   5. 主角太小：连续 3 秒以上身高不到画面的 8%（远景太久）
 //   6. 音效 id 在 audio/音效需求.json 里找不到
 //   7. 每次"运行"时屏幕上的代码不是合法的 Python（运行后 0.6 秒内报错的算故意写错，跳过）
+//   8. 节奏空档：连续 5 秒以上没有新事件（出字、报错、运行、打击、键帽……；脚步、打字、环境声不算）
+// 另外打印景别分布（主角高度占画面的比例），对照原片实测（拆解 2.1 / 2.2）
 'use strict';
 const fs = require('fs'), path = require('path');
 const K = require('../core');
@@ -75,6 +77,18 @@ if (miss.length) push(0, 0, `音效 id 不在需求表里：${miss.join('、')}`
   const out = require('child_process').execFileSync('python3', ['-c', py], { input: JSON.stringify(list) }).toString().trim();
   for (const line of out ? out.split('\n') : []) { const [t, ...m] = line.split(' '); push(clock.real(+t), clock.real(+t), `运行的代码有语法错误（${m.join(' ')}）`); }
 }
+// 8 节奏空档
+{
+  const AMB = new Set(['step', 'key', 'key_space', 'key_enter', 'key_back', 'blink', 'rustle', 'tick', 'word_rain', 'music', 'snake_slither', 'scratch', 'tap']);
+  const ev = cues.list.filter(c => !AMB.has(c.type)).map(c => c.t).sort((a, b) => a - b);
+  let prev = S.heroFrom ?? 0;
+  for (const t of ev.concat([S.DUR])) { if (t - prev > 5) push(prev, t, `节奏空档 ${(t - prev).toFixed(1)} 秒没有新事件`); prev = Math.max(prev, t); }
+}
+// 景别分布
+const SIZES = [['大远景 <12%', 0.12], ['远景 12–25%', 0.25], ['全景 25–45%', 0.45], ['中近景 >45%', 9]];
+const hist = SIZES.map(() => 0); let nT = 0;
+for (let t = S.heroFrom ?? 0; t <= S.DUR; t += 0.1) { if (inOff(t)) continue; const f = hero.H * cam.at(t).z / H; hist[SIZES.findIndex(([, m]) => f < m)]++; nT++; }
 issues.sort((a, b) => a.t0 - b.t0);
 console.log(`体检 ${process.env.SCENE || 'loop'}：${S.DUR} 秒，${issues.length} 个问题`);
+console.log('  景别分布：' + SIZES.map(([n], i) => `${n} ${(100 * hist[i] / nT).toFixed(0)}%`).join('，') + '（编程集：20% / 33% / 25% / 22%；数学集基准是全景 ~40%）');
 for (const i of issues) console.log(`  ${i.t0.toFixed(2)}${i.t1 > i.t0 ? '–' + i.t1.toFixed(2) : ''}s  ${i.what}`);
