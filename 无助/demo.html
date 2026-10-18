@@ -76,6 +76,44 @@
     <radialGradient id="warmPool"><stop offset="0" stop-color="#ffd99a" stop-opacity=".22"/><stop offset="1" stop-color="#ffd99a" stop-opacity="0"/></radialGradient>
     <linearGradient id="iconFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#23262e"/><stop offset="1" stop-color="#15171c"/></linearGradient>
     <linearGradient id="cardFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d2026"/><stop offset="1" stop-color="#14161a"/></linearGradient>
+    <g id="person">
+      <circle cx="0" cy="-198" r="26"/>
+      <rect x="-28" y="-168" width="56" height="108" rx="22"/>
+      <rect x="-24" y="-70" width="20" height="70" rx="10"/><rect x="4" y="-70" width="20" height="70" rx="10"/>
+      <rect x="-46" y="-160" width="16" height="86" rx="8"/><rect x="30" y="-160" width="16" height="86" rx="8"/>
+    </g>
+    <g id="personBow">
+      <circle cx="12" cy="-180" r="26"/>
+      <rect x="-28" y="-162" width="56" height="102" rx="22"/>
+      <rect x="-24" y="-70" width="20" height="70" rx="10"/><rect x="4" y="-70" width="20" height="70" rx="10"/>
+      <rect x="-44" y="-152" width="16" height="86" rx="8"/><rect x="28" y="-152" width="16" height="86" rx="8"/>
+    </g>
+    <g id="personHand">
+      <circle cx="0" cy="-198" r="26"/>
+      <rect x="-28" y="-168" width="56" height="108" rx="22"/>
+      <rect x="-24" y="-70" width="20" height="70" rx="10"/><rect x="4" y="-70" width="20" height="70" rx="10"/>
+      <rect x="-46" y="-160" width="16" height="86" rx="8"/><rect x="30" y="-262" width="16" height="100" rx="8"/>
+    </g>
+    <g id="personSit">
+      <circle cx="10" cy="-122" r="24"/>
+      <rect x="-30" y="-104" width="52" height="78" rx="20"/>
+      <rect x="-26" y="-36" width="86" height="20" rx="10"/>
+      <rect x="44" y="-36" width="20" height="36" rx="10"/>
+      <rect x="0" y="-86" width="56" height="16" rx="8"/>
+      <rect x="-40" y="-20" width="110" height="20" rx="10"/>
+    </g>
+    <linearGradient id="coneD" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff2d0" stop-opacity="0"/><stop offset=".4" stop-color="#fff2d0" stop-opacity=".06"/><stop offset="1" stop-color="#fff2d0" stop-opacity=".12"/>
+    </linearGradient>
+    <linearGradient id="endGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b0c10"/><stop offset=".65" stop-color="#1a1714"/><stop offset="1" stop-color="#3a2a1c"/>
+    </linearGradient>
+    <filter id="rimRed" x="-50%" y="-50%" width="200%" height="200%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="d"/>
+      <feFlood flood-color="#e0786a"/><feComposite in2="d" operator="in" result="edge"/>
+      <feGaussianBlur in="edge" stdDeviation="7" result="soft"/>
+      <feMerge><feMergeNode in="soft"/><feMergeNode in="edge"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
 
   <!-- ============ A · 邮箱 ============ -->
@@ -223,6 +261,231 @@
       <text x="512" y="452" fill="#d8dde6" class="sans" font-size="22">一样多</text>
     </g>
   </g>
+
+  <!-- ============ D · 人也一样：一句话听了太多遍 ============ -->
+  <g id="D" opacity="0">
+    <polygon points="790,0 1130,0 1290,780 630,780" fill="url(#coneD)"/>
+    <line x1="0" y1="780" x2="1920" y2="780" stroke="#ffffff" stroke-opacity=".07"/>
+    <g fill="#121318">
+      <use id="dP" href="#person" transform="translate(960 780)" filter="url(#rimSilver)"/>
+      <use id="dPb" href="#personBow" transform="translate(960 780)" filter="url(#rimDim)" opacity="0"/>
+    </g>
+    <g id="dLabels"></g>
+  </g>
+
+  <!-- ============ E · 不举手了 / 角落 / 箱子 ============ -->
+  <g id="E" opacity="0">
+    <g id="E1" opacity="0" fill="#121318">
+      <use href="#personHand" transform="translate(560 800) scale(.8)" filter="url(#rimGold)"/>
+      <use href="#personHand" transform="translate(760 800) scale(.8)" filter="url(#rimGold)"/>
+      <use href="#personBow" transform="translate(960 800) scale(.8)" filter="url(#rimDim)"/>
+      <use href="#personHand" transform="translate(1160 800) scale(.8)" filter="url(#rimGold)"/>
+      <use href="#personHand" transform="translate(1360 800) scale(.8)" filter="url(#rimGold)"/>
+      <line x1="300" y1="800" x2="1620" y2="800" stroke="#ffffff" stroke-opacity=".07"/>
+    </g>
+    <g id="E2" opacity="0">
+      <ellipse cx="1300" cy="790" rx="380" ry="70" fill="url(#warmPool)"/>
+      <g fill="#121318">
+        <use href="#person" transform="translate(1100 790) scale(.85)" filter="url(#rimGold)"/>
+        <use href="#personHand" transform="translate(1260 790) scale(.85)" filter="url(#rimGold)"/>
+        <use href="#person" transform="translate(1420 790) scale(.85)" filter="url(#rimGold)"/>
+        <use href="#person" transform="translate(1570 790) scale(.85)" filter="url(#rimGold)"/>
+        <use href="#personSit" transform="translate(470 790) scale(.85)" filter="url(#rimDim)"/>
+      </g>
+      <g class="sans" font-size="22" fill="#f2cf85" opacity=".85">
+        <text x="1150" y="560">哈哈哈</text><text x="1330" y="520">然后呢？</text><text x="1500" y="575">真的假的</text>
+      </g>
+      <line x1="200" y1="790" x2="1720" y2="790" stroke="#ffffff" stroke-opacity=".07"/>
+    </g>
+    <g id="E3" opacity="0">
+      <ellipse id="eWarm" cx="1360" cy="760" rx="220" ry="90" fill="url(#warmPool)" opacity="0"/>
+      <use href="#personSit" transform="translate(940 760)" fill="#121318" filter="url(#rimDim)"/>
+      <g id="eWalls" stroke-linecap="round" fill="none">
+        <line id="eW0" x1="720" y1="460" x2="720" y2="760" stroke="#c97a6e" stroke-width="3"/>
+        <line id="eW1" x1="700" y1="760" x2="1180" y2="760" stroke="#c97a6e" stroke-width="3"/>
+        <line id="eW2" x1="1160" y1="670" x2="1160" y2="760" stroke="#eef2f8" stroke-width="5" filter="url(#glow)"/>
+        <line id="eW3" x1="720" y1="460" x2="900" y2="460" stroke="#c97a6e" stroke-width="2" stroke-opacity=".5"/>
+      </g>
+      <g id="eLabels"></g>
+    </g>
+  </g>
+
+  <!-- ============ F · 我们弄反了 / 自我效能感 ============ -->
+  <g id="F" opacity="0">
+    <g id="fQuote" opacity="0">
+      <text x="960" y="430" text-anchor="middle" font-family="Noto Serif SC" font-weight="900" font-size="120" fill="#f4f1ea" filter="url(#glowBig)">我们弄反了。</text>
+      <text x="960" y="500" text-anchor="middle" class="mono" font-size="20" letter-spacing="4" fill="#8a909c">SELIGMAN &amp; MAIER · 2016</text>
+    </g>
+    <g id="fInst" opacity="0">
+      <path d="M960 590 L960 690 M936 668 L960 694 L984 668" stroke="#7c8392" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <text x="1010" y="650" class="sans" font-size="24" fill="#a3aab6">疼太久 → 趴下</text>
+      <text x="1010" y="680" class="mono" font-size="16" letter-spacing="3" fill="#5f6675">INSTINCT · 本能</text>
+    </g>
+    <g id="fMeter" opacity="0">
+      <rect x="920" y="330" width="80" height="420" rx="40" fill="#121318" stroke="#5a6170" stroke-width="2"/>
+      <clipPath id="meterClip"><rect x="922" y="332" width="76" height="416" rx="38"/></clipPath>
+      <rect id="fFill" x="920" y="750" width="80" height="0" fill="#f2cf85" clip-path="url(#meterClip)" filter="url(#glow)"/>
+      <g stroke="#2a2e36" stroke-width="2"><line x1="922" y1="412" x2="998" y2="412"/><line x1="922" y1="495" x2="998" y2="495"/><line x1="922" y1="578" x2="998" y2="578"/><line x1="922" y1="661" x2="998" y2="661"/></g>
+    </g>
+    <circle id="fDot" r="12" fill="#fff3d1" filter="url(#glow)" opacity="0"/>
+    <text id="fDotTxt" x="990" y="262" class="sans" font-size="26" fill="#f2cf85" opacity="0">我做的，有用</text>
+    <g id="fDots"></g>
+    <g id="fLabel" opacity="0">
+      <text x="120" y="120" fill="#d9dde5" font-family="Noto Serif SC" font-weight="900" font-size="34">自我效能感</text>
+      <text x="120" y="152" fill="#6c7482" class="mono" font-size="17" letter-spacing="3">SELF-EFFICACY · 相信自己做得到</text>
+    </g>
+    <g id="fPraise" class="sans" font-size="32" fill="#c3c9d4"></g>
+  </g>
+
+  <!-- ============ G · 牵着它跨过去 ============ -->
+  <g id="G" opacity="0">
+    <line x1="160" y1="720" x2="1760" y2="720" stroke="#ffffff" stroke-opacity=".10" stroke-width="1.5"/>
+    <g stroke="#e8edf5" stroke-width="5" stroke-linecap="round" filter="url(#glow)">
+      <line x1="860" y1="720" x2="860" y2="640"/><line x1="1400" y1="720" x2="1400" y2="640"/>
+    </g>
+    <path id="gArc" fill="none" stroke="#f2cf85" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round" filter="url(#glow)" opacity="0" d="M1140 680 Q1400 420 1660 680"/>
+    <line id="gLeash" stroke="#f2cf85" stroke-width="2.5" stroke-opacity=".8"/>
+    <g fill="#121318">
+      <use id="gMan" href="#person" filter="url(#rimGold)"/>
+      <use id="gDogL" href="#dogLie" filter="url(#rimDim)"/>
+      <use id="gDogS" href="#dogStand" filter="url(#rimSilver)" opacity="0"/>
+      <use id="gDogG" href="#dogStand" filter="url(#rimGold)" opacity="0"/>
+    </g>
+  </g>
+
+  <!-- ============ H1 · 便利店 ============ -->
+  <g id="H1" opacity="0">
+    <line x1="200" y1="780" x2="1720" y2="780" stroke="#ffffff" stroke-opacity=".07"/>
+    <g fill="#121318">
+      <use href="#person" transform="translate(1290 780)" filter="url(#rimSilver)"/>
+      <use id="hMe" href="#person" transform="translate(700 780)" filter="url(#rimSilver)"/>
+    </g>
+    <rect x="1060" y="610" width="460" height="170" rx="6" fill="#17191e" stroke="#3a3f4b" stroke-width="2"/>
+    <text x="1290" y="560" text-anchor="middle" class="mono" font-size="18" letter-spacing="4" fill="#6c7482" opacity=".8">24H</text>
+    <g id="hOld" opacity="0">
+      <rect x="470" y="430" width="200" height="44" rx="22" fill="rgba(60,24,22,.55)" stroke="#e0786a" stroke-opacity=".6"/>
+      <text x="570" y="460" text-anchor="middle" class="sans" font-size="22" fill="#e58a7c">你真不会说话</text>
+    </g>
+    <g id="hB1" opacity="0">
+      <rect x="560" y="400" width="300" height="70" rx="20" fill="#1f2228" stroke="#c9ced8" stroke-opacity=".6"/>
+      <path d="M690 470 L700 492 L716 470" fill="#1f2228" stroke="#c9ced8" stroke-opacity=".6"/>
+      <text x="710" y="446" text-anchor="middle" font-family="Noto Serif SC" font-weight="900" font-size="30" fill="#ece8df">谢谢，辛苦了</text>
+    </g>
+    <g id="hB2" opacity="0">
+      <rect x="1220" y="380" width="140" height="70" rx="20" fill="#1f2228" stroke="#f2cf85" stroke-opacity=".7"/>
+      <path d="M1276 450 L1286 472 L1300 450" fill="#1f2228" stroke="#f2cf85" stroke-opacity=".7"/>
+      <circle cx="1270" cy="405" r="4" fill="#f2cf85"/><circle cx="1310" cy="405" r="4" fill="#f2cf85"/>
+      <path d="M1262 420 Q1290 442 1318 420" stroke="#f2cf85" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- ============ H2 · 本子上的勾 / 最矮的栏杆 ============ -->
+  <g id="H2" opacity="0">
+    <g id="hNote">
+      <rect x="640" y="230" width="640" height="520" rx="18" fill="#16181d" stroke="#3a3f4b" stroke-width="2"/>
+      <text x="690" y="300" font-family="Noto Serif SC" font-weight="900" font-size="36" fill="#e4e1d9">今天</text>
+      <text x="1230" y="298" text-anchor="end" class="mono" font-size="18" letter-spacing="3" fill="#6c7482">TODAY</text>
+      <line x1="690" y1="325" x2="1230" y2="325" stroke="#2c3039"/>
+      <g class="sans" font-size="28">
+        <g id="r0" opacity="0"><text x="740" y="390" fill="#6f7685">最难的那道题</text><line id="r0s" x1="736" y1="380" x2="736" y2="380" stroke="#8b93a2" stroke-width="2.5"/>
+          <text x="1230" y="388" text-anchor="end" class="mono" font-size="16" letter-spacing="2" fill="#5f6675">先放一放</text></g>
+        <g id="r1" opacity="0"><rect x="696" y="436" width="26" height="26" rx="5" fill="none" stroke="#7c8392" stroke-width="2"/><text x="740" y="460" fill="#d9dde5">会做的那一道</text></g>
+        <g id="r2" opacity="0"><rect x="696" y="506" width="26" height="26" rx="5" fill="none" stroke="#7c8392" stroke-width="2"/><text x="740" y="530" fill="#d9dde5">回一条消息</text></g>
+        <g id="r3" opacity="0"><rect x="696" y="576" width="26" height="26" rx="5" fill="none" stroke="#7c8392" stroke-width="2"/><text x="740" y="600" fill="#d9dde5">下楼走一走</text></g>
+      </g>
+      <g stroke="#f2cf85" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+        <path id="c1" d="M700 448 L708 458 L724 432" opacity="0"/>
+        <path id="c2" d="M700 518 L708 528 L724 502" opacity="0"/>
+        <path id="c3" d="M700 588 L708 598 L724 572" opacity="0"/>
+      </g>
+      <g id="r4" opacity="0">
+        <line x1="690" y1="640" x2="1230" y2="640" stroke="#2c3039"/>
+        <text x="690" y="700" font-family="Noto Serif SC" font-weight="900" font-size="28" fill="#f2cf85">睡前：今天，店员对我笑了一下。</text>
+      </g>
+    </g>
+    <g id="hHurdles" opacity="0">
+      <line x1="460" y1="720" x2="1460" y2="720" stroke="#ffffff" stroke-opacity=".10"/>
+      <g stroke-linecap="round" stroke-width="5">
+        <line x1="620" y1="720" x2="620" y2="690" stroke="#f2cf85" filter="url(#glow)"/>
+        <line x1="790" y1="720" x2="790" y2="660" stroke="#4a5160"/>
+        <line x1="960" y1="720" x2="960" y2="630" stroke="#4a5160"/>
+        <line x1="1130" y1="720" x2="1130" y2="600" stroke="#4a5160"/>
+        <line x1="1300" y1="720" x2="1300" y2="570" stroke="#4a5160"/>
+      </g>
+      <text x="620" y="770" text-anchor="middle" class="sans" font-size="22" fill="#f2cf85">从这里开始</text>
+    </g>
+  </g>
+
+  <!-- ============ I · 回到他 ============ -->
+  <g id="I" opacity="0">
+    <circle id="iGlow" cx="960" cy="470" r="360" fill="url(#iconGlow)" opacity="0"/>
+    <g id="iIcon">
+      <rect x="845" y="355" width="230" height="230" rx="54" fill="url(#iconFill)" stroke="#3a3f4b" stroke-width="2"/>
+      <g id="iEnv" fill="none" stroke="#3a3f4b" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+        <rect x="895" y="420" width="130" height="96" rx="12"/><path d="M899 428 L960 476 L1021 428"/>
+      </g>
+      <text id="iEmpty" x="960" y="640" text-anchor="middle" class="sans" font-size="26" fill="#6f7685" opacity="0">没有新邮件</text>
+    </g>
+    <g id="iSteps" fill="#f2cf85"></g>
+    <text id="iT1" x="760" y="830" text-anchor="middle" class="mono" font-size="22" letter-spacing="2" fill="#f2cf85" opacity="0">10 分钟</text>
+    <text id="iT2" x="1180" y="830" text-anchor="middle" class="mono" font-size="22" letter-spacing="2" fill="#f2cf85" opacity="0">20 分钟</text>
+    <g id="iCompose" opacity="0">
+      <rect x="560" y="290" width="800" height="380" rx="22" fill="url(#cardFill)" stroke="#353a45" stroke-width="2"/>
+      <text x="600" y="342" fill="#c9ced8" class="sans" font-size="24">新邮件</text>
+      <line x1="560" y1="366" x2="1360" y2="366" stroke="#2c3039"/>
+      <text x="600" y="420" fill="#6f7685" class="sans" font-size="21">主题</text><text x="700" y="420" fill="#b9bfca" class="sans" font-size="21">应聘 · 第 31 份</text>
+      <rect x="600" y="456" width="190" height="44" rx="10" fill="#22262e" stroke="#3a3f4b"/>
+      <text x="622" y="485" fill="#9aa2b0" class="sans" font-size="19">📎 简历.pdf</text>
+      <g id="iSend"><rect x="1190" y="596" width="132" height="50" rx="25" fill="#5b8cff"/>
+        <text x="1256" y="629" text-anchor="middle" fill="#fff" class="sans" font-size="21">发送</text></g>
+    </g>
+    <g id="iToast" opacity="0">
+      <rect x="820" y="170" width="280" height="54" rx="27" fill="#20242b" stroke="#3a3f4b"/>
+      <text x="960" y="205" text-anchor="middle" fill="#cfd5df" class="sans" font-size="22">✓ 已发送 · 第 31 份</text>
+    </g>
+  </g>
+
+  <!-- ============ J · 陪他跨过去 ============ -->
+  <g id="J" opacity="0">
+    <polygon points="700,0 1220,0 1460,760 460,760" fill="url(#coneD)"/>
+    <line x1="0" y1="760" x2="1920" y2="760" stroke="#ffffff" stroke-opacity=".08"/>
+    <g stroke="#eef2f8" stroke-linecap="round" filter="url(#glow)">
+      <line x1="915" y1="700" x2="1005" y2="700" stroke-width="6"/>
+      <line x1="922" y1="700" x2="922" y2="760" stroke-width="4" stroke-opacity=".7"/>
+      <line x1="998" y1="700" x2="998" y2="760" stroke-width="4" stroke-opacity=".7"/>
+    </g>
+    <g fill="#121318" stroke="#121318" stroke-linecap="round" filter="url(#rimSilver)">
+      <circle cx="850" cy="470" r="27" stroke="none"/>
+      <rect x="822" y="506" width="56" height="128" rx="22" stroke="none"/>
+      <line x1="838" y1="626" x2="815" y2="752" stroke-width="24"/>
+      <path id="jLeg" d="M864 626 L945 606 L1004 652" fill="none" stroke-width="24" stroke-linejoin="round"/>
+      <line x1="830" y1="520" x2="800" y2="610" stroke-width="20"/>
+      <line x1="872" y1="522" x2="960" y2="560" stroke-width="20"/>
+    </g>
+    <g fill="#121318" stroke="#121318" stroke-linecap="round" filter="url(#rimGold)">
+      <circle cx="1080" cy="462" r="27" stroke="none"/>
+      <rect x="1052" y="498" width="56" height="134" rx="22" stroke="none"/>
+      <line x1="1066" y1="624" x2="1050" y2="752" stroke-width="24"/>
+      <line x1="1094" y1="624" x2="1118" y2="752" stroke-width="24"/>
+      <line x1="1058" y1="516" x2="975" y2="556" stroke-width="20"/>
+      <line x1="1102" y1="520" x2="1128" y2="608" stroke-width="20"/>
+    </g>
+    <circle cx="967" cy="558" r="9" fill="#fff6e0" filter="url(#glow)"/>
+  </g>
+
+  <!-- ============ 片尾 ============ -->
+  <g id="END" opacity="0">
+    <rect x="0" y="0" width="1920" height="1080" fill="url(#endGrad)"/>
+    <text x="960" y="430" text-anchor="middle" font-family="Noto Serif SC" font-weight="900" font-size="130" letter-spacing="24" fill="#eef1f6" filter="url(#glowBig)">无助</text>
+    <text x="960" y="580" text-anchor="middle" font-family="Noto Serif SC" font-weight="900" font-size="46" fill="#ece8df">致每一个，说了“算了”，又试了一次的人。</text>
+    <text x="960" y="690" text-anchor="middle" class="mono" font-size="15" letter-spacing="3" fill="#7c8391">SELIGMAN &amp; MAIER 1967 · MAIER &amp; SELIGMAN 2016 · BANDURA 1977</text>
+  </g>
+
+  <!-- 右上角：有用的次数 -->
+  <g id="useCtr" opacity="0">
+    <text id="useNum" x="1840" y="92" text-anchor="end" fill="#f2cf85" class="mono" font-size="44">0</text>
+    <text x="1840" y="122" text-anchor="end" fill="#a39274" class="sans" font-size="18">次“有用”</text>
+  </g>
 </svg>
 <div id="titleEn">LEARNED HELPLESSNESS</div>
 <div id="title">无助</div>
@@ -267,6 +530,47 @@ const SUBS = [
   [54.6, '它挨的疼，一点也不比一号多。'],
   [56.8, '区别只在于，它的经历告诉它——'],
   [59.0, ''],
+  [63.6, '人，其实也一样。'],
+  [65.8, '没有谁，生下来就趴着。'],
+  [68.0, '我们只是把同一句话，**听了太多遍**。'],
+  [70.4, '举手答错一题——“你怎么这么**笨**。”'],
+  [72.9, '饭桌上讲个笑话，没人笑——“你真**不会说话**。”'],
+  [75.3, '一次，两次，十次。'],
+  [77.3, '后来，你就**不举手了**。'],
+  [79.7, '聚会上，你坐在角落，笑着听别人说。'],
+  [82.1, '不是你真的笨，也不是你真的不会说话。'],
+  [84.5, '是那些话，**替你下了结论**。'],
+  [87.0, '你开始相信：**我就是这样的人**。'],
+  [89.4, '改不了的。'],
+  [91.4, '直到——'],
+  [93.6, '五十年后，当年做实验的人说：**我们弄反了**。'],
+  [96.3, '放弃，根本不用学。疼得太久，谁都会趴下。'],
+  [99.0, '那是本能。'],
+  [100.9, '真正要学会的，是另一件事——'],
+  [103.0, '亲眼看见一次：**我做的，有用**。'],
+  [105.6, '心理学管这叫“自我效能感”：**相信自己，做得到**。'],
+  [108.4, '它不是靠别人夸出来的。'],
+  [110.3, '是一次一次，小小的“有用”，**攒出来的**。'],
+  [112.8, '那只趴下的狗，后来就是这样好起来的——'],
+  [115.0, '有人牵着它，一次，一次，跨过栏杆。'],
+  [117.3, '直到有一天，它**自己**跳了过去。'],
+  [119.6, '所以，如果你总被说“不会说话”——'],
+  [121.9, '先别急着，在一桌人面前讲笑话。'],
+  [124.1, '对便利店的店员，说一句“**谢谢，辛苦了**”。'],
+  [126.5, '她会笑一下。那就是一次“**有用**”。'],
+  [128.8, '如果你总被说“笨”——'],
+  [131.0, '别拿最难的题，去证明自己。'],
+  [133.2, '挑一道你会的，做完，**打一个勾**。'],
+  [135.5, '睡前，写下今天一件“有用”的小事。'],
+  [137.8, '栏杆，从来不用**一次跳最高的**。'],
+  [140.0, '那个不再点开邮箱的人，后来呢？'],
+  [142.2, '他先下楼，走了十分钟。第二天，二十分钟。'],
+  [144.5, ''],
+  [147.9, '一个星期后，他又点开了邮箱。还是空的。'],
+  [150.0, '可这一次，他投出了**第 31 份**。'],
+  [152.1, '如果你身边，也有人趴下很久了——'],
+  [154.0, '别催他跳。**陪他，跨过去一次**。'],
+  [156.1, ''],
 ];
 function parse(s) {               // → [{ch, k}]
   const out = []; let k = false;
@@ -317,6 +621,58 @@ function renderGrain(frame) {
 const setOp = (id, v) => $(id).setAttribute('opacity', clamp(v).toFixed(3));
 const use = (id, x, y, sx = 1, sy = 1) => $(id).setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${sx} ${sy})`);
 
+// ---------- 后半段的小元素 ----------
+const NS = 'http://www.w3.org/2000/svg';
+function pill(parent, text, size = 26, red = true) {
+  const g = document.createElementNS(NS, 'g');
+  const w = text.length * size + 44, h = size + 22;
+  g.innerHTML = `<rect x="${-w/2}" y="${-h/2}" width="${w}" height="${h}" rx="${h/2}" fill="${red ? 'rgba(60,24,22,.55)' : 'rgba(30,32,38,.6)'}" stroke="${red ? '#e0786a' : '#7c8392'}" stroke-opacity=".6"/>` +
+    `<text x="0" y="${size * .36}" text-anchor="middle" font-family="Noto Sans SC" font-weight="500" font-size="${size}" fill="${red ? '#e58a7c' : '#aab1bd'}">${text}</text>`;
+  g.setAttribute('opacity', 0);
+  parent.appendChild(g);
+  return g;
+}
+const LABELS = [
+  { t: 70.5, x: 620, y: 360, s: 30, text: '你怎么这么笨', op: 1 },
+  { t: 73.0, x: 1310, y: 430, s: 30, text: '你真不会说话', op: 1 },
+  ...[['又错了', 420, 520], ['别说了', 1500, 280], ['你不行', 700, 600], ['算了吧', 1240, 620], ['怎么又这样', 520, 240],
+      ['笨死了', 1600, 520], ['你能干嘛', 360, 680], ['又搞砸了', 1460, 720], ['没用', 760, 200], ['闭嘴吧', 1180, 220],
+      ['不会说话', 300, 400], ['这都不会', 1680, 380]]
+    .map(([text, x, y], i) => ({ t: 75.3 + i * .09, x, y, s: 24, text, op: .75 })),
+];
+LABELS.forEach(l => l.el = pill($('dLabels'), l.text, l.s));
+const ELABELS = [['笨', 560, 420, 720, 540], ['不会说话', 1340, 460, 720, 640], ['你不行', 520, 640, 820, 760],
+                 ['没用', 1380, 620, 1000, 760], ['算了吧', 760, 330, 800, 460], ['别说了', 1200, 360, 720, 720]]
+  .map(([text, x, y, tx, ty], i) => ({ text, x, y, tx, ty, d: i * .12 }));
+ELABELS.forEach(l => l.el = pill($('eLabels'), l.text, 22));
+const PRAISE = [['你真棒', 700, 560, 108.5], ['加油！', 1210, 600, 108.9], ['你可以的', 680, 450, 109.3]]
+  .map(([text, x, y, t]) => ({ text, x, y, t }));
+PRAISE.forEach(p => {
+  p.el = document.createElementNS(NS, 'text');
+  p.el.setAttribute('text-anchor', 'middle'); p.el.textContent = p.text + '   +0';
+  $('fPraise').appendChild(p.el);
+});
+const DOTS = Array.from({ length: 7 }, (_, i) => ({ t: 110.4 + i * .28 }));
+DOTS.forEach(d => {
+  d.el = document.createElementNS(NS, 'circle');
+  d.el.setAttribute('cx', 960); d.el.setAttribute('r', 10); d.el.setAttribute('fill', '#fff3d1');
+  d.el.setAttribute('filter', 'url(#glow)'); d.el.setAttribute('opacity', 0);
+  $('fDots').appendChild(d.el);
+});
+const STEPS = Array.from({ length: 16 }, (_, i) => ({ t: 142.2 + i * .09, x: 560 + i * 54, y: 875 + (i % 2) * 14 }));
+STEPS.forEach(s => {
+  s.el = document.createElementNS(NS, 'ellipse');
+  s.el.setAttribute('cx', s.x); s.el.setAttribute('cy', s.y); s.el.setAttribute('rx', 9); s.el.setAttribute('ry', 5);
+  s.el.setAttribute('opacity', 0);
+  $('iSteps').appendChild(s.el);
+});
+const USE_AT = [127.0, 133.6, 134.5, 135.1, 136.0, 142.7, 143.5, 150.9];
+const BIGS = [
+  { t0: 59.0, t1: 63.3, text: '做什么，都没用', size: 150 },
+  { t0: 144.58, t1: 147.7, text: '放弃是天生的，希望是学会的', size: 104 },
+];
+const FLASHES = [[17.05, 1.1], [93.57, .8]];
+
 // ---------- 主渲染 ----------
 window.render = function (t, frame) {
   renderGrain(frame);
@@ -360,8 +716,9 @@ window.render = function (t, frame) {
 
   // ===== 片名（17.05 – 22.2）=====
   const T = t >= DROP - .02 && t < 22.4;
-  const flash = t >= DROP ? Math.exp(-(t - DROP) / .09) : 0;
-  $('flash').style.opacity = (t >= DROP && t < DROP + .8 ? clamp(flash * 1.1) : 0).toFixed(3);
+  let fl = 0;
+  FLASHES.forEach(([t0, a]) => { if (t >= t0 && t < t0 + .8) fl = Math.max(fl, clamp(a * Math.exp(-(t - t0) / .09))); });
+  $('flash').style.opacity = fl.toFixed(3);
   if (T) {
     $('bg').style.filter = 'brightness(.7)';
     const k = t - DROP, out = 1 - ss(21.6, 22.3, t);
@@ -449,22 +806,184 @@ window.render = function (t, frame) {
     setOp('brace', ss(54.8, 55.5, t));
   }
 
-  // 大字：做什么，都没用
-  const BIG = '做什么，都没用', B0 = 59.0;
+  // ===== D：人也一样（63.3 – 77）=====
+  const Dv = win(t, 63.3, 77.1, .6, .4);
+  setOp('D', Dv);
+  if (Dv > 0) {
+    $('bg').style.filter = 'brightness(.9)';
+    const bow = ss(75.4, 76.2, t);
+    setOp('dP', 1 - bow); setOp('dPb', bow);
+    const sink = 1 - .05 * bow;
+    $('dP').setAttribute('transform', `translate(960 780) scale(${sink})`);
+    $('dPb').setAttribute('transform', `translate(960 780) scale(${sink})`);
+    LABELS.forEach(l => {
+      const a = ss(l.t, l.t + .25, t);
+      l.el.setAttribute('opacity', (a * l.op).toFixed(3));
+      l.el.setAttribute('transform', `translate(${l.x} ${l.y + 8 * (1 - a)}) scale(${(1.15 - .15 * a).toFixed(3)})`);
+    });
+  }
+
+  // ===== E：不举手 / 角落 / 箱子（76.8 – 94.8）=====
+  const Ev = win(t, 76.8, 94.8, .5, .6);
+  setOp('E', Ev);
+  if (Ev > 0) {
+    $('bg').style.filter = `brightness(${(1 - .6 * ss(87.0, 92.6, t)).toFixed(3)})`;
+    setOp('E1', win(t, 76.8, 79.7, .5, .4));
+    setOp('E2', win(t, 79.5, 82.3, .4, .4));
+    setOp('E3', ss(82.1, 82.7, t));
+    // 那些话飞过来，变成箱子的墙
+    const draw = ss(84.5, 86.2, t);
+    ['eW0','eW1','eW2','eW3'].forEach((id, i) => {
+      const e = $(id), len = 600;
+      e.setAttribute('stroke-dasharray', len);
+      e.setAttribute('stroke-dashoffset', (len * (1 - ss(84.5 + i * .15, 86.0 + i * .15, t))).toFixed(1));
+      // 93.57 墙被炸开
+      const k = ss(93.57, 94.6, t), dir = [[-1, 0], [0, 1], [1, 0], [0, -1]][i];
+      e.setAttribute('transform', `translate(${dir[0] * 260 * k} ${dir[1] * 180 * k}) rotate(${(i % 2 ? 1 : -1) * 18 * k} 960 610)`);
+      e.setAttribute('opacity', (1 - k).toFixed(3));
+    });
+    setOp('eWarm', ss(85.8, 86.8, t) * (1 - ss(92, 93, t)));
+    ELABELS.forEach(l => {
+      const a = win(t, 82.3 + l.d, 86.3, .3, .5), m = ss(84.5, 86.0, t);
+      l.el.setAttribute('opacity', a.toFixed(3));
+      l.el.setAttribute('transform', `translate(${lerp(l.x, l.tx, m)} ${lerp(l.y, l.ty, m)}) scale(${(1 - .5 * m).toFixed(3)})`);
+    });
+  }
+
+  // ===== F：我们弄反了 / 自我效能感（93.57 – 112.6）=====
+  const Fv = win(t, 93.57, 112.7, .05, .4);
+  setOp('F', Fv);
+  if (Fv > 0) {
+    $('bg').style.filter = 'brightness(.95)';
+    setOp('fQuote', win(t, 93.8, 100.6, .5, .5));
+    setOp('fInst', win(t, 96.4, 100.6, .4, .5));
+    setOp('fMeter', ss(101.0, 101.6, t));
+    // 第一个“有用”：一个金点，落进瓶子
+    const drop = ss(104.2, 104.9, t);
+    $('fDot').setAttribute('cx', 960); $('fDot').setAttribute('cy', lerp(250, 715, drop));
+    setOp('fDot', ss(103.0, 103.4, t) * (1 - ss(104.8, 105.0, t)));
+    setOp('fDotTxt', win(t, 103.2, 104.4, .3, .3));
+    setOp('fLabel', ss(105.7, 106.3, t));
+    // 别人的夸奖：飘过去，没装进去
+    PRAISE.forEach(p => {
+      const k = clamp((t - p.t) / 2.2);
+      p.el.setAttribute('opacity', (Math.sin(Math.PI * k) * .9).toFixed(3));
+      p.el.setAttribute('transform', `translate(${p.x} ${p.y - 120 * k})`);
+    });
+    // 后面一个个小“有用”
+    let n = t > 104.9 ? 1 : 0;
+    DOTS.forEach(d => {
+      const k = ss(d.t, d.t + .45, t);
+      d.el.setAttribute('cy', lerp(260, 715, k).toFixed(1));
+      d.el.setAttribute('opacity', (ss(d.t - .2, d.t, t) * (1 - ss(d.t + .4, d.t + .5, t))).toFixed(3));
+      if (t > d.t + .45) n++;
+    });
+    const h = 416 * Math.min(1, n / 9);
+    $('fFill').setAttribute('y', (750 - h).toFixed(1)); $('fFill').setAttribute('height', h.toFixed(1));
+  }
+
+  // ===== G：牵着它跨过去（112.6 – 119.4）=====
+  const Gv = win(t, 112.6, 119.5, .5, .4);
+  setOp('G', Gv);
+  if (Gv > 0) {
+    $('bg').style.filter = 'brightness(.95)';
+    const walk = ss(115.0, 116.6, t), alone = ss(117.4, 118.5, t);
+    const manX = lerp(380, 980, walk), manLift = Math.sin(Math.PI * walk) * 30;
+    const dogX = lerp(560, 1140, walk) + lerp(0, 520, alone);
+    const dogLift = Math.sin(Math.PI * walk) * 110 + Math.sin(Math.PI * alone) * 150;
+    use('gMan', manX, 720 - manLift);
+    const up = ss(114.5, 115.0, t);
+    use('gDogL', 560, 720); setOp('gDogL', 1 - up);
+    use('gDogS', dogX, 720 - dogLift); use('gDogG', dogX, 720 - dogLift);
+    const gold = ss(117.6, 118.2, t);
+    setOp('gDogS', up * (1 - gold)); setOp('gDogG', up * gold);
+    // 牵绳：手 → 狗脖子
+    const hx = manX + 38, hy = 720 - manLift - 80;
+    const nx = up > .5 ? dogX + 50 : 560 + 70, ny = up > .5 ? 720 - dogLift - 82 : 720 - 22;
+    const L = $('gLeash');
+    L.setAttribute('x1', hx); L.setAttribute('y1', hy); L.setAttribute('x2', nx); L.setAttribute('y2', ny);
+    L.setAttribute('opacity', (ss(113.2, 113.8, t) * (1 - ss(116.9, 117.3, t))).toFixed(3));
+    setOp('gArc', ss(117.4, 118.0, t));
+    $('gArc').setAttribute('stroke-dashoffset', (-(t * 20) % 14).toFixed(1));
+  }
+
+  // ===== H1：便利店（119.4 – 128.6）=====
+  const H1v = win(t, 119.4, 128.7, .5, .4);
+  setOp('H1', H1v);
+  if (H1v > 0) {
+    $('bg').style.filter = 'brightness(.95)';
+    setOp('hOld', win(t, 119.8, 122.0, .4, .5));
+    setOp('hB1', ss(124.2, 124.6, t));
+    setOp('hB2', ss(126.5, 126.9, t));
+  }
+
+  // ===== H2：本子 / 最矮的栏杆（128.6 – 139.8）=====
+  const H2v = win(t, 128.6, 139.8, .5, .4);
+  setOp('H2', H2v);
+  if (H2v > 0) {
+    $('bg').style.filter = 'brightness(.95)';
+    setOp('hNote', 1 - ss(137.4, 137.9, t));
+    setOp('r0', ss(131.0, 131.4, t) * (1 - .5 * ss(132.6, 133.0, t)));
+    $('r0s').setAttribute('x2', lerp(736, 920, ss(131.8, 132.3, t)).toFixed(1));
+    setOp('r1', ss(133.0, 133.3, t)); setOp('c1', ss(133.5, 133.7, t));
+    setOp('r2', ss(134.0, 134.2, t)); setOp('c2', ss(134.4, 134.6, t));
+    setOp('r3', ss(134.6, 134.8, t)); setOp('c3', ss(135.0, 135.2, t));
+    setOp('r4', ss(135.6, 136.1, t));
+    setOp('hHurdles', ss(137.8, 138.3, t));
+  }
+
+  // ===== I：回到他（139.6 – 152.3）=====
+  const Iv = win(t, 139.6, 152.3, .6, .4);
+  setOp('I', Iv);
+  if (Iv > 0) {
+    $('bg').style.filter = `brightness(${(.8 - .4 * win(t, 144.4, 147.8, .3, .3)).toFixed(3)})`;
+    const lit = ss(147.9, 148.8, t);
+    $('iEnv').setAttribute('stroke', `rgb(${lerp(58,200,lit)|0},${lerp(63,214,lit)|0},${lerp(75,240,lit)|0})`);
+    setOp('iGlow', lit);
+    setOp('iEmpty', ss(148.8, 149.3, t));
+    setOp('iIcon', 1 - ss(149.8, 150.2, t));
+    STEPS.forEach(s => s.el.setAttribute('opacity', (ss(s.t, s.t + .2, t) * (1 - ss(146.8, 147.6, t)) * .8).toFixed(3)));
+    setOp('iT1', win(t, 142.6, 147.6, .3, .6)); setOp('iT2', win(t, 143.4, 147.6, .3, .6));
+    setOp('iCompose', win(t, 150.0, 151.5, .3, .4));
+    $('iSend').setAttribute('transform', `translate(1256 621) scale(${1 - .06 * win(t, 150.6, 150.9, .1, .15)}) translate(-1256 -621)`);
+    setOp('iToast', win(t, 151.0, 152.3, .25, .4));
+  }
+
+  // ===== J：陪他跨过去（152.0 – 156.3）=====
+  const Jv = win(t, 152.0, 156.4, .7, .5);
+  setOp('J', Jv);
+  if (Jv > 0) {
+    $('bg').style.filter = 'brightness(1)';
+    const s = 1 + .04 * ss(152, 156.4, t);
+    $('J').setAttribute('transform', `translate(960 600) scale(${s}) translate(-960 -600)`);
+  }
+
+  // ===== 片尾（156 – 159.75）=====
+  setOp('END', ss(156.1, 156.9, t));
+
+  // 右上角“有用”计数
+  setOp('useCtr', win(t, 119.6, 152.3, .5, .4));
+  $('useNum').textContent = USE_AT.filter(x => t >= x).length;
+
+  // 大字
   const big = $('big');
-  if (!big.children.length) big.innerHTML = [...BIG].map(c => `<span>${c}</span>`).join('');
-  const bigOut = 1 - ss(62.6, 63.3, t);
-  const shake = t > B0 ? 3 * Math.exp(-(t - B0) / .25) * Math.sin(t * 90) : 0;
-  big.style.transform = `translateX(${shake.toFixed(2)}px)`;
-  [...big.children].forEach((sp, i) => {
-    const t0 = B0 + i * .11, x = ss(t0, t0 + .22, t);
-    const land = t > t0 + .18 ? Math.exp(-(t - t0 - .18) / .35) : 0;
-    sp.style.opacity = (x * bigOut).toFixed(3);
-    sp.style.transform = `scale(${(1.3 - .3 * x).toFixed(3)})`;
-    sp.style.filter = `blur(${((1 - x) * 14).toFixed(1)}px)`;
-    sp.style.textShadow = `0 0 ${(18 + 40 * land).toFixed(0)}px rgba(170,195,255,${(.35 + .45 * land).toFixed(2)}), 0 3px 8px rgba(0,0,0,.9)`;
-  });
-  if (Cv > 0) setOp('C', Cv * (1 - .75 * ss(58.7, 59.4, t)));
+  const B = BIGS.find(b => t >= b.t0 - .05 && t < b.t1 + .1);
+  if (!B) { big.innerHTML = ''; big._b = null; }
+  else {
+    if (big._b !== B) { big.innerHTML = [...B.text].map(c => `<span>${c}</span>`).join(''); big.style.fontSize = B.size + 'px'; big._b = B; }
+    const bigOut = 1 - ss(B.t1 - .7, B.t1, t);
+    const shake = t > B.t0 ? 3 * Math.exp(-(t - B.t0) / .25) * Math.sin(t * 90) : 0;
+    big.style.transform = `translateX(${shake.toFixed(2)}px)`;
+    [...big.children].forEach((sp, i) => {
+      const t0 = B.t0 + i * .09, x = ss(t0, t0 + .22, t);
+      const land = t > t0 + .18 ? Math.exp(-(t - t0 - .18) / .35) : 0;
+      sp.style.opacity = (x * bigOut).toFixed(3);
+      sp.style.transform = `scale(${(1.3 - .3 * x).toFixed(3)})`;
+      sp.style.filter = `blur(${((1 - x) * 14).toFixed(1)}px)`;
+      sp.style.textShadow = `0 0 ${(18 + 40 * land).toFixed(0)}px rgba(${B.t0 > 100 ? '242,207,133' : '170,195,255'},${(.35 + .45 * land).toFixed(2)}), 0 3px 8px rgba(0,0,0,.9)`;
+    });
+  }
+  if (Cv > 0) setOp('C', Cv * (1 - .75 * ss(58.7, 59.4, t)) * (1 - ss(63.0, 63.6, t)));
   // 字幕
   renderSub(t, $('sub'), PARSED);
   if (t >= 17.5 && t < 22.4) {
@@ -472,7 +991,7 @@ window.render = function (t, frame) {
     renderSub(t, $('sub'), Q);
   } else $('sub').style.bottom = '58px';
   // 结尾淡出
-  $('fade').style.opacity = ss(63.0, 63.8, t).toFixed(3);
+  $('fade').style.opacity = ss(159.0, 159.75, t).toFixed(3);
 };
 </script>
 </body></html>
