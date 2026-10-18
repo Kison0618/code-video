@@ -3,6 +3,7 @@
 - `无助_demo_前1分钟.mp4`：v1 版 0–62 秒 demo，1080p 30fps，配 `reference-videos/BGM.m4a`，17.05 秒片名卡点。
 - `demo.html`：全部画面和字幕。`window.render(t)` 画出第 t 秒的画面，字幕在文件里的 `SUBS` 数组中。
 - `render.js`：逐帧截图。
+- `sfx.py`：音效轨，全部用代码合成。时间点写在文件里的 `CUES` 列表中；音量是 dB，想调哪一声，直接改那一行。
 - `文案.md`：完整文案和时间。
 - `关键帧/`：风格关键帧；`关键帧/完整版/` 是后半段自查用的静帧。
 
@@ -24,8 +25,12 @@ node render.js stills 17.3,59.5,85.5,94.2,146,157.5
 # 2. 拼 BGM：原曲 0–129.70 秒，接上 99.95 秒到结尾，一共 159.75 秒
 ffmpeg -i ../reference-videos/BGM.m4a -filter_complex "[0]atrim=0:129.70,asetpts=PTS-STARTPTS[a];[0]atrim=start=99.95,asetpts=PTS-STARTPTS[b];[a][b]concat=n=2:v=0:a=1[m]" -map "[m]" bgm_full.wav
 
-# 3. 合成视频
-ffmpeg -framerate 30 -i frames/f_%05d.jpg -i bgm_full.wav -map 0:v -map 1:a -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -b:a 192k -af "afade=t=out:st=158.3:d=1.45" -shortest 无助_完整版.mp4
+# 3. 生成音效并和 BGM 混音（需要 numpy：pip install numpy）
+python sfx.py                 # → sfx.wav（只有音效）、mix.wav（BGM + 音效）
+python sfx.py --solo 93.57    # 只试听某个时刻前后 4 秒 → solo.wav
+
+# 4. 合成视频
+ffmpeg -framerate 30 -i frames/f_%05d.jpg -i mix.wav -map 0:v -map 1:a -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest 无助_完整版.mp4
 ```
 
 想用自己装的 Chrome，先设好环境变量 `CHROME_PATH`，指向浏览器程序的路径。
@@ -44,3 +49,9 @@ ffmpeg -framerate 30 -i frames/f_%05d.jpg -i bgm_full.wav -map 0:v -map 1:a -c:v
   - 93.57 秒翻转：“我们弄反了”。
   - 后面给出做法：对店员说一句谢谢、挑一道会做的题打个勾、睡前写下一件“有用”的小事；右上角“有用”计数一次次往上加。
   - 结尾回到开头那个人，他投出了第 31 份。
+- 音效：`sfx.py`。只在这几类地方出声，和参考视频的做法一样：
+  - 画面里会响的东西：发送邮件、面板、电、狗趴下、标签冒出来、打勾、脚步；
+  - 大字和落点的低音：17.05、59、93.57、144.58 秒，以及片尾；
+  - 落点之前的上扬音；
+  - 76.6–87.2 秒安静段落里的一条细音；
+  - 每次“有用”的“叮”，音一次比一次高。
