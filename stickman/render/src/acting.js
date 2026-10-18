@@ -63,18 +63,24 @@ A.scratch = function (t, dur = 1.0, o = {}) {
   return t + dur;
 };
 
-// 吓一跳：身子往后一弹、手护到身前，落回来时膝盖压一下
+// 吓一跳（原片编程集 0:34 hi 掉出来那一下，30fps 逐帧）：
+//   1 帧之内甩到极限（上身后仰约 35°、头往后甩、双手往上甩）→ 定住约 0.2 秒（还在微微往后飘）
+//   → 约 0.18 秒回正，双手护在脸前 → 护着脸愣住不动（hold 秒）。弹簧做不出"1 帧到位"，所以极限这段走精确路径。
 A.startle = function (t, o = {}) {
   const h = this.hipT.at(t), l = this.leanT.at(t), D = this.dirAt(t), H = this.H, k = o.amt ?? 1;
-  const fF = this.feet.F.at(t), fB = this.feet.B.at(t), back = (o.back ?? 0.1) * H * k;
-  this.hip(t, [h[0] - D * back * 0.6, h[1] - 0.06 * H * k]).lean(t, l - 16 * k).head(t, -14 * k);
-  this.hand('F', t, 'local', [0.16, -0.06]).hand('B', t + 0.02, 'local', [0.1, -0.02]);
-  this.foot('F', t + 0.03, [fF[0] - D * back, 0], 0.16, 14 * k, 'out3', false).foot('B', t + 0.05, [fB[0] - D * back * 1.2, 0], 0.16, 12 * k);
-  this.hip(t + 0.2, [h[0] - D * back, h[1] + 0.05 * H * k]).lean(t + 0.2, l - 6);
-  this.hip(t + 0.55, [h[0] - D * back, h[1]], 0.35).lean(t + 0.55, l, 0.3);
+  const fB = this.feet.B.at(t), back = (o.back ?? 0.1) * H * k, L1 = l - 34 * k;
+  const T1 = t + 0.04, T2 = t + 0.26, T3 = T2 + 0.18, hold = o.hold ?? 0.8;
+  this.path('lean', t, T2, s => s < T1 ? lerp(l, L1, (s - t) / 0.04) : L1 - 5 * k * (s - T1) / (T2 - T1));
+  this.path('hip', t, T2, s => { const u = Math.min(1, (s - t) / 0.04), d = Math.max(0, (s - T1) / (T2 - T1)); return [h[0] - D * back * (0.45 * u + 0.35 * d), h[1] + 0.05 * H * k * u]; });
+  this.head(t, -26 * k);
+  this.hand('F', t, 'pose', [0.17, -0.2]).hand('B', t, 'pose', [0.1, -0.16]);                 // 手往上甩
+  this.foot('B', t + 0.04, [fB[0] - D * back * 1.3, 0], 0.16, 12 * k, 'out3', false);        // 后脚退一步撑住
+  this.hip(T2, [h[0] - D * back * 0.8, h[1] + 0.03 * H * k], 0.18).lean(T2, l - 6 * k, 0.18).head(T2, -10 * k, 0.2);
+  this.hand('F', T2, 'local', [0.13, -0.15]).hand('B', T2 + 0.03, 'local', [0.09, -0.11]);   // 护着脸
+  this.hip(T3 + hold * 0.5, [h[0] - D * back * 0.8, h[1]], 0.4).lean(T3 + hold * 0.5, l, 0.4);
   this.sfx(t, 'whoosh_short', { v: 0.35 * k });
-  if (o.release !== false) this.hand('F', t + 0.7, 'free', REST_F).hand('B', t + 0.7, 'free', REST_B);
-  return t + 0.7;
+  if (o.release !== false) this.hand('F', T3 + hold, 'free', REST_F).hand('B', T3 + hold, 'free', REST_B).head(T3 + hold, 0, 0.3);
+  return T3 + hold;
 };
 
 // 试探着伸手去戳：慢慢伸过去（犹豫）→ 很快戳一下（配音效）→ 像被烫到一样缩回来

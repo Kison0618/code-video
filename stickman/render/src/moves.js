@@ -2,11 +2,11 @@
 // 全部是 Actor2 底层意图（胯、前倾、脚、手、精确轨迹）的组合，require 之后直接挂在 Actor2 上：
 //   a.flinch(t)                                    小后仰
 //   a.knockback(t, { dist: 90 })                   被推着往后滑一段，站稳
-//   const L = a.launch(t, { vx: -700, vy: -900, turns: 1, land: 'back' })   被打飞，空翻 turns 圈，仰面 / 脸朝下 / 双脚落地
+//   const L = a.launch(t, { vx: -700, vy: -900, turns: 1, land: 'back' })   被打飞，空翻 turns 圈，仰面 / 脸朝下 / 双脚落地（roll: true 仰面落地后再往后滚一圈坐起来）
 //   a.getUp(L.t + 0.6, { from: 'back' })           爬起来，返回站稳的时间
 //   const r = a.run(t, x1, { speed: 1100, stop: true })  跑到 x1（v0 接着上一段的速度跑；stop:false 不刹车）
 //   const s = a.slide(t, { v0: r.v, dur: 0.5 })    滑铲（从线下面钻过去）
-//   const w = a.walk(t, x1)                        走到 x1（胯的位置），返回到达时间
+//   const w = a.walk(t, x1, { arms: true })        走到 x1（胯的位置），返回到达时间（arms 摆臂；手上有东西时别开）
 //   const k = a.kneel(t, { front: x })              单膝跪下（前脚踩在 x，后膝着地），a.rise(t) 站起来
 //   a.jump(t, { to: x, h: 160, dur: 0.55 })        跳（running: true 跑着起跳不下蹲；skid: 落地后往前滑的距离；gy: 落在多高的台子上，往上是负）
 //   a.bonk(t, { amt: 1 })                          被东西砸到头：头一缩、肩膀一沉，马上恢复（只改头和胯，不打断手上的动作）
@@ -30,13 +30,22 @@ A.flinch = function (t, o = {}) {
   return t + back + 0.3;
 };
 
-// 被砸到头：头往下一缩、肩膀一沉，0.3 秒内恢复到原来的目标（先记下原来的目标再插入，不会打断之后的动作）
+// 被砸到头：和吓一跳一样"1 帧到位 → 定住 → 回来"，只是方向相反——缩脖子、肩膀一沉、上身往前一弯，手马上捂到头上
+//   o.hip === false：只缩头和弯腰（人正在做别的动作，比如抱头蹲着、被缠住），不碰胯和手
 A.bonk = function (t, o = {}) {
-  const k = o.amt ?? 1, H = this.H, b = t + (o.hold ?? 0.12);
-  const h0 = this.headT.at(t), h1 = this.headT.at(b), p0 = this.hipT.at(t), p1 = this.hipT.at(b);
-  this.head(t, h0 + 34 * k).head(b, h1, 0.25);
-  if (o.hip !== false) this.hip(t, [p0[0], p0[1] + 0.05 * H * k]).hip(b, p1, 0.22);
-  return b + 0.25;
+  const k = o.amt ?? 1, H = this.H, T1 = t + 0.035, b = t + (o.hold ?? 0.16);
+  const h0 = this.headT.at(t), h1 = this.headT.at(b + 0.2), l0 = this.leanT.at(t), l1 = this.leanT.at(b + 0.2);
+  this.head(t, h0 + 40 * k).head(b, h1, 0.22);
+  if (o.hip === false) { this.lean(t, l0 + 8 * k).lean(b, l1, 0.2); return b + 0.25; }
+  const p0 = this.hipT.at(t), p1 = this.hipT.at(b + 0.2);
+  this.path('lean', t, b, s => lerp(l0, l0 + 14 * k, Math.min(1, (s - t) / 0.035)));
+  this.path('hip', t, b, s => [p0[0], p0[1] + 0.06 * H * k * Math.min(1, (s - t) / 0.035)]);
+  this.lean(b, l1, 0.2).hip(b, p1, 0.22);
+  if (o.hands !== false) {                                           // 双手捂头，揉两下
+    this.hand('F', T1 + 0.05, 'local', s => [0.05 + 0.03 * Math.sin((s - T1) * 26), -0.26]).hand('B', T1 + 0.08, 'local', [0.0, -0.25]);
+    this.hand('F', b + 0.55, 'free', [0.05, 0.35]).hand('B', b + 0.55, 'free', [-0.04, 0.35]);
+  }
+  return b + 0.6;
 };
 
 // 击退：整个人被推着往后滑（脚贴地滑，不抬脚），手往前甩，最后站稳
@@ -88,6 +97,19 @@ A.launch = function (t, o = {}) {
   this.hip(tL, [xs, land === 'feet' ? -this.STAND + 0.16 * H : -0.026 * H], 0.25, 'out3').lean(tL, lEnd).head(tL, land === 'feet' ? 20 : 0);
   if (land === 'feet') this.hip(tL + 0.3, [xs, -this.STAND], 0.35).lean(tL + 0.3, 2, 0.3);
   if (land !== 'feet') this.sfx(tL, 'body', { v: Math.min(1, Math.hypot(vx, vy + G * tau) / 1400) });   // 落地时的速度
+  if (land === 'back' && o.roll) {
+    // 落地后顺着惯性往后滚（原片编程集 2:42 被线扫倒）：躺下 → 腿翻过头顶 → 摇回来坐起，手撑在身后
+    const r0 = tL + 0.04, r1 = r0 + 0.2, r2 = r1 + 0.04, r3 = r2 + 0.3, dx = Math.sign(vx) * 0.32 * H;
+    this.path('lean', r0, r3, s => s < r1 ? lerp(lEnd, lEnd - 60, E.out((s - r0) / (r1 - r0))) : s < r2 ? lEnd - 60 : lerp(lEnd - 60, lEnd + 76, E.inOut((s - r2) / (r3 - r2))));
+    this.path('hip', r0, r3, s => [xs + dx * E.out(clamp((s - r0) / (r3 - r0))), s < r2 ? -0.05 * H : lerp(-0.05 * H, -0.12 * H, E.inOut((s - r2) / (r3 - r2)))]);
+    this.footFree('F', r0, [0.24, 0.32]).footFree('B', r0 + 0.03, [0.1, 0.4]);
+    const xe = xs + dx, Ds = -Math.sign(vx) || D;                    // 坐起来时脚朝滚来的方向
+    this.foot('F', r3 - 0.12, [xe + Ds * 0.36 * H, 0], 0.14, 0, 'out3', false).foot('B', r3 - 0.1, [xe + Ds * 0.26 * H, 0], 0.14, 0, 'out3', false);
+    this.hip(r3, [xe, -0.12 * H]).lean(r3, lEnd + 76).head(r3, 6);
+    this.hand('F', r2, 'world', [xe - Ds * 0.14 * H, 0]).hand('B', r2 + 0.03, 'world', [xe - Ds * 0.08 * H, 0]);
+    this.sfx(r1, 'rustle', { v: 0.8 }).sfx(r3, 'body', { v: 0.4 });
+    return { t: r3, x: xe, lean: lEnd + 76, sit: true };
+  }
   return { t: tL, x: xs, lean: lEnd };
 };
 
@@ -267,19 +289,36 @@ A.jump = function (t, o = {}) {
 
 // 走：脚轮流踩点，胯平滑地移过去；最后两步把脚收成站姿
 A.walk = function (t, x1, o = {}) {
+  // 原片实测（编程集 0:18 赌气走开）：触地时两脚前后分开约 0.5H，两腿成倒 V（和竖直方向约 30°），胯只比站直低一点；
+  // 两只脚轮流迈，一只在空中时另一只踩稳不动，触地的姿势停得比"两脚交错"那一下久。
+  // 我们的腿比原片短（0.45H 对 0.5H），按腿的角度换算成步幅 0.4H。
   const D = this.dirAt(t), H = this.H, c = cur(this, t), x0 = c.hip[0], sg = Math.sign(x1 - x0) || D;
-  const dist = Math.abs(x1 - x0), sd = o.stepDur ?? 0.3, n = Math.max(1, Math.ceil(dist / (o.stride ?? 0.3 * H)));
-  const dur = n * sd * 0.8 + sd * 0.5;
-  const hipAt = s => x0 + (x1 - x0) * E.inOut(clamp((s - t) / dur));
+  const dist = Math.abs(x1 - x0), sd = o.stepDur ?? 0.3, stride = o.stride ?? 0.4 * H, n = Math.max(1, Math.ceil(dist / stride));
+  const P = sd * 0.8, sw = P * (o.swing ?? 0.6);                 // 一步的周期；脚在空中的时间（其余时间踩稳）
+  const dur = n * P + sd * 0.5;
+  // 胯走精确路径：只在第一步加速、最后一步减速，中间匀速（整段缓入缓出会让长距离走路一直在加速，弹簧再一滞后，胯落在脚后面人就蹲下去了）
+  const ta = Math.min(P * 0.9, dur / 2), vmax = dist / (dur - ta);
+  const prof = a => a <= 0 ? 0 : a < ta ? 0.5 * vmax * a * a / ta : a < dur - ta ? 0.5 * vmax * ta + vmax * (a - ta) : dist - 0.5 * vmax * Math.pow(Math.max(0, dur - a), 2) / ta;
+  const hipAt = s => x0 + sg * Math.min(dist, prof(s - t));
+  const tl0 = t + sw;                                            // 第一次触地；之后每 P 秒一次。触地时胯最低
+  const y0 = c.hip[1], ys = -this.STAND;
+  this.path('hip', t, t + dur, s => [hipAt(s), lerp(y0, ys, clamp((s - t) / 0.2)) + 0.025 * H * Math.max(0, Math.cos(2 * Math.PI * (s - tl0) / P)) * clamp((s - t) / P) * clamp((t + dur - s) / P)]);
   const fin = { F: x1 + D * 0.07 * H, B: x1 - D * 0.07 * H };
   this.hip(t, [x1, -this.STAND + 0.012 * H], dur, 'inOut').hip(t + dur, [x1, -this.STAND], 0.2);
   let side = (c.fF[0] - c.fB[0]) * sg < 0 ? 'F' : 'B';          // 后面那只脚先迈
+  const half = Math.min(stride, dist / n) * 0.5;
   for (let k = 0; k <= n; k++) {
-    const tk = t + k * sd * 0.8, last = k >= n - 1;
-    this.foot(side, tk, [last ? fin[side] : hipAt(tk + sd) + sg * 0.1 * H, 0], sd, o.lift ?? 14);
+    const tk = t + k * P, last = k >= n - 1;
+    this.foot(side, tk, [last ? fin[side] : hipAt(tk + sw) + sg * half, 0], last ? Math.max(sw, sd * 0.7) : sw, o.lift ?? 0.06 * H);
     side = side === 'F' ? 'B' : 'F';
   }
-  return { t: t + n * sd * 0.8 + sd, x: x1 };
+  if (o.arms) {                                                  // 摆臂：和对侧腿同步，肘微弯（手上拿着东西时不要开）
+    const sgn = side === 'F' ? 1 : -1;
+    this.hand('F', t, 'pose', s => { const ph = Math.sin(Math.PI * (s - t) / P) * sgn * clamp((t + dur - s) / 0.3); return [0.05 + 0.12 * ph, 0.33 - 0.03 * Math.abs(ph)]; });
+    this.hand('B', t, 'pose', s => { const ph = -Math.sin(Math.PI * (s - t) / P) * sgn * clamp((t + dur - s) / 0.3); return [-0.03 + 0.12 * ph, 0.33 - 0.03 * Math.abs(ph)]; });
+    this.hand('F', t + dur + 0.05, 'free', [0.05, 0.35]).hand('B', t + dur + 0.05, 'free', [-0.04, 0.35]);
+  }
+  return { t: t + n * P + sd, x: x1 };
 };
 
 // 单膝跪：前脚踩在 front，胯在前脚后面 0.2H、高度正好让后膝着地（小腿平放在地上）

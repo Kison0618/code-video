@@ -60,7 +60,7 @@ class Actor2 {
     this.hands = { F: [{ t: -1e9, mode: 'free', arg: [0.05, 0.35] }], B: [{ t: -1e9, mode: 'free', arg: [-0.04, 0.35] }] };
     this.objModes = [{ t: -1e9, mode: 'none' }];
     this.objJiggle = o.objJiggle || null;          // t → [dy, drot]（比如敲键盘时电脑的微震）
-    this.noise = o.noise ?? 1;                     // "活"的停顿强度
+    this.noise = o.noise ?? 0.5;                   // "活"的停顿强度（原片静止段几乎不动：快动作 + 长停顿，晃多了像站不稳）
     this.feel = { ...FEEL, ...(o.feel || {}) };
     this.paths = { hip: [], lean: [] };            // 精确轨迹（抛飞、空翻、跑步）：这段时间内不走弹簧
     this.footModes = { F: [{ t: -1e9, mode: 'ground' }], B: [{ t: -1e9, mode: 'ground' }] };
