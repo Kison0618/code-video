@@ -37,9 +37,10 @@ let prev = null;
 for (let t = 0; t <= S.DUR; t += 1 / 30) {
   const ta = clock.anim(t), j = hero.jointsAt(ta), s = hero.stateAt(ta);
   if (prev && ta > prev.ta && t > (S.heroFrom ?? 0) + 0.05) {
-    const pts = ['head', 'hip'].map(k => [j[k], prev.j[k]]).concat(['aF', 'aB', 'lF', 'lB'].map(k => [j[k][2], prev.j[k][2]]));
-    const dmax = Math.max(...pts.map(([a, b]) => Math.hypot(a[0] - b[0], a[1] - b[1]))) / hero.H;
-    if (dmax > 0.6) push(t, t, `身体瞬移（一帧 ${dmax.toFixed(2)} 个身高）`);
+    // 胯和头一帧超过 0.6H 算瞬移；手脚放宽到 1.0H（出招本来就是 1–2 帧打到位，原片实测一帧 0.5–0.8H）
+    const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]) / hero.H;
+    const dBody = Math.max(dist(j.head, prev.j.head), dist(j.hip, prev.j.hip)), dLimb = Math.max(...['aF', 'aB', 'lF', 'lB'].map(k => dist(j[k][2], prev.j[k][2])));
+    if (dBody > 0.6 || dLimb > 1.0) push(t, t, `身体瞬移（一帧 ${Math.max(dBody, dLimb).toFixed(2)} 个身高）`);
     const dd = s.lean - prev.s.lean, dl = Math.abs(dd - 360 * Math.round(dd / 360)) / (ta - prev.ta);   // 差整圈的角度看起来一样，不算
     if (dl > 2000) push(t, t, `身体角度突跳（${dl.toFixed(0)}°/秒）`);
   }

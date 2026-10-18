@@ -6,7 +6,7 @@
 //   const { Actor2, exchange } = require('./fight');
 //   const r = hero.move(t, 'jab');                 // 招式数据在 analysis/fight_moves.json（从原片逐帧量出来的帧数和姿势）
 //   r.contact                                      // 打中的时刻（动画时间）；r.t 招式结束（回到架势）
-//   exchange(D, [{ t, a: hero, move: 'jab', b: foe, react: 'hurt_high', level: 'light' }, ...])   // 攻防编排：动作 + 反应 + 打击停顿
+//   exchange(D, [{ t, a: hero, move: "thrust", b: foe, react: "stagger", glyph: "0" }, ...], fx)   // 出招 + 反应 + 打击特效（不停帧）
 //
 // 姿势（每个 key）：{ f, hip:[x,y], lean, head, F:[x,y], B:[x,y], fF:[x,y], fB:[x,y], e, hit }
 //   f：帧号（24fps，相对招式开始）
@@ -39,11 +39,17 @@ function chan(list) {
   };
 }
 
+// 此刻胯的实际位置（精确路径进行中就取路径上的值，否则取目标）
+A.hipNow = function (t) { const L = this.paths.hip; for (let n = L.length - 1; n >= 0; n--) if (t >= L[n].t0 && t < L[n].t1) return L[n].fn(t); return this.hipT.at(t); };
+
 A.keys = function (t0, keys, o = {}) {
   const D = o.dir ?? this.dirAt(t0), H = this.H, fps = o.fps ?? 24, sc = o.slow ?? 1;
-  const hip0 = this.hipT.at(t0), lean0 = this.leanT.at(t0), head0 = this.headT.at(t0);
+  // 起点 = 此刻的实际姿势：上一招的精确路径还没走完（招式叠着接）时取路径上此刻的值，不然人会被拽回上一招开始前的位置
+  const pathNow = ch => { const L = this.paths[ch]; for (let n = L.length - 1; n >= 0; n--) if (t0 >= L[n].t0 && t0 < L[n].t1) return L[n].fn(t0); return null; };
+  const footNow = f => { let m = null; for (const x of this.footModes[f]) if (x.t <= t0) m = x; return m && m.mode === 'path' ? m.fn(t0) : this.feet[f].target(t0); };
+  const hip0 = pathNow('hip') || this.hipT.at(t0), lean0 = pathNow('lean') ?? this.leanT.at(t0), head0 = this.headT.at(t0);
   const lw = 360 * Math.round(lean0 / 360);
-  const fw = { F: this.feet.F.target(t0), B: this.feet.B.target(t0) };
+  const fw = { F: footNow('F'), B: footNow('B') };
   const T = k => t0 + k.f / fps * sc, tE = T(keys[keys.length - 1]);
   const build = (name, start) => {
     const L = start === undefined ? [] : [[t0, start, 'linear']];
@@ -106,7 +112,7 @@ A.move = function (t, name, o = {}) {
   let keys = m.keys;
   // 打中对方：按招式的出手距离（reach，单位 H）和两人此刻的距离，把差值加到接触帧之前的前移里（够不着就多冲一点，太近就少走一点）
   if (o.to && m.reach) {
-    const D = this.dirAt(t), gap = (o.to.hipT.at(t)[0] - this.hipT.at(t)[0]) * D / this.H, extra = clamp(gap - m.reach, -0.3, 0.9);
+    const D = this.dirAt(t), gap = (o.to.hipNow(t)[0] - this.hipNow(t)[0]) * D / this.H, extra = clamp(gap - m.reach, -0.3, 0.9);
     const hi = keys.findIndex(k => k.hit);
     if (hi >= 0 && Math.abs(extra) > 0.02) keys = keys.map((k, i) => {
       const u = i >= hi ? 1 : clamp(k.f / keys[hi].f, 0, 1), add = v => v && [v[0] + extra * u, v[1]];
@@ -115,15 +121,69 @@ A.move = function (t, name, o = {}) {
     if (hi >= 0 && Math.abs(extra) > 0.02 && !keys[hi].hip) keys[hi] = { ...keys[hi], hip: [extra, 0.05] };
   }
   const hiF = keys.find(k => k.hit);
-  const r = this.keys(t, keys, { ...o, follow: o.to && m.reach && hiF ? { f: hiF.f + 1, dx: clamp((o.to.hipT.at(t)[0] - this.hipT.at(t)[0]) * this.dirAt(t) / this.H - m.reach, -0.3, 0.9) } : null });
+  const r = this.keys(t, keys, { ...o, follow: o.to && m.reach && hiF ? { f: hiF.f + 1, dx: clamp((o.to.hipNow(t)[0] - this.hipNow(t)[0]) * this.dirAt(t) / this.H - m.reach, -0.3, 0.9) } : null });
   if (m.whoosh !== undefined && o.sfx !== false) this.sfx(t + m.whoosh / 24 * (o.slow ?? 1), 'whoosh_short', { v: m.whooshV ?? 0.6 });
   return { ...r, react: m.react, level: m.level, reach: m.reach };
 };
 
-// 攻防编排：每一拍 { t, a, move, b, react, level, fx }。a 出招；打中那一刻 b 做反应，导演登记打击（停顿帧、震屏、闪白）
-//   react：fight_moves 里的反应招式名（hurt_high、hurt_body…），或 'block' / 'dodge'（b 先做这个招式，不算打中），或函数 (b, tc) => {}
-//   返回每一拍的结果（contact 时刻、接触点），方便接着排下一拍
-function exchange(D, beats) {
+// —— 打击特效（原片实测：打中不停帧、不震屏；1 帧放射光 + 1–2 帧火花，命中本体再加一个结果字形 5 帧淡出）——
+//   level：none 擦碰无光 / clash 兵器相碰 / hit 命中本体 / shot 子弹命中 / heavy 击倒打飞（再加 1 帧全屏白闪）
+const F1 = 1 / 24;
+class FightFX {
+  constructor(H = 300) { this.H = H; this.list = []; }
+  add(t, p, level = 'hit', o = {}) { if (level !== 'none' && p) this.list.push({ t, p, level, glyph: o.glyph, dir: o.dir ?? 1, seed: this.list.length * 7 + 3 }); return this; }
+  flashAt(t) { let a = 0; for (const e of this.list) if (e.level === 'heavy' && t >= e.t && t < e.t + F1) a = 0.9; return a; }
+  draw(ctx, t) {
+    const H = this.H;
+    for (const e of this.list) {
+      const age = t - e.t;
+      if (age < 0 || age > F1 * 8) continue;
+      const big = e.level === 'clash' ? 0.25 : e.level === 'shot' ? 0.3 : 0.4, r = big * H, rnd = K.mulberry32(e.seed);
+      ctx.save(); ctx.translate(e.p[0], e.p[1]);
+      if (age < F1) {                                               // 1 帧放射光
+        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+        g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.35, 'rgba(255,255,255,0.85)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+        if (e.level !== 'clash') { ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, r * 1.15, 0, Math.PI * 2); ctx.stroke(); }
+      }
+      if (age < F1 * 2.2) {                                         // 火花细线
+        const n = e.level === 'clash' ? 3 : 6;
+        ctx.strokeStyle = `rgba(255,255,255,${1 - age / (F1 * 2.2)})`; ctx.lineWidth = 3; ctx.lineCap = 'round';
+        for (let k = 0; k < n; k++) { const a = rnd() * Math.PI * 2, r0 = r * (0.5 + age / F1 * 0.5), r1 = r0 + r * (0.4 + rnd() * 0.5); ctx.beginPath(); ctx.moveTo(Math.cos(a) * r0, Math.sin(a) * r0); ctx.lineTo(Math.cos(a) * r1, Math.sin(a) * r1); ctx.stroke(); }
+      }
+      if (e.glyph && age >= F1 * 0.5 && age < F1 * 6.5) {           // 结果字形（例如 e^iπ 被 +1 打中出现 0），5 帧淡出
+        const a = 1 - (age - F1 * 0.5) / (F1 * 6);
+        ctx.fillStyle = `rgba(180,180,180,${a})`; ctx.font = `400 ${0.6 * H}px Code`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(e.glyph, 0, -0.05 * H);
+      }
+      ctx.restore();
+    }
+  }
+}
+
+// 手里的武器：从肘到手的方向往前延伸 len（单位 H）。挥得快的那一帧画扇形拖影（原片只留 1 帧）
+function weaponLine(actor, ta, len, hand = 'F') {
+  const j = actor.jointsAt(ta), L = j[hand === 'F' ? 'aF' : 'aB'], el = L[1], hd = L[2];
+  const dx = hd[0] - el[0], dy = hd[1] - el[1], n = Math.hypot(dx, dy) || 1;
+  return [hd, [hd[0] + dx / n * len * actor.H, hd[1] + dy / n * len * actor.H]];
+}
+function drawWeapon(ctx, actor, ta, o = {}) {
+  const len = o.len ?? 0.45, [a, b] = weaponLine(actor, ta, len, o.hand), [pa, pb] = weaponLine(actor, ta - F1, len, o.hand);
+  const H = actor.H, moved = Math.hypot(b[0] - pb[0], b[1] - pb[1]);
+  if (moved > 0.12 * H) {                                           // 拖影：上一帧和这一帧武器之间的扇面
+    const g = ctx.createLinearGradient(pb[0], pb[1], b[0], b[1]);
+    g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(255,255,255,0.55)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(a[0], a[1]); ctx.closePath(); ctx.fill();
+  }
+  ctx.strokeStyle = o.color || '#f0f0f0'; ctx.lineWidth = o.width ?? 0.035 * H; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+  if (o.label) { ctx.save(); ctx.fillStyle = o.color || '#f0f0f0'; ctx.font = `400 ${0.2 * H}px Code`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(o.label, b[0], b[1]); ctx.restore(); }
+}
+
+// 攻防编排：每一拍 { t, a, move, b, react, level, glyph }。a 出招；打中那一刻 b 做反应，登记打击特效
+//   react：fight_moves 里的反应招式名（stagger、hurt_fold、launched…），或 'block' / 'dodge' / 'lean_dodge' / 'duck'（b 先做这个招式，算没打中），或函数 (b, tc) => {}
+//   fx：FightFX（不传就不画特效）；heavy 级别额外交给导演登记一次（白闪 1 帧，不停帧不震屏）
+function exchange(D, beats, fx) {
   const out = [];
   for (const bt of beats) {
     const r = bt.a.move(bt.t, bt.move, { to: bt.b, ...(bt.opts || {}) });
@@ -133,19 +193,18 @@ function exchange(D, beats) {
     if (bt.b && react) {
       if (react === 'block' || react === 'dodge' || (MOVES[react] && MOVES[react].defend)) {
         const name = react === 'block' ? 'block' : react === 'dodge' ? 'dodge_back' : react;
-        const lead = (MOVES[name].ready ?? 2) / 24;                              // 防守要在接触前就位
-        bt.b.move(tc - lead, name);
-        landed = name === 'block';                                               // 格挡也会有一下小的打击
+        bt.b.move(tc - (MOVES[name].ready ?? 2) / 24, name);              // 防守要在接触前就位
+        landed = name === 'block';
       } else if (typeof react === 'function') react(bt.b, tc);
       else bt.b.move(tc, react);
     }
-    if (D && bt.b && (r.point || bt.point)) {
-      const level = bt.level ?? r.level ?? 'light';
-      if (landed) D.hit(tc, bt.point || r.point, react === 'block' ? 'light' : level, { ...(react === 'block' ? { sfx: ['impact_light'], freeze: 0.04, flash: 0, rays: 4 } : {}), ...(bt.fx || {}) });
-    }
+    const level = bt.level ?? r.level ?? 'hit';
+    if (fx && (r.point || bt.point)) fx.add(tc, bt.point || r.point, landed ? (react === 'block' ? 'clash' : level) : 'none', { glyph: landed && react !== 'block' ? bt.glyph : null });
+    if (D && landed && level === 'heavy') D.cue(tc, 'impact_heavy');
+    else if (D && landed && level !== 'none') D.cue(tc, level === 'clash' || react === 'block' ? 'impact_light' : 'impact_medium', { v: 0.8 });
     out.push({ ...r, tc, landed });
   }
   return out;
 }
 
-module.exports = { Actor2, exchange, MOVES };
+module.exports = { Actor2, exchange, MOVES, FightFX, drawWeapon, weaponLine };
