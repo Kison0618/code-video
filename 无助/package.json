@@ -1,0 +1,13 @@
+{
+  "name": "wuzhu-demo",
+  "private": true,
+  "scripts": {
+    "frames": "node render.js frames 0:62.3:30:0:1"
+  },
+  "dependencies": {
+    "@fontsource/jetbrains-mono": "^5.0.0",
+    "@fontsource/noto-sans-sc": "^5.0.0",
+    "@fontsource/noto-serif-sc": "^5.0.0",
+    "playwright": "^1.48.0"
+  }
+}
