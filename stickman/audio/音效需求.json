@@ -768,6 +768,158 @@
    "reference": null,
    "sync": "起音在文件第 0 ms（前面不留静音）",
    "notes": "长度不固定：做成可以无缝循环的 3 秒左右，管线会按需要的长度拼接"
+  },
+  {
+   "id": "bonk",
+   "folder": "audio/samples/bonk/",
+   "name": "字砸到头上",
+   "group": "打击与特效",
+   "used_for": "循环 v2：print 出来的 hi、hi 雨、墙上飞出来的 # 方块、碎掉的蛇砸到火柴人头上",
+   "trigger": "碰到头的那一帧",
+   "duration_ms": [
+    100,
+    220
+   ],
+   "character": "短促的\"咚\"，像小木块敲到脑袋，音高往下滑一点，带一点滑稽感（卡通里被砸的那种，但要克制）",
+   "avoid": "不要太响太夸张、不要金属声",
+   "level_peak_dbfs": -12.0,
+   "variants": 3,
+   "reference": "原片没有完全一样的声音（循环 v2 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "tap",
+   "folder": "audio/samples/tap/",
+   "name": "字碰到身上",
+   "group": "打击与特效",
+   "used_for": "循环 v2：字碰到火柴人的肩膀、手臂、身体（不是头）",
+   "trigger": "碰到的那一帧",
+   "duration_ms": [
+    40,
+    90
+   ],
+   "character": "很轻的\"噗\"，像纸团碰到衣服",
+   "avoid": "不要有音高",
+   "level_peak_dbfs": -24.0,
+   "variants": 3,
+   "reference": "原片没有完全一样的声音（循环 v2 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "block_drop",
+   "folder": "audio/samples/block_drop/",
+   "name": "# 方块砸地",
+   "group": "打击与特效",
+   "used_for": "循环 v2：\"#\" * i 的每一根柱子立在地上；for 砌墙时每一层落下；被撞飞的方块落地",
+   "trigger": "落地那一帧",
+   "duration_ms": [
+    200,
+    400
+   ],
+   "character": "比字重得多的闷响，像一块小石砖放到地上，带一点颗粒感；后面的柱子越来越高，可以用同一个声音按音量区分",
+   "avoid": "不要太脆、不要回声",
+   "level_peak_dbfs": -11.0,
+   "variants": 3,
+   "reference": "原片没有完全一样的声音（循环 v2 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "snake_bite",
+   "folder": "audio/samples/snake_bite/",
+   "name": "蛇头咬地 / 撞墙",
+   "group": "打击与特效",
+   "used_for": "循环 v2：hi 长蛇的蛇头扑过来咬在地上、一头撞在墙上、撞飞火柴人",
+   "trigger": "咬下 / 撞上的那一帧",
+   "duration_ms": [
+    250,
+    450
+   ],
+   "character": "一口\"咔嚓\"（纸片牙齿合上的感觉）+ 下沉的闷响",
+   "avoid": "不要像真的野兽、不要嘶吼",
+   "level_peak_dbfs": -9.0,
+   "variants": 2,
+   "reference": "原片没有完全一样的声音（循环 v2 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "snake_slither",
+   "folder": "audio/samples/snake_slither/",
+   "name": "蛇游动",
+   "group": "打击与特效",
+   "used_for": "循环 v2：while True 输出的 hi 首尾相连成一条蛇，在空中游动、追人、缠绕",
+   "trigger": "整段持续（时间表里有 dur）",
+   "duration_ms": [
+    3000,
+    3000
+   ],
+   "character": "很多很轻的纸片 / 字母互相摩擦的沙沙声，有缓慢的起伏，像一串纸条在风里游",
+   "avoid": "不要像真的蛇嘶嘶声、不要太响盖过别的声音",
+   "level_peak_dbfs": -20.0,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（循环 v2 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": "做成可以无缝循环的 3 秒左右，管线按需要的长度拼接"
+  },
+  {
+   "id": "scale_drone",
+   "folder": "audio/samples/scale_drone/",
+   "name": "蛇盘满天空",
+   "group": "打击与特效",
+   "used_for": "循环 v2：镜头拉到大远景，看到蛇占满整个天空",
+   "trigger": "大远景开始，持续约 3.6 秒",
+   "duration_ms": [
+    3000,
+    4000
+   ],
+   "character": "低沉、慢慢变大的拉长音，让人感到\"这东西太大了\"",
+   "avoid": "不要恐怖片那种刺耳弦乐",
+   "level_peak_dbfs": -12.0,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（循环 v2 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "cond_true",
+   "folder": "audio/samples/cond_true/",
+   "name": "条件为 True",
+   "group": "界面",
+   "used_for": "循环 v2：while n < 3 每检查一次条件，代码右边弹出绿色 True 标签",
+   "trigger": "标签弹出那一帧",
+   "duration_ms": [
+    60,
+    150
+   ],
+   "character": "轻快、干净的高\"嘀\"",
+   "avoid": "不要像报错",
+   "level_peak_dbfs": -20.0,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（循环 v2 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "cond_false",
+   "folder": "audio/samples/cond_false/",
+   "name": "条件为 False，循环结束",
+   "group": "界面",
+   "used_for": "循环 v2：n 变成 3，条件变红 False，循环自己停下来",
+   "trigger": "标签弹出那一帧",
+   "duration_ms": [
+    300,
+    500
+   ],
+   "character": "两声往下走的\"嘀—嘟\"，有\"完成了\"的感觉，干净、友好",
+   "avoid": "不要像报错、不要悲伤",
+   "level_peak_dbfs": -15.0,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（循环 v2 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
   }
  ]
 }

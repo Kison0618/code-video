@@ -47,4 +47,33 @@ function word(ctx, str, x, y, rot = 0, size = 40, a = 1, col = [214, 214, 214]) 
   ctx.restore();
 }
 
-module.exports = { laptop, word };
+// 键帽：按组合键时在电脑上方弹出（不切镜头）。combo = { at: [x, y], size, keys: [{ label, t }], t1 }
+//   每个键在按下那一刻弹出（放大一下），按住 0.15 秒往下一沉，键之间画 "+"；t1 之后 0.25 秒淡出
+function keyCombo(ctx, t, combo) {
+  const { at, size = 64, keys } = combo, t1 = combo.t1 ?? keys[keys.length - 1].t + 0.6;
+  if (t < keys[0].t - 0.02 || t > t1 + 0.25) return;
+  const fade = 1 - K.clamp((t - t1) / 0.25), pad = size * 0.32, gap = size * 0.7;
+  ctx.save(); ctx.font = `400 ${size * 0.5}px Code`;
+  const ws = keys.map(k => Math.max(size, ctx.measureText(k.label).width + pad * 2));
+  const total = ws.reduce((a, b) => a + b, 0) + gap * (keys.length - 1);
+  let x = at[0] - total / 2;
+  keys.forEach((k, i) => {
+    const age = t - k.t, w = ws[i];
+    if (age >= 0) {
+      const pop = 1 + 0.3 * Math.exp(-age * 16) * Math.sin(Math.min(age * 30, Math.PI)), down = age < 0.15 ? size * 0.1 : 0;
+      ctx.save(); ctx.translate(x + w / 2, at[1] + down); ctx.scale(pop, pop); ctx.globalAlpha = fade * K.clamp(age / 0.04);
+      ctx.fillStyle = '#5a5a5a'; ctx.beginPath(); ctx.roundRect(-w / 2, -size / 2 + size * 0.12, w, size, size * 0.2); ctx.fill();   // 键帽侧面（按下去时看不见）
+      ctx.fillStyle = age < 0.15 ? '#d9d9d9' : '#f2f2f2'; ctx.beginPath(); ctx.roundRect(-w / 2, -size / 2 + (age < 0.15 ? size * 0.08 : 0), w, size, size * 0.2); ctx.fill();
+      ctx.fillStyle = '#1e1e1e'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(k.label, 0, (age < 0.15 ? size * 0.08 : 0) + size * 0.02);
+      ctx.restore();
+    }
+    if (i < keys.length - 1 && t >= keys[i + 1].t - 0.08) {
+      ctx.save(); ctx.globalAlpha = fade; ctx.fillStyle = '#f2f2f2'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `400 ${size * 0.6}px Code`;
+      ctx.fillText('+', x + w + gap / 2, at[1]); ctx.restore();
+    }
+    x += w + gap;
+  });
+  ctx.restore();
+}
+
+module.exports = { laptop, word, keyCombo };

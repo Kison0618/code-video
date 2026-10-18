@@ -242,6 +242,49 @@ def s_dissolve(v=1.0):
     d = 1.1; u = np.linspace(0, 1, int(d * SR)); env = np.exp(-u * 3) * np.minimum(1, u * 30)
     return level(bp(noise(d), 4000, 14000) * env, -14.0)
 
+def s_bonk(v=1.0):
+    # 砸到头（占位）：短促的木头"咚"，音高往下一滑，带点滑稽感
+    d = 0.16; t = tt(d); f = 520 * np.exp(-t * 9)
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 28) + bp(noise(d), 1500, 6000) * np.exp(-t * 200) * 0.4
+    return level(att(x, 0.001), -12.0 + 20 * np.log10(max(0.3, v)))
+
+def s_tap(v=1.0):
+    # 字碰到身上（占位）：很轻的"噗"
+    d = 0.06; t = tt(d)
+    return level(lp(noise(d), 1800) * np.exp(-t * 90), -24.0 + 20 * np.log10(max(0.3, v)))
+
+def s_block_drop(v=1.0):
+    # # 方块 / 一层墙砸地（占位）：比字重的闷响 + 一点石头碰撞的颗粒
+    d = 0.3; t = tt(d)
+    x = np.sin(2 * np.pi * 55 * t) * np.exp(-t * 22) + bp(noise(d), 600, 4000) * np.exp(-t * 40) * 0.5
+    return level(att(x, 0.002), -11.0 + 20 * np.log10(max(0.3, v)))
+
+def s_snake_bite(v=1.0):
+    # 蛇头咬地 / 撞墙（占位）：一口"咔"+ 下沉的闷声
+    d = 0.35; t = tt(d)
+    x = bp(noise(d), 2500, 9000) * np.exp(-t * 60) + np.sin(2 * np.pi * 90 * np.exp(-t * 3) * t) * np.exp(-t * 14) * 0.8
+    return level(att(x, 0.001), -9.0 + 20 * np.log10(max(0.3, v)))
+
+def s_snake_slither(dur=3.0, v=1.0):
+    # 蛇游动（占位，可循环）：很多很轻的纸片摩擦声，带慢慢起伏
+    n = int(dur * SR); u = np.arange(n) / SR
+    x = bp(rng.standard_normal(n), 2000, 9000) * (0.55 + 0.45 * np.sin(2 * np.pi * 1.6 * u) ** 2)
+    fade = np.minimum(1, np.minimum(np.arange(n), n - np.arange(n)) / (0.2 * SR))
+    return level(x * fade, -20.0 + 20 * np.log10(max(0.3, v)))
+
+def s_scale_drone(dur=3.6, v=1.0):
+    # 蛇盘满天空（占位）：低沉、慢慢变大的拉长音
+    n = int(dur * SR); u = np.arange(n) / SR
+    x = sum(a * np.sin(2 * np.pi * f * u) for f, a in [(55, 1), (82.5, 0.5), (110, 0.3)]) * np.minimum(1, u / 1.2) * np.minimum(1, (dur - u) / 0.8)
+    return level(x, -12.0 + 20 * np.log10(max(0.3, v)))
+
+def s_cond(ok=True):
+    # 条件的值（占位）：True 一声轻快的高"嘀"，False 两声往下的"嘀嘟"（循环结束）
+    def blip(f, d=0.09): t = tt(d); return np.sin(2 * np.pi * f * t) * np.exp(-t * 30) * np.minimum(1, t / 0.003)
+    if ok: return level(blip(1760), -20.0)
+    a, b = blip(1320, 0.12), blip(880, 0.3); out = np.zeros(int(0.45 * SR)); out[:len(a)] += a; o = int(0.11 * SR); out[o:o + len(b)] += b
+    return level(out, -15.0)
+
 def s_whoosh(v=1.0):
     # 呼：中心频率先升后降的带通噪声
     d = 0.4; n = int(d * SR); u = np.linspace(0, 1, n)
@@ -407,7 +450,7 @@ def sample(kind, idx):
 # 每个 cue 先找 samples/<id>/ 里的素材（id 见 音效需求.json），没有才用合成音；音量按需求文件里的目标峰值对齐
 _REQ = json.load(open(os.path.join(HERE, '音效需求.json'), encoding='utf-8')) if os.path.exists(os.path.join(HERE, '音效需求.json')) else {'sounds': []}
 LEVELS = {x['id']: x['level_peak_dbfs'] for x in _REQ['sounds']}
-LOOPABLE = {'turtle', 'charge', 'word_rain'}
+LOOPABLE = {'turtle', 'charge', 'word_rain', 'snake_slither'}
 ALIAS = {'enter': 'key_enter', 'laptop': 'laptop_drop', 'kick': 'impact_light', 'click': 'select', 'pop': 'output', 'grab': 'rustle', 'hit': 'ground_shock'}
 def sample_id(c):
     ty = c['type']
@@ -428,6 +471,9 @@ GEN = {
     'impact_light': lambda c: s_impact('light'), 'impact_medium': lambda c: s_impact('medium'), 'impact_heavy': lambda c: s_impact('heavy'),
     'impact_frame': lambda c: s_impact_frame(), 'shatter': lambda c: s_shatter(), 'char_bounce': lambda c: s_char_bounce(c.get('v', 1)),
     'laptop_slam': lambda c: s_laptop_slam(), 'ground_shock': lambda c: s_ground_shock(), 'charge': lambda c: s_charge(c.get('dur', 2.0)),
+    'bonk': lambda c: s_bonk(c.get('v', 1)), 'tap': lambda c: s_tap(c.get('v', 1)), 'block_drop': lambda c: s_block_drop(c.get('v', 1)),
+    'snake_bite': lambda c: s_snake_bite(c.get('v', 1)), 'snake_slither': lambda c: s_snake_slither(c.get('dur', 3), c.get('v', 1)),
+    'scale_drone': lambda c: s_scale_drone(c.get('dur', 3.6), c.get('v', 1)), 'cond_true': lambda c: s_cond(True), 'cond_false': lambda c: s_cond(False),
     'release': lambda c: s_release(), 'debris': lambda c: s_debris(), 'recoil_slide': lambda c: s_recoil_slide(c.get('dur', 0.5)),
 }
 # 有素材时替换合成音的类型（音量仍按实测值）

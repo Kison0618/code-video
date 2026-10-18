@@ -135,6 +135,21 @@ v1 把所有关节按同一条缓动插值，结果全身一起动、一起停�
 
 `SCENE=loop node build.js --from 0 --to 106.86`；体检 `SCENE=loop node render/src/tools/qa.js`；音效时间表 `audio/时间表/loop.md`。
 
+已知问题：第二幕敲第二行 print 时光标还停在括号里，屏幕上的代码变成了 `print("hi"\nprint("hi"))`（v2 已修，体检也加了语法检查；v1 按规则保留不动）。
+
+## 《火柴人 VS 循环》v2（`render/src/scene_loop2.js`，约 151 秒）
+
+剧本 `剧本/火柴人VS循环_v2.md`，第三幕分镜 `storyboards/循环v2_第三幕_分镜草图.png`，参考片的镜头、对手、知识当武器分析在 `拆解_火柴人系列.md` 2.2、3.2–3.4 节。
+
+- 知识按 Python 入门顺序：print → for（缩进）→ range 的次数 → i → `"#" * i` → while True → Ctrl+C → 条件 `while n < 3`
+- 镜头学数学集：开场 4 秒大远景（空的世界里只有一个光标）；全景为基准；东西变多才拉远；大远景只在开场、hi 雨、蛇占满天空、结尾
+- 对手：while True 的输出首尾相连成一条无穷长的 hi 长蛇（蛇身就是蛇头走过的路，所以永远连着代码）
+- 知识当道具：`"#" * i` 搭楼梯、for 砌墙挡蛇、条件把蛇驯服成三节的小宠物
+- 碰撞：print 出来的 hi 砸在头上、hi 雨一个个砸在身上、墙上撞飞的方块、碎掉的蛇，都会真的碰到人，砸到头时角色会缩一下
+- 按键不切镜头：Tab、Ctrl+C 在电脑上方弹出键帽
+
+`SCENE=loop2 node build.js --from 0 --to 151.4`；体检 `SCENE=loop2 node render/src/tools/qa.js`；音效时间表 `audio/时间表/loop2.md`（新声音：bonk、tap、block_drop、snake_bite、snake_slither、scale_drone、cond_true、cond_false）。
+
 ## 样片 v4：探索开头（`render/src/scene_v4.js`）
 
 按原片的逻辑重做"从 0 到 1 的探索"，角色有内心过程（拆解 第 3.1 节）：看见光标 → 托腮 → 犹豫着戳一下 → 挠头 → 发现电脑 → 按一个键、抬头看到字母、反应过来 → hello 报错、吓一跳、挠头、删掉 → print() 没反应、连按、挠头 → print("hi") → hi 掉出来、吓得坐下、凑过去戳一戳 → 踢飞。

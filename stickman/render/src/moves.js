@@ -8,7 +8,8 @@
 //   const s = a.slide(t, { v0: r.v, dur: 0.5 })    滑铲（从线下面钻过去）
 //   const w = a.walk(t, x1)                        走到 x1（胯的位置），返回到达时间
 //   const k = a.kneel(t, { front: x })              单膝跪下（前脚踩在 x，后膝着地），a.rise(t) 站起来
-//   a.jump(t, { to: x, h: 160, dur: 0.55 })        跳（running: true 跑着起跳不下蹲；skid: 落地后往前滑的距离）
+//   a.jump(t, { to: x, h: 160, dur: 0.55 })        跳（running: true 跑着起跳不下蹲；skid: 落地后往前滑的距离；gy: 落在多高的台子上，往上是负）
+//   a.bonk(t, { amt: 1 })                          被东西砸到头：头一缩、肩膀一沉，马上恢复（只改头和胯，不打断手上的动作）
 // 时间都是动画时间；返回值里的时间也是。
 'use strict';
 const K = require('./core');
@@ -27,6 +28,15 @@ A.flinch = function (t, o = {}) {
   this.hip(t + back, c.hip, 0.2).lean(t + back, c.lean, 0.2).head(t + back + 0.05, c.head, 0.25);
   this.hand('F', t + back + 0.1, 'free', [0.05, 0.35]).hand('B', t + back + 0.1, 'free', [-0.04, 0.35]);
   return t + back + 0.3;
+};
+
+// 被砸到头：头往下一缩、肩膀一沉，0.3 秒内恢复到原来的目标（先记下原来的目标再插入，不会打断之后的动作）
+A.bonk = function (t, o = {}) {
+  const k = o.amt ?? 1, H = this.H, b = t + (o.hold ?? 0.12);
+  const h0 = this.headT.at(t), h1 = this.headT.at(b), p0 = this.hipT.at(t), p1 = this.hipT.at(b);
+  this.head(t, h0 + 34 * k).head(b, h1, 0.25);
+  if (o.hip !== false) this.hip(t, [p0[0], p0[1] + 0.05 * H * k]).hip(b, p1, 0.22);
+  return b + 0.25;
 };
 
 // 击退：整个人被推着往后滑（脚贴地滑，不抬脚），手往前甩，最后站稳
@@ -74,6 +84,7 @@ A.launch = function (t, o = {}) {
     this.foot('F', tL, [xs + D * 0.1 * H, 0], 0.06, 0, 'out3', { v: 1 }).foot('B', tL, [xs - D * 0.1 * H, 0], 0.07, 0, 'out3', false);
     this.hand('F', tL, 'free', [0.14, 0.2]).hand('B', tL, 'free', [-0.12, 0.22]);
   }
+  this.hip(tL - 0.001, [xL, yL]);                           // 落地后的滑动从落地点开始（不然会从起飞前的旧目标插值过来，从高处被打飞时人会被拽回去）
   this.hip(tL, [xs, land === 'feet' ? -this.STAND + 0.16 * H : -0.026 * H], 0.25, 'out3').lean(tL, lEnd).head(tL, land === 'feet' ? 20 : 0);
   if (land === 'feet') this.hip(tL + 0.3, [xs, -this.STAND], 0.35).lean(tL + 0.3, 2, 0.3);
   if (land !== 'feet') this.sfx(tL, 'body', { v: Math.min(1, Math.hypot(vx, vy + G * tau) / 1400) });   // 落地时的速度
@@ -175,8 +186,8 @@ A.run = function (t0, x1, o = {}) {
   const LEAN = [[0, -15], [0.2, -3], [0.5, -4], [0.8, -24], [1, -15]];
   const yRun = s => -H * lerp(this.STAND / H, catmull(HIP, ph(s)), k(s));
   this.path('hip', t0, t1, s => [X(s), lerp(c.hip[1], yRun(s), E.out(clamp((s - t0) / 0.2)))]);
-  const l0 = c.lean;
-  this.path('lean', t0, t1, s => lerp(l0, catmull(LEAN, ph(s)) * k(s) * (o.leanScale ?? 0.7), E.out(clamp((s - t0) / 0.2))));
+  const l0 = c.lean, lw = 360 * Math.round(l0 / 360);       // 翻滚过的整圈不倒转回去（被打飞空翻之后接着跑）
+  this.path('lean', t0, t1, s => lerp(l0, lw + catmull(LEAN, ph(s)) * k(s) * (o.leanScale ?? 0.7), E.out(clamp((s - t0) / 0.2))));
   this.lean(t1, 2).head(t0, 6);
   // 手（相对肩，世界坐标方向）：前拳举到下巴、后手垂到胯后，和对侧腿同步
   const tF = plan.F[0] ?? t0;
@@ -220,10 +231,10 @@ A.jump = function (t, o = {}) {
   const D = this.dirAt(t), H = this.H, c = cur(this, t), [x0, y0] = c.hip, dur = o.dur ?? 0.55, h = o.h ?? 150;
   const to = o.to ?? x0 + D * 120, sg = Math.sign(to - x0) || D;
   if (!o.running) {
-    this.hip(t - 0.14, [x0, -this.STAND + 0.1 * H]).lean(t - 0.14, 14 * sg * D);
+    this.hip(t - 0.14, [x0, y0 + 0.1 * H]).lean(t - 0.14, 14 * sg * D);           // 在哪儿起跳就在哪儿下蹲（台阶上也一样）
     this.hand('F', t - 0.14, 'local', [-0.16, 0.22]).hand('B', t - 0.14, 'local', [-0.2, 0.2]);
   }
-  const yE = -this.STAND + 0.1 * H;
+  const gy = o.gy ?? 0, yE = -this.STAND + 0.1 * H + gy;
   // 过 (0,y0)、(dur,yE)、顶点比两端高 h 的抛物线
   const ya = y0, yb = yE, top = Math.min(ya, yb) - h;
   const fn = s => { const u = (s - t) / dur; return [lerp(x0, to, u), (1 - u) * (1 - u) * ya + 2 * u * (1 - u) * (2 * top - (ya + yb) / 2) + u * u * yb]; };
@@ -240,8 +251,8 @@ A.jump = function (t, o = {}) {
   }
   const tl = t + dur;
   if (o.land === 'run') { this.hip(tl, [to, yE]); this.sfx(tl, 'step', { run: 1, v: 1 }); return { t: tl, x: to }; }   // 落地接着跑（脚交给下一段 run）
-  this.foot('F', tl, [to + sg * 0.08 * H, 0], 0.08, 0, 'out3', { v: 1 }).foot('B', tl, [to - sg * 0.08 * H, 0], 0.09, 0, 'out3', false);
-  this.hip(tl, [to, -this.STAND + 0.13 * H]).lean(tl, 12 * sg * D).hand('F', tl, 'free', [0.12, 0.22]).hand('B', tl, 'free', [-0.06, 0.24]);
+  this.foot('F', tl, [to + sg * 0.08 * H, gy], 0.08, 0, 'out3', { v: 1 }).foot('B', tl, [to - sg * 0.08 * H, gy], 0.09, 0, 'out3', false);
+  this.hip(tl, [to, -this.STAND + 0.13 * H + gy]).lean(tl, 12 * sg * D).hand('F', tl, 'free', [0.12, 0.22]).hand('B', tl, 'free', [-0.06, 0.24]);
   if (o.skid) {                                                 // 跑着跳：落地后带着速度往前滑一段再停
     const d = sg * o.skid;
     this.hip(tl, [to + d, -this.STAND + 0.13 * H], 0.32, 'out3').lean(tl, -6 * sg * D);
@@ -250,7 +261,7 @@ A.jump = function (t, o = {}) {
     this.hip(tl + 0.45, [to + d, -this.STAND], 0.3).lean(tl + 0.45, 2, 0.3).hand('F', tl + 0.45, 'free', [0.05, 0.35]).hand('B', tl + 0.45, 'free', [-0.04, 0.35]);
     return { t: tl, x: to + d };
   }
-  if (!o.keep) this.hip(tl + 0.22, [to, -this.STAND], 0.3).lean(tl + 0.22, 2, 0.3).hand('F', tl + 0.3, 'free', [0.05, 0.35]).hand('B', tl + 0.3, 'free', [-0.04, 0.35]);
+  if (!o.keep) this.hip(tl + 0.22, [to, -this.STAND + gy], 0.3).lean(tl + 0.22, 2, 0.3).hand('F', tl + 0.3, 'free', [0.05, 0.35]).hand('B', tl + 0.3, 'free', [-0.04, 0.35]);
   return { t: tl, x: to };
 };
 

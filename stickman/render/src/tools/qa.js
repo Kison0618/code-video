@@ -7,11 +7,12 @@
 //   4. 代码被画面切掉：场景导出 codes: [Code...]，代码块有一部分在画面外
 //   5. 主角太小：连续 3 秒以上身高不到画面的 8%（远景太久）
 //   6. 音效 id 在 audio/音效需求.json 里找不到
+//   7. 每次"运行"时屏幕上的代码不是合法的 Python（运行后 0.6 秒内报错的算故意写错，跳过）
 'use strict';
 const fs = require('fs'), path = require('path');
 const K = require('../core');
 const { W, H } = K;
-const S = require({ v4: '../scene_v4', loop: '../scene_loop' }[process.env.SCENE] || '../scene_loop');
+const S = require({ v4: '../scene_v4', loop: '../scene_loop', loop2: '../scene_loop2' }[process.env.SCENE] || '../scene_loop');
 const cues = require('../cues');
 const hero = S.hero, cam = S.cam, clock = S.clock;
 const issues = [];
@@ -37,7 +38,7 @@ for (let t = 0; t <= S.DUR; t += 1 / 30) {
     const pts = ['head', 'hip'].map(k => [j[k], prev.j[k]]).concat(['aF', 'aB', 'lF', 'lB'].map(k => [j[k][2], prev.j[k][2]]));
     const dmax = Math.max(...pts.map(([a, b]) => Math.hypot(a[0] - b[0], a[1] - b[1]))) / hero.H;
     if (dmax > 0.6) push(t, t, `身体瞬移（一帧 ${dmax.toFixed(2)} 个身高）`);
-    const dl = Math.abs(s.lean - prev.s.lean) / (ta - prev.ta);
+    const dd = s.lean - prev.s.lean, dl = Math.abs(dd - 360 * Math.round(dd / 360)) / (ta - prev.ta);   // 差整圈的角度看起来一样，不算
     if (dl > 2000) push(t, t, `身体角度突跳（${dl.toFixed(0)}°/秒）`);
   }
   prev = { ta, j, s };
@@ -46,7 +47,7 @@ for (let t = 0; t <= S.DUR; t += 1 / 30) {
 for (const code of S.codes || []) {
   runs(t => {
     const ta = clock.anim(t);
-    if (ta < code.vis[0] || ta > code.vis[1]) return false;
+    if (code.visible ? !code.visible(ta) : ta < code.vis[0] || ta > code.vis[1]) return false;
     const sn = code.snap(ta); if (!sn.text) return false;
     const lines = sn.text.split('\n'), cw = code.size * 0.55, lh = code.size * 1.32, [x0, y0] = code.pos(ta), c = cam.at(t);
     const a = scr(c, [x0, y0 - code.size]), b = scr(c, [x0 + Math.max(...lines.map(l => l.length)) * cw, y0 + (lines.length - 1) * lh + code.size * 0.3]);
@@ -62,6 +63,18 @@ const ids = new Set(req.sounds.map(s => s.id));
 const ALIAS = { blink: 1, enter: 1, laptop: 1, kick: 1, click: 1, pop: 1, grab: 1, hit: 1, music: 1 };
 const miss = [...new Set(cues.list.map(c => c.type).filter(id => !ids.has(id) && !ALIAS[id]))];
 if (miss.length) push(0, 0, `音效 id 不在需求表里：${miss.join('、')}`);
+// 7 运行时的代码语法
+{
+  const list = [];
+  for (const code of S.codes || []) for (const r of code.runs) {
+    const tx = code.snap(r.t).text; if (!tx) continue;
+    const errAfter = code.snaps.some(sn => sn.err && sn.t >= r.t && sn.t <= r.t + 0.6);
+    if (!errAfter) list.push({ t: r.t, src: tx });
+  }
+  const py = 'import ast,json,sys\nfor x in json.load(sys.stdin):\n  try: ast.parse(x["src"])\n  except SyntaxError as e: print(x["t"], e.msg)';
+  const out = require('child_process').execFileSync('python3', ['-c', py], { input: JSON.stringify(list) }).toString().trim();
+  for (const line of out ? out.split('\n') : []) { const [t, ...m] = line.split(' '); push(clock.real(+t), clock.real(+t), `运行的代码有语法错误（${m.join(' ')}）`); }
+}
 issues.sort((a, b) => a.t0 - b.t0);
 console.log(`体检 ${process.env.SCENE || 'loop'}：${S.DUR} 秒，${issues.length} 个问题`);
 for (const i of issues) console.log(`  ${i.t0.toFixed(2)}${i.t1 > i.t0 ? '–' + i.t1.toFixed(2) : ''}s  ${i.what}`);

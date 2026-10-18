@@ -97,10 +97,17 @@ class Code {
   error(t, a, b, label = 'NameError') { this.push(t, { err: { a, b, label } }); cues.add(t, 'error'); return this; }
   clearErr(t) { this.push(t, { err: null }); return this; }
   hide(t) { this.vis = [this.vis[0], t]; return this; }
+  // 中途淡出一段（t0 开始 0.3 秒淡出，t1 开始 0.2 秒淡入；t1 省略就是不再出现）
+  fadeOut(t0, t1 = 1e9) { (this.gaps = this.gaps || []).push([t0, t1]); return this; }
+  alphaAt(t) { let a = 1; for (const [t0, t1] of this.gaps || []) a = Math.min(a, 1 - clamp((t - t0) / 0.3) + clamp((t - t1) / 0.2)); return clamp(a); }
+  visible(t) { return t >= this.vis[0] && t <= this.vis[1] && this.alphaAt(t) > 0.02; }
   // 平移整块代码（世界坐标）
   moveTo(t0, t1, x, y, ease = 'inOut3') { this.moves.push({ t0, t1, x, y, ease }); return this; }
   // 被碰了一下：整块抖一抖（衰减的小晃动）
   jiggle(t, amp = 10) { this.jiggles.push({ t, amp }); return this; }
+  // 小标签：t0–t1 在第 a–b 个字符正上方弹出一个圆角框（条件的值 True / False、变量现在是几），col 是框的颜色
+  //   side: 'right' 放在这一行的右边（多行代码时不挡上一行）
+  tag(t0, t1, a, b, label, col = [78, 160, 92], side = 'top') { (this.tags = this.tags || []).push({ t0, t1, a, b, label, col, side }); return this; }
 
   snap(t) {
     const s = this.snaps;
@@ -138,6 +145,7 @@ class Code {
   }
   draw(ctx, t, alpha = 1) {
     if (t < this.vis[0] || t > this.vis[1]) return;
+    alpha *= this.alphaAt(t); if (alpha <= 0.003) return;
     const s = this.snap(t);
     const { cw, lh } = this.layout(ctx), sz = this.size;
     const [x0, y0] = this.pos(t);
@@ -177,6 +185,21 @@ class Code {
       ctx.font = `400 ${sz * 0.3}px Code`;
       ctx.fillStyle = rgba(C.errText);
       ctx.fillText(s.err.label, x0 + c * cw, y0 + r * lh + sz * 0.62);
+    }
+    // 小标签：弹出时放大一下
+    for (const g of this.tags || []) {
+      const age = t - g.t0;
+      if (age < 0 || t > g.t1 + 0.15) continue;
+      const a = Math.min(clamp(age / 0.06), 1 - clamp((t - g.t1) / 0.15)), sc = 1 + 0.25 * Math.exp(-age * 18);
+      const [r0, c0] = this.rc(s.text, g.a), [, c1] = this.rc(s.text, g.b);
+      const fs = sz * 0.42, w = g.label.length * cw * 0.42 + sz * 0.36, h = sz * 0.6;
+      const right = g.side === 'right', cx = right ? x0 + (lines[r0].length + 0.8) * cw + w / 2 : x0 + (c0 + c1) / 2 * cw, cy = right ? y0 + r0 * lh - sz * 0.32 : y0 + r0 * lh - sz * 1.32;
+      ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.globalAlpha = alpha * a;
+      ctx.fillStyle = rgba(g.col); ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, h * 0.25); ctx.fill();
+      if (right) { ctx.beginPath(); ctx.moveTo(-w / 2 + 1, -h * 0.18); ctx.lineTo(-w / 2 + 1, h * 0.18); ctx.lineTo(-w / 2 - h * 0.28, 0); ctx.fill(); }   // 指向左边代码的小尖角
+      else { ctx.beginPath(); ctx.moveTo(-h * 0.18, h / 2 - 1); ctx.lineTo(h * 0.18, h / 2 - 1); ctx.lineTo(0, h * 0.78); ctx.fill(); }   // 指向下面代码的小尖角
+      ctx.fillStyle = '#fff'; ctx.font = `400 ${fs}px Code`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(g.label, 0, 1);
+      ctx.restore();
     }
     // 运行：浅灰半透明盖住整块
     for (const rn of this.runs) {
