@@ -14,7 +14,7 @@
 const fs = require('fs'), path = require('path');
 const K = require('../core');
 const { W, H } = K;
-const S = require({ v4: '../scene_v4', loop: '../scene_loop', loop2: '../scene_loop2', fight: '../scene_fight_demo', duel1: '../scene_duel1', duel2: '../scene_duel2', blade1: '../scene_blade1', garble: '../scene_garble', garble2: '../scene_garble2' }[process.env.SCENE] || '../scene_loop');
+const S = require({ v4: '../scene_v4', loop: '../scene_loop', loop2: '../scene_loop2', fight: '../scene_fight_demo', duel1: '../scene_duel1', duel2: '../scene_duel2', blade1: '../scene_blade1', blade2: '../scene_blade2', garble: '../scene_garble', garble2: '../scene_garble2' }[process.env.SCENE] || '../scene_loop');
 const cues = require('../cues');
 const hero = S.hero, cam = S.cam, clock = S.clock;
 const issues = [];

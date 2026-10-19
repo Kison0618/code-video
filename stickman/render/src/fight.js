@@ -44,18 +44,72 @@ const A = Actor2.prototype;
 const MOVES = JSON.parse(fs.readFileSync(path.join(__dirname, '../../analysis/fight_moves.json'), 'utf8')).moves;
 
 // 一个通道（一串 [时间, 值, 缓动]）在 t 时的值
+//   e: 'thru'（第 11 轮）：这一段用 Catmull-Rom 样条"穿过"关键帧——速度在 key 处连续，不像 'out' 那样每个 key 都"到位 → 停 → 再起"。
+//   连贯的挥剑（蓄 → 挥 → 收）把中间几个 key 写成 thru，只有最后一个 key 用 out / inOut 收住；接触帧照样精确经过
 function chan(list) {
+  const val = (v, n) => Array.isArray(v) ? v[n] : v;
+  const tangent = (i, n) => {                                              // 第 i 个 key 处的斜率（有限差分，两头单边）
+    const a = list[Math.max(0, i - 1)], b = list[Math.min(list.length - 1, i + 1)], c = list[i];
+    const dt = b[0] - a[0]; if (dt <= 1e-6) return 0;
+    const m = (val(b[1], n) - val(a[1], n)) / dt;
+    if (a === c || b === c) return m;
+    // 保单调（Fritsch–Carlson）：key 两边一升一降（这个 key 是转折点）斜率取 0，不然样条会冲过头（剑尖插地、手甩过位）；斜率也不超过两边平均速度的 3 倍
+    const d1 = (val(c[1], n) - val(a[1], n)) / Math.max(1e-6, c[0] - a[0]), d2 = (val(b[1], n) - val(c[1], n)) / Math.max(1e-6, b[0] - c[0]);
+    if (d1 * d2 <= 0) return 0;
+    return Math.sign(m) * Math.min(Math.abs(m), 3 * Math.abs(d1), 3 * Math.abs(d2));
+  };
   return t => {
     if (t <= list[0][0]) return list[0][1];
     for (let i = 1; i < list.length; i++) {
       const [t1, v1, e] = list[i];
       if (t <= t1) {
-        const [t0, v0] = list[i - 1], u = (E[e] || E.out)((t - t0) / Math.max(1e-6, t1 - t0));
+        const [t0, v0] = list[i - 1], h = Math.max(1e-6, t1 - t0);
+        if (e === 'thru') {
+          const u = clamp((t - t0) / h), u2 = u * u, u3 = u2 * u;
+          const h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
+          const one = n => h00 * val(v0, n) + h10 * h * tangent(i - 1, n) + h01 * val(v1, n) + h11 * h * tangent(i, n);
+          return Array.isArray(v0) ? v0.map((_, n) => one(n)) : one(0);
+        }
+        const u = (E[e] || E.out)((t - t0) / h);
         return Array.isArray(v0) ? v0.map((x, n) => lerp(x, v1[n], u)) : lerp(v0, v1, u);
       }
     }
     return list[list.length - 1][1];
   };
+}
+
+// —— 剑决定手（第 11 轮）——
+// 第 10 轮的问题：h（手在哪）和 wa（剑指哪）是分开手写的两个数，腕角（剑和前臂的夹角）没人管，blade1 里主角 22%、强者 41% 的帧腕角超过 60°，
+//   剑看起来是粘在手腕上转，不是握在手里。真人握剑：腕的伸屈 ±30°、尺桡偏 ±40°，侧视图里剑和前臂的夹角舒服的范围在 45° 以内。
+// 做法：剑的线（过设计的手位、角度 wa）是设计意图，不动；手沿着这条线滑（最多 ±slide H），两种肘向里挑一个，让腕角回到 wr（默认 ≤ WR 就行），
+//   滑得越少越好。actor.blade.solve = true | { wr: 45, slide: 0.2 } 打开；招式级 "solve": false 关掉（抱剑礼这种反握）；key 级 wr 指定腕角（挂剑写 80）
+// 肘向连续选（第 11 轮）：bend 在 −1…1 里挑（ik2 支持小数 = 肘转出画面），让腕角 ≤ WR（或 ≈ wr），同时离 prev 近（不跳）、平手时偏向默认 +1。
+//   p：手相对肩（[朝前, 朝下]，单位 H）；wa：剑角；返回 { bend, w = 腕角超标量 }
+function bestBend(p, wa, WR, wr, prev = 1, kPrev = 0) {
+  const Lu = P.upper, Lf = P.fore, d = clamp(Math.hypot(p[0], p[1]), Math.abs(Lu - Lf) + 1e-3, (Lu + Lf) * 0.999);
+  const a = Math.atan2(p[1], p[0]), A = Math.acos(clamp((Lu * Lu + d * d - Lf * Lf) / (2 * Lu * d), -1, 1));
+  const ux = Math.cos(a), uy = Math.sin(a), c = Lu * Math.cos(A), sA = Lu * Math.sin(A), hx = d * ux, hy = d * uy;
+  let best = null;
+  for (let i = -20; i <= 20; i++) {
+    const b = i / 20, ex = c * ux - b * sA * uy, ey = c * uy + b * sA * ux;
+    const fa = Math.atan2(-(hy - ey), hx - ex) * 180 / Math.PI, dev = Math.abs(wrap(wa - fa));
+    const w = wr == null ? Math.max(0, dev - WR) : Math.abs(dev - wr);
+    const cost = w * w + kPrev * (b - prev) * (b - prev) + 20 * (1 - b) * (1 - b);
+    if (!best || cost < best.cost) best = { cost, bend: b, w };
+  }
+  return best;
+}
+function solveGrip(F, wa, wr, WR, SL) {
+  const u = [Math.cos(wa * Math.PI / 180), -Math.sin(wa * Math.PI / 180)];   // 剑的方向（[朝前, 朝下]，单位 H）
+  let best = null;
+  for (let i = -20; i <= 20; i++) {
+    const s = SL * i / 20, p = [F[0] + s * u[0], F[1] + s * u[1]], d = Math.hypot(p[0], p[1]);
+    if (s > 0 && u[1] > 0.4) continue;                                   // 剑尖朝下时手不往剑尖那头滑（会把剑尖压进地里）
+    if (d > (P.upper + P.fore) * 0.995 || d < Math.abs(P.upper - P.fore) + 0.01) continue;
+    const w = bestBend(p, wa, WR, wr).w, cost = w * w + 2500 * s * s;   // 滑 0.2H 的代价 ≈ 腕角差 10°
+    if (!best || cost < best.cost) best = { cost, p, w, s };
+  }
+  return best ? best.p : F;
 }
 
 // 此刻胯的实际位置（精确路径进行中就取路径上的值，否则取目标）
@@ -104,6 +158,14 @@ A.keys = function (t0, keys, o = {}) {
       return { ...k, fF: k.fF && cv(k.fF), fB: k.fB && cv(k.fB) };
     });
   }
+  // 剑决定手（第 11 轮，见 solveGrip）：有剑角的 key，手沿剑的线滑到腕角合理的位置
+  const GS = this.blade && this.blade.solve && o.solve !== false, TH = !!(this.blade && this.blade.thru) && o.thru !== false;
+  if (GS && keys.some(k => k.wa !== undefined)) {
+    const cfg = typeof GS === 'object' ? GS : {}, WR = cfg.wr ?? 45, SL = cfg.slide ?? 0.2;
+    const wl = keys.filter(k => k.wa !== undefined).map(k => [k.f, k.wa, k.e]), wc = chan(wl), f0 = wl[0][0];
+    // 接触帧（攻方 hit、守方挡的那一帧 = ready）手不滑：剑的线不变，但手沿线滑了，两把剑碰的位置就跟着沿剑移（滑 0.15H = 碰点挪 1/4 剑长，会变成剑柄磕剑柄）
+    keys = keys.map(k => (!k.F || k.f < f0 || k.wr === null) ? k : { ...k, F: solveGrip(k.F, wc(k.f), k.wr, WR, (k.hit || (o.blockF != null && k.f === o.blockF)) ? 0 : SL) });
+  }
   // g2：双手握剑 → 后手跟着前手和剑的角度走（后手在剑柄末端，沿剑往回 g2）
   if (keys.some(k => k.g2)) { let F = null, wa = null; keys = keys.map(k => { F = k.F ?? F; wa = k.wa ?? wa; if (!k.g2 || !F || wa === null) return k; const a = wa * Math.PI / 180; return { ...k, B: [F[0] - k.g2 * Math.cos(a), F[1] + k.g2 * Math.sin(a)] }; }); }
   const T = k => t0 + k.f / fps * sc, tE = T(keys[keys.length - 1]);
@@ -111,7 +173,10 @@ A.keys = function (t0, keys, o = {}) {
   { let d = D; for (const k of keys) if (k.turn) { d = -d; this.turn(T(k), d); } }
   const build = (name, start) => {
     const L = start === undefined ? [] : [[t0, start, 'linear']];
-    for (const k of keys) if (k[name] !== undefined) L.push([T(k), k[name], k.e || 'out', k.slide]);   // 第 4 项：slide（脚贴地滑，不抬脚）
+    const ks = keys.filter(k => k[name] !== undefined);
+    // 默认 thru（第 11 轮，actor.blade.thru = true；招式级 "thru": false 关掉）：只管手和剑（F / B / wa / wl）：没写 e 的 key，除了这个通道的最后一个，都用样条穿过——剑路中间不停顿；最后一个照样 out 收住。
+    //   胯和身体不改：招式常被下一招中途接走，胯用 out 早到位，换成样条会让人停在半路、两人间距变了（blade2 f164 间距 1.07→0.95H，剑柄磕剑）
+    ks.forEach((k, i) => L.push([T(k), k[name], k.e || (TH && /^(F|B|wa|wl)$/.test(name) && i < ks.length - 1 ? 'thru' : 'out'), k.slide]));   // 第 4 项：slide（脚贴地滑，不抬脚）
     return L.length ? L : null;
   };
   // 胯、上身：精确路径
@@ -214,7 +279,7 @@ A.move = function (t, name, o = {}) {
     if (hi >= 0 && Math.abs(extra) > 0.02 && !keys[hi].hip) keys[hi] = { ...keys[hi], hip: [extra, 0.05] };
   }
   const hiF = keys.find(k => k.hit);
-  const r = this.keys(t, keys, { ...o, follow: o.extra === undefined && o.to && reach && hiF ? { f: hiF.f + 1, dx: clamp((o.to.hipNow(t)[0] - this.hipNow(t)[0]) * this.dirAt(t) / this.H - reach, -0.3, 0.9) } : null });
+  const r = this.keys(t, keys, { ...o, solve: m.solve === false ? false : o.solve, thru: m.thru === false ? false : o.thru, blockF: m.block ? (m.ready ?? 2) : null, follow: o.extra === undefined && o.to && reach && hiF ? { f: hiF.f + 1, dx: clamp((o.to.hipNow(t)[0] - this.hipNow(t)[0]) * this.dirAt(t) / this.H - reach, -0.3, 0.9) } : null });
   if (m.whoosh !== undefined && o.sfx !== false) this.sfx(t + m.whoosh / 24 * (o.slow ?? 1), this.blade ? 'sword_whoosh' : 'whoosh_short', { v: m.whooshV ?? 0.6 });   // 拿刀剑的（.blade）挥起来是更细更尖的“咻”
   // behind: [从第几帧, 到第几帧]——这段时间兵器画在身体后面（缠头裹脑时刀背贴着后背、背剑）。场景用 a.weaponBehind(ta) 决定先画谁
   if (m.behind) (this.behindSegs = this.behindSegs || []).push([t + m.behind[0] / 24 * (o.slow ?? 1), t + m.behind[1] / 24 * (o.slow ?? 1)]);
@@ -266,7 +331,10 @@ const GG = 1 / 240;
 const wrap = d => ((d + 540) % 360) - 180;
 A.gripGrid = function () {
   if (this._gg && this._gg.rec === this.rec) return this._gg;
-  const N = this.N, H = this.H, raw = { F: new Float32Array(N), B: new Float32Array(N), E: new Float32Array(N) };
+  const N = this.N, H = this.H, raw = { F: new Float32Array(N), B: new Float32Array(N), E: new Float32Array(N), Z: new Float32Array(N) };
+  // 自动前后（第 11 轮，actor.blade.autoBehind）：剑身穿过头的圆、或者剑尖指向身后且穿过躯干时，这一帧剑画在身体后面——2D 侧视图里"剑在身体另一侧"的深度
+  const seg = (p, a, b) => { const vx = b[0] - a[0], vy = b[1] - a[1], u = clamp(((p[0] - a[0]) * vx + (p[1] - a[1]) * vy) / Math.max(1e-9, vx * vx + vy * vy)); return Math.hypot(a[0] + vx * u - p[0], a[1] + vy * u - p[1]); };
+  const cross = (a, b, c, d) => { const o = (p, q, r) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]); return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0; };
   let sF = 1, sB = 1, sE = 1, prevA = null;
   const len = ta => (typeof this.weapon === 'function' ? this.weapon(ta) : this.weapon) || 0;
   const pick = (cur, w1, w2) => cur > 0 ? (w1 > 105 && w2 < w1 - 30 ? -1 : 1) : (w1 < 60 || w2 > w1 + 20 ? 1 : -1);
@@ -277,12 +345,23 @@ A.gripGrid = function () {
       const s = this.stateAt(t); s.st = this.stAt(t);
       const j1 = body(s, H, s.dir), j2 = body({ ...s, eF: -1, eB: -1 }, H, s.dir), D = s.dir;
       const sw = Math.atan2(-Math.sin(wa * Math.PI / 180), D * Math.cos(wa * Math.PI / 180)) * 180 / Math.PI;   // 剑的世界角度
+      if (this.blade && this.blade.autoBehind) {
+        const hd = j1.aF[2], ux = Math.cos(sw * Math.PI / 180), uy = Math.sin(sw * Math.PI / 180), L = len(t) * H;
+        const g = [hd[0] + ux * 0.04 * H, hd[1] + uy * 0.04 * H], tp = [hd[0] + ux * L, hd[1] + uy * L];
+        const inHead = seg(j1.head, g, tp) < P.headR * H * 0.95, back = Math.cos(wa * Math.PI / 180) < -0.25;
+        raw.Z[i] = inHead || (back && cross(g, tp, j1.hip, j1.neck)) ? 1 : 0;
+      }
       const fa = L => Math.atan2(L[2][1] - L[1][1], L[2][0] - L[1][0]) * 180 / Math.PI;
-      sF = pick(sF, Math.abs(wrap(sw - fa(j1.aF))), Math.abs(wrap(sw - fa(j2.aF))));
+      const SV = this.blade && this.blade.solve, WRg = (SV && SV.wr) || 45;
+      // 前手：solve 打开时肘向连续选（bestBend），不然沿用两档迟滞 pick
+      const rel = L => { const sh = L[0], hd = L[2]; return [D * (hd[0] - sh[0]) / H, (hd[1] - sh[1]) / H]; };
+      if (SV) sF = bestBend(rel(j1.aF), wa, WRg, null, sF, 2000).bend;
+      else sF = pick(sF, Math.abs(wrap(sw - fa(j1.aF))), Math.abs(wrap(sw - fa(j2.aF))));
       // 后手在剑柄上（离剑轴 < 0.05H，在前手后面 0.02–0.2H）才按剑选
       const h = j1.aF[2], b = j1.aB[2], ux = Math.cos(sw * Math.PI / 180), uy = Math.sin(sw * Math.PI / 180);
       const along = -((b[0] - h[0]) * ux + (b[1] - h[1]) * uy), off = Math.abs((b[0] - h[0]) * uy - (b[1] - h[1]) * ux);
-      sB = along > 0.02 * H && along < 0.2 * H && off < 0.05 * H ? pick(sB, Math.abs(wrap(sw - fa(j1.aB))), Math.abs(wrap(sw - fa(j2.aB)))) : 1;
+      const onHilt = along > 0.02 * H && along < 0.2 * H && off < 0.05 * H;
+      sB = !onHilt ? 1 : SV ? bestBend(rel(j1.aB), wa, WRg, null, sB, 2000).bend : pick(sB, Math.abs(wrap(sw - fa(j1.aB))), Math.abs(wrap(sw - fa(j2.aB))));
     }
     if (this.blade && this.blade.kind === 'dao') {
       const a = wa ?? this.forearmAng(t);
@@ -292,10 +371,14 @@ A.gripGrid = function () {
     raw.F[i] = sF; raw.B[i] = sB; raw.E[i] = sE;
   }
   const avg = (A, W) => { const o = new Float32Array(N); let acc = 0; for (let i = -W; i <= W; i++) acc += A[clamp(i, 0, N - 1)]; for (let i = 0; i < N; i++) { o[i] = acc / (2 * W + 1); acc += A[Math.min(N - 1, i + W + 1)] - A[Math.max(0, i - W)]; } return o; };
-  this._gg = { rec: this.rec, F: avg(raw.F, 15), B: avg(raw.B, 15), E: avg(raw.E, 10) };
+  this._gg = { rec: this.rec, F: avg(raw.F, 15), B: avg(raw.B, 15), E: avg(raw.E, 10), Z: raw.Z };
   return this._gg;
 };
-A.weaponBehind = function (ta) { return !!(this.behindSegs && this.behindSegs.some(([a, b]) => ta >= a && ta < b)); };
+A.weaponBehind = function (ta) {
+  if (this.behindSegs && this.behindSegs.some(([a, b]) => ta >= a && ta < b)) return true;
+  if (!(this.blade && this.blade.autoBehind && this.rec && this.N)) return false;
+  return this.gripGrid().Z[clamp(Math.round(ta / GG), 0, this.N - 1)] > 0.5;
+};
 A.elbowAt = function (ta) {
   if (!this.blade || this.blade.elbow === false || !this.rec || !this.N) return [1, 1];
   const g = this.gripGrid(), x = clamp(ta / GG, 0, this.N - 1.001), i = Math.floor(x), u = x - i;

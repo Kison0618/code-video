@@ -4,7 +4,7 @@
 //   ✗手：手的目标离肩膀太远（够不着，画出来手停在半路）；✗脚：脚离胯太远（腿拉直，脚被拖着）；✗地：剑尖低于地面
 'use strict';
 const { weaponLine } = require('../fight');
-const SC = { duel1: '../scene_duel1', duel2: '../scene_duel2', blade1: '../scene_blade1', fight: '../scene_fight_demo' };
+const SC = { duel1: '../scene_duel1', duel2: '../scene_duel2', blade1: '../scene_blade1', blade2: '../scene_blade2', fight: '../scene_fight_demo' };
 const S = require(SC[process.env.SCENE] || '../scene_duel2');
 const frames = [];
 for (const a of process.argv.slice(2)) { const m = a.split('-').map(Number); if (m.length === 2) for (let f = m[0]; f <= m[1]; f++) frames.push(f); else frames.push(m[0]); }

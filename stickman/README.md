@@ -157,7 +157,9 @@ v1 把所有关节按同一条缓动插值，结果全身一起动、一起停�
 单手剑（主角，黄）对单手刀（强者，白），武术指导思路是"剑走轻灵、刀如猛虎"：亮相对峙 → 第一回合 13 拍 → 力劈华山磕飞剑、空手连躲、踢剑空中接剑 → 反击五拍 + 连环六拍 → 错身斩断刀 → 刀头掉下来吓一跳 → 抱拳礼。设计稿（拆招逻辑、节拍表、镜头、音效需求、看片清单）：`剧本/刀剑短片_blade1.md`。持剑画法（剑柄、护手、拳头、剑指、剑穗、刀单刃翻刃、肘自动翻）见 `fight.js` 的"持剑""刀剑的画法"两节。
 
 ```bash
-SCENE=blade1 node build.js --from 0 --to 30 --jobs 8                # 带占位音效，60fps（在本机渲染）
+SCENE=blade2 node build.js --from 0 --to 30 --jobs 8                # 第 11 轮改进版（剑决定手 + 开场试探），带占位音效，60fps（在本机渲染）
+(cd render && SCENE=blade2 node src/tools/wrist_check.js)           # 腕角 / 穿头 / 顿挫 / 独舞 逐帧体检
+SCENE=blade1 node build.js --from 0 --to 30 --jobs 8                # 第 10 轮原版
 (cd render && SCENE=blade1 node src/tools/qa.js)                     # 体检
 (cd render && SCENE=blade1 node src/tools/contact_check.js)          # 28 拍逐拍 + 逐帧
 SCENE=blade1 node render/src/tools/cue_sheet.js                      # 音效时间表 audio/时间表/blade1.md

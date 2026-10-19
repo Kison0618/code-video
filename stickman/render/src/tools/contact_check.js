@@ -19,7 +19,7 @@
 const K = require('../core');
 const { P } = require('../rig');
 const { weaponLine, MOVES } = require('../fight');
-const SC = { duel1: '../scene_duel1', duel2: '../scene_duel2', blade1: '../scene_blade1', fight: '../scene_fight_demo' };
+const SC = { duel1: '../scene_duel1', duel2: '../scene_duel2', blade1: '../scene_blade1', blade2: '../scene_blade2', fight: '../scene_fight_demo' };
 const S = require(SC[process.env.SCENE] || '../scene_duel1');
 const fights = S.fights || [];
 const wl = (a, ta, fb) => (S.weaponLen ? S.weaponLen(a, ta) : fb) || 0;
