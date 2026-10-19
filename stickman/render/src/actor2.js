@@ -226,11 +226,11 @@ class Actor2 {
   // 画：先拖影（手脚快速移动时沿轨迹的带子），再画人
   //   o.step：按这个帧率出画（24 = 原片的一拍一，12 = 一拍二），姿势在两张画之间不插值——原片"硬"的感觉主要来自这个
   //   o.smear：false 时不画手脚拖影（原片人身上没有拖影，只有武器有，见 研究/动作逐帧_四集.md）
-  //   o.turn：转身后的第一张画横向压扁成这个比例（原片转身就是 1 张压扁的画，0.4 左右）；要和 o.step 一起用
+  //   o.turn：转身后的第一张画横向压扁成这个比例（原片转身就是 1 张压扁的画，0.4 左右）；不写 o.step 时压扁 1/24 秒
   draw(ctx, ta, o = {}) {
     const H = this.H;
     if (o.step) ta = Math.floor(ta * o.step + 1e-6) / o.step;
-    const squash = o.turn && o.step && o.turn !== 1 && this.stateAt(ta).dir !== this.stateAt(ta - 1 / o.step).dir;
+    const squash = o.turn && o.turn !== 1 && this.stateAt(ta).dir !== this.stateAt(ta - 1 / (o.step || 24)).dir;   // 不按帧率出画时，转身后 1/24 秒内压扁
 
     if (o.smear !== false) for (const k of ['aF', 'aB', 'lF', 'lB']) {
       // 拖影只看手脚相对身体的挥动（整个人在飞、在掉的时候不画）

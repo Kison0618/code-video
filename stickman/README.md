@@ -152,6 +152,18 @@ v1 把所有关节按同一条缓动插值，结果全身一起动、一起停�
 
 `SCENE=loop2 node build.js --from 0 --to 151.4`；体检 `SCENE=loop2 node render/src/tools/qa.js`；音效时间表 `audio/时间表/loop2.md`（新声音：bonk、tap、block_drop、snake_bite、snake_slither、scale_drone、cond_true、cond_false）。
 
+## 打斗试做 duel2（`render/src/scene_duel2.js`，7.48 秒，第 8 轮）
+
+按用户对 duel1 的意见（不连贯、中间有停顿、像击剑）重做的动漫刀剑打斗：拖刀对冲撞 X → 六拍连续攻防 → 锁剑 → 推开 → 跳劈 → 燕返し → 回转斩 → 跪滑时打 `sword.len *= 3` → 巨剑上撩打飞空中的强者 → 两人都躺着。双手握剑、剑角单独写（大弧线）、透视、转身、月牙拖影、平滑跟拍，中间不停。设计稿（为什么 duel1 像击剑、原则、节拍表、每招要点、距离、镜头、音效需求、看片清单）在 `剧本/打斗试做_duel2.md`。
+
+```bash
+SCENE=duel2 node build.js --from 0 --to 7.5 --jobs 8                 # 带音效，60fps（在本机渲染）；STEP=24 环境变量改成一拍一
+(cd render && SCENE=duel2 node src/tools/qa.js)                      # 体检
+(cd render && SCENE=duel2 node src/tools/contact_check.js)           # 逐拍查碰剑 / 打中 / 闪避，逐帧查插地 / 够不着 / 锁剑 / 停顿
+(cd render && SCENE=duel2 node src/tools/fight_probe.js 40-48)       # 打印某几帧两人的胯、手、剑尖、剑角、脚
+SCENE=duel2 node render/src/tools/cue_sheet.js                       # 音效时间表 audio/时间表/duel2.md
+```
+
 ## 打斗试做 duel1（`render/src/scene_duel1.js`，约 14 秒，第 7 轮）
 
 按 `动作设计.md` 的七个问题自己设计的一段打斗：强者几乎不动就化解主角的进攻 → 主角写 `sword.len *= 3` 翻盘 → 举剑庆祝自己倒了。24fps 一拍一出画。设计稿（节拍表、每招七问、距离、镜头、音效需求、看片清单）在 `剧本/打斗试做_duel1.md`。

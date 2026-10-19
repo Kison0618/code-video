@@ -6,15 +6,20 @@
 //             剑和剑最近距离、剑尖高度，和判断：
 //   hit / heavy：刺——剑尖要碰到身体（越过躯干线 −0.05…+0.15H）；挥砍——剑身扫过躯干或头，交点在剑的前半段
 //                穿过去太多 → 把 reach 加大（人站远一点），够不着 → reach 减小
-//   clash：两把剑要真的碰上（最近距离 < 0.06H），而且碰在身前（攻方剑尖离对方躯干线至少 0.05H），不然看起来像打中了
+//   clash：两把剑要真的碰上（最近距离 < 0.06H），而且碰在身前（攻方剑尖离对方躯干线至少 0.05H，或者离身体 0.12H 以上），不然看起来像打中了
 //   闪开（landed=false）：剑尖离身体 0.03…0.3H（差一点）
 //   任何时候剑尖不能插进地里（y > 0）
+//   守方用剑挡（block: true 的反应招，写了 wa）：再算"守方的手该放在哪"——两把剑交在攻方剑 70–85%、守方剑 25–50% 处，
+//     打印守方接触帧（ready 那个 key）该写的 h [胯前, 离地] 和剑角，以及够不够得着（手离肩 ≤ 0.375H）
+//   闪开：用整条剑身到身体的最近距离（不只是剑尖），横扫、劈砍也准
+// 逐帧（第 8 轮加）：剑尖插地、手 / 脚够不着（画出来手停在半路、腿被拖直）、锁剑段两把剑没卡在一起（场景导出 locks: [[t0, t1]]）、
+//   打斗段（第一拍出手到最后一拍接触）两个人同时几乎不动超过 4 帧（= 停顿，用户明确说"打架中间是没有停顿的"）
 // 建议 reach：只对带 reach 的招式有效（move 会按 reach 自动调整接触前的前移，reach 大 1 → 接触时人往后站 1H）
 'use strict';
 const K = require('../core');
 const { P } = require('../rig');
-const { weaponLine } = require('../fight');
-const SC = { duel1: '../scene_duel1', fight: '../scene_fight_demo' };
+const { weaponLine, MOVES } = require('../fight');
+const SC = { duel1: '../scene_duel1', duel2: '../scene_duel2', fight: '../scene_fight_demo' };
 const S = require(SC[process.env.SCENE] || '../scene_duel1');
 const fights = S.fights || [];
 const wl = (a, ta, fb) => (S.weaponLen ? S.weaponLen(a, ta) : fb) || 0;
@@ -55,6 +60,25 @@ function depth(tip, j, D, Ha, Hb) {
   return (tip[0] - x) * D / Ha;
 }
 
+// 整条剑身（手 → 剑尖）到身体的最近距离
+function bladeBody(h, tip, j, H) { let m = 1e9; for (let i = 0; i <= 20; i++) { const u = i / 20; m = Math.min(m, bodyDist([h[0] + (tip[0] - h[0]) * u, h[1] + (tip[1] - h[1]) * u], j, H)); } return m; }
+// 守方的剑该放在哪：两把剑交在攻方剑 ua（0.7–0.85）、守方剑 ub（0.25–0.5）；剑角在现在的 ±30° 里找，攻方 reach 在 ±0.2 里找
+//   （reach 大 = 攻方接触时站远）；手离肩 ≤ 0.33H 最好，剑角、手、reach 改得越少越好
+function blockFit(h, tip, a, b, tc, lb) {
+  const j = b.jointsAt(tc), Hb = b.H, Ha = a.H, D = j.dir, Da = a.jointsAt(tc).dir, wa0 = b.swordAng(tc), k = b.bladeK ? b.bladeK(tc) : 1, L = lb * k * Hb;
+  const rel = p => [(p[0] - j.hip[0]) * D / Hb, -(p[1]) / Hb];
+  const curH = rel(j.aF[2]), curReach = Math.hypot(j.aF[2][0] - j.sh[0], j.aF[2][1] - j.sh[1]) / Hb;
+  let best = null;
+  for (let dr = -0.2; dr <= 0.201; dr += 0.05) for (let ua = 0.7; ua <= 0.851; ua += 0.05) for (let ub = 0.25; ub <= 0.501; ub += 0.05) for (let dw = -30; dw <= 30; dw += 5) {
+    const P = [h[0] + (tip[0] - h[0]) * ua - Da * dr * Ha, h[1] + (tip[1] - h[1]) * ua], an = (wa0 + dw) * Math.PI / 180;
+    const hd = [P[0] - D * Math.cos(an) * L * ub, P[1] + Math.sin(an) * L * ub];
+    const r = Math.hypot(hd[0] - j.sh[0], hd[1] - j.sh[1]) / Hb, hh = rel(hd);
+    const sc = Math.max(0, r - 0.33) * 10 + Math.abs(dw) / 60 + Math.abs(ua - 0.78) + Math.abs(ub - 0.35) + Math.abs(dr) * 2 + Math.hypot(hh[0] - curH[0], hh[1] - curH[1]) * 2;
+    if (!best || sc < best.sc) best = { sc, h: hh, wa: wa0 + dw, r, dr };
+  }
+  return { best, curH, wa0, curReach };
+}
+
 console.log(`场景 ${process.env.SCENE || 'duel1'}：${fights.length} 拍`);
 const bad = [];
 for (const f of fights) {
@@ -74,10 +98,22 @@ for (const f of fights) {
     if (tip[1] > 2) notes.push(`剑尖插进地里 ${(tip[1] / Ha).toFixed(2)}H`);
     let blade = null, bl = null;
     if (lb > 0) { bl = weaponLine(b, tc, lb); blade = dSegSeg(h, tip, bl[0], bl[1]); row.push(`剑碰剑 ${(blade[0] / Ha).toFixed(2)}`); }
-    if (!f.landed) { if (db < 0.03) notes.push('闪开了却碰到身体' + want(dep + 0.08)); else if (db > 0.3) notes.push(`差得太远（${db.toFixed(2)}H），看不出"差一点"` + want(dep + 0.08)); }
+    const dBl = bladeBody(h, tip, jb, Hb) / Ha;
+    row.push(`剑身到身体 ${dBl.toFixed(2)}`);
+    if (!f.landed) { if (dBl < 0.03) notes.push('闪开了却碰到身体' + want(0.08 - dBl)); else if (dBl > 0.3) notes.push(`差得太远（${dBl.toFixed(2)}H），看不出"差一点"` + want(0.12 - dBl)); }
     else if (f.level === 'clash') {
+      if (blade && b.swordAng && MOVES[f.react] && MOVES[f.react].block) {
+        const fit = blockFit(h, tip, a, b, tc, lb), cur = blade[0] / Ha;
+        const [c, d] = bl, ua = blade[0] / Ha <= 0.06 ? dSegSeg(c, d, h, tip)[1] : null, ub = blade[0] / Ha <= 0.06 ? blade[1] : null;
+        const ok = cur <= 0.06 && ua >= 0.68 && ua <= 0.88 && ub >= 0.2 && ub <= 0.55 && fit.curReach <= 0.375;
+        row.push(ub !== null ? `碰在 攻${ua.toFixed(2)} 守${ub.toFixed(2)}` : '');
+        if (!ok) notes.push(`守方 ${f.react} 接触帧（ready）写 h [${fit.best.h.map(v => v.toFixed(2)).join(', ')}] wa ${fit.best.wa.toFixed(0)}（现在 h [${fit.curH.map(v => v.toFixed(2)).join(', ')}] wa ${fit.wa0.toFixed(0)}，手离肩 ${fit.curReach.toFixed(2)}→${fit.best.r.toFixed(2)}H）` + (Math.abs(fit.best.dr) > 0.01 ? `，攻方 ${f.move} reach ${f.reach != null ? (f.reach + fit.best.dr).toFixed(2) : '（没有 reach）'}${fit.best.dr > 0 ? '（站远一点）' : '（站近一点）'}` : ''));
+        console.log(row.join('  ') + (notes.length ? '\n      ✗ ' + notes.join('；') : '  ✓'));
+        if (notes.length) bad.push(fr);
+        continue;
+      }
       if (!blade) notes.push('clash 但守方没有兵器');
-      else if (blade[0] / Ha > 0.06 || dep > -0.05) {
+      else if (blade[0] / Ha > 0.06 || (dep > -0.05 && db < 0.12)) {   // 剑尖越过躯干线但离身体还远（比如在头顶上方），不算刺中
         // 攻方剑上 0.6…1.0 那一段，找和守方剑同高的点，算出要前后挪多少才碰上（越靠近 0.85 越好）
         const [c, d] = bl, ylo = Math.min(c[1], d[1]), yhi = Math.max(c[1], d[1]);
         let best = null;
@@ -120,5 +156,41 @@ for (const ac of actors) {
     if (sink > 0.06) { if (s === null) s = t; worst = Math.max(worst, sink); }
     else if (s !== null) { if (t - s >= 0.25) { console.log(`  ✗ ${ac === S.hero ? '主角' : '对手'} f${Math.round(s * 24)}–f${Math.round(t * 24)} 胯被压低 ${worst.toFixed(2)}H（脚分太开够不着，换小一点的架势）`); bad.push(-1); } s = null; worst = 0; }
   }
+}
+// 逐帧：剑尖插地、手脚够不着、锁剑没卡住、两人同时不动
+const nm = ac => ac === S.hero ? '主角' : '对手';
+const end = S.clock ? S.clock.anim(S.DUR) : S.DUR, NF = Math.floor(end * 24);
+const ranges = (list) => { const out = []; for (const f of list) { const l = out[out.length - 1]; if (l && f === l[1] + 1) l[1] = f; else out.push([f, f]); } return out.map(([a, b]) => a === b ? `f${a}` : `f${a}–${b}`).join(' '); };
+for (const ac of actors) {
+  const lab = { 地: [], 手: [], 后手: [], 脚: [] };
+  for (let fr = 0; fr <= NF; fr++) {
+    const ta = fr / 24, j = ac.jointsAt(ta), s = ac.stateAt(ta), Hh = ac.H;
+    const len = wl(ac, ta, 0);
+    if (len > 0 && weaponLine(ac, ta, len)[1][1] > 2) lab.地.push(fr);
+    if (Math.hypot(j.aF[2][0] - s.hF[0], j.aF[2][1] - s.hF[1]) > 0.03 * Hh) lab.手.push(fr);
+    if (Math.hypot(j.aB[2][0] - s.hB[0], j.aB[2][1] - s.hB[1]) > 0.04 * Hh) lab.后手.push(fr);
+    if (Math.hypot(j.lF[2][0] - s.fF[0], j.lF[2][1] - s.fF[1]) > 0.03 * Hh || Math.hypot(j.lB[2][0] - s.fB[0], j.lB[2][1] - s.fB[1]) > 0.03 * Hh) lab.脚.push(fr);
+  }
+  const msg = { 地: '剑尖插进地里', 手: '前手够不着（停在半路）', 后手: '后手够不着', 脚: '脚够不着（腿被拖直）' };
+  for (const k of Object.keys(lab)) if (lab[k].length) { console.log(`  ✗ ${nm(ac)} ${msg[k]}：${ranges(lab[k])}`); bad.push(-1); }
+}
+for (const [t0, t1] of S.locks || []) {
+  const miss = [];
+  for (let fr = Math.ceil(t0 * 24); fr <= Math.floor(t1 * 24); fr++) {
+    const ta = fr / 24, A = weaponLine(S.hero, ta, wl(S.hero, ta, 0)), B = weaponLine(S.foe, ta, wl(S.foe, ta, 0));
+    const d = dSegSeg(A[0], A[1], B[0], B[1]);
+    if (d[0] / S.hero.H > 0.04) miss.push(fr);
+  }
+  if (miss.length) { console.log(`  ✗ 锁剑段两把剑没卡在一起：${ranges(miss)}`); bad.push(-1); }
+}
+if (fights.length > 1 && fights[0].t0 != null) {
+  const t0 = fights[0].t0, t1 = fights[fights.length - 1].tc, still = [];
+  const pts = (ac, ta) => { const j = ac.jointsAt(ta), l = wl(ac, ta, 0); return [j.hip, j.aF[2], j.head, ...(l > 0 ? [weaponLine(ac, ta, l)[1]] : [])]; };
+  for (let fr = Math.ceil(t0 * 24) + 1; fr <= Math.floor(t1 * 24); fr++) {
+    const mv = ac => { const a = pts(ac, (fr - 1) / 24), b = pts(ac, fr / 24); return Math.max(...a.map((p, i) => Math.hypot(p[0] - b[i][0], p[1] - b[i][1]))) / ac.H; };
+    if (actors.every(ac => mv(ac) < 0.006)) still.push(fr);
+  }
+  const long = []; { let s = null; for (let i = 0; i <= still.length; i++) { if (i < still.length && (s === null || still[i] === still[i - 1] + 1)) { if (s === null) s = still[i]; } else { if (s !== null && still[i - 1] - s + 1 > 4) long.push(`f${s}–${still[i - 1]}`); s = i < still.length ? still[i] : null; } } }
+  if (long.length) { console.log(`  ✗ 打斗中两个人同时不动（停顿）：${long.join(' ')}`); bad.push(-1); }
 }
 console.log(bad.length ? `共 ${bad.length} 处要看` : '全部通过');

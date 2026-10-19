@@ -41,6 +41,8 @@ class Director {
   shot(ta, dur, spec, ease = 'inOut3') { this.plan.push({ type: 'move', ta, dur, spec, ease }); return this; }
   cut(ta, spec) { this.plan.push({ type: 'move', ta, dur: 0.001, spec, ease: 'linear' }); return this; }
   track(t0, t1, spec, step = 0.2) { this.plan.push({ type: 'track', t0, t1, spec, step }); return this; }
+  // 平滑跟拍（第 8 轮，打斗用）：每 1/24 秒算一次机位，再按 ±smooth 秒做滑动平均，镜头不会一顿一顿地追
+  follow(t0, t1, spec, smooth = 0.25) { this.plan.push({ type: 'follow', t0, t1, spec, smooth }); return this; }
   // 景别 → 机位（在动作模拟完之后调用）
   frame(ta, spec) {
     const pts = [], actors = [];
@@ -85,6 +87,15 @@ class Director {
       if (p.type === 'move') {
         keys.push({ ta: p.ta, ...cur, ease: 'linear' });
         cur = this.frame(p.ta + p.dur, p.spec); keys.push({ ta: p.ta + p.dur, ...cur, ease: p.ease });
+      } else if (p.type === 'follow') {
+        const st = 1 / 24, raw = [];
+        for (let ta = p.t0 - p.smooth; ta < p.t1 + p.smooth + 1e-6; ta += st) raw.push([ta, this.frame(clamp(ta, 0, dur), p.spec)]);
+        const n = Math.round(p.smooth / st);
+        for (let i = n; i < raw.length - n; i += 2) {
+          let x = 0, y = 0, z = 0, w = 0;
+          for (let k = -n; k <= n; k++) { const q = raw[i + k][1], c = 1 - Math.abs(k) / (n + 1); x += q.x * c; y += q.y * c; z += q.z * c; w += c; }
+          cur = { x: x / w, y: y / w, z: z / w }; keys.push({ ta: raw[i][0], ...cur, ease: 'linear' });
+        }
       } else {
         for (let ta = p.t0; ta < p.t1 + 1e-6; ta += p.step) { cur = this.frame(Math.min(ta, p.t1), p.spec); keys.push({ ta: Math.min(ta, p.t1), ...cur, ease: 'linear' }); }
       }
