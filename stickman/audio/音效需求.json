@@ -920,6 +920,196 @@
    "reference": "原片没有完全一样的声音（循环 v2 新加的）",
    "sync": "起音在文件第 0 ms（前面不留静音）",
    "notes": null
+  },
+  {
+   "id": "label_stick",
+   "folder": "audio/samples/label_stick/",
+   "name": "便签贴上",
+   "group": "界面",
+   "used_for": "火柴人VS乱码 第一幕：变量便签飞过去\"啪\"地贴在数字 / 小蛇头上",
+   "trigger": "贴上那一帧",
+   "duration_ms": [
+    120,
+    250
+   ],
+   "character": "干脆的\"啪\"，像贴纸拍在硬东西上，轻、有点俏皮",
+   "avoid": "不要像打击、不要太响",
+   "level_peak_dbfs": -16,
+   "variants": 2,
+   "reference": "原片没有完全一样的声音（火柴人VS乱码 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "label_tear",
+   "folder": "audio/samples/label_tear/",
+   "name": "便签撕下",
+   "group": "界面",
+   "used_for": "火柴人VS乱码 第一幕：重新赋值：便签从 5 上撕下来飞走",
+   "trigger": "开始翘起那一帧",
+   "duration_ms": [
+    250,
+    450
+   ],
+   "character": "\"嘶啦\"一声短短的撕纸 / 撕胶带",
+   "avoid": "不要太长、不要刺耳",
+   "level_peak_dbfs": -17,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS乱码 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "roar_big",
+   "folder": "audio/samples/roar_big/",
+   "name": "大 HI 的吼",
+   "group": "动作",
+   "used_for": "火柴人VS乱码 第一幕：print(pet.upper()) 飞出巨大的 HI 对着主角吼，带一阵风",
+   "trigger": "吼开始那一帧（时长约 0.9 秒）",
+   "duration_ms": [
+    800,
+    1100
+   ],
+   "character": "卡通的\"吼！\"+ 呼呼的风，夸张但可爱（是字在吼，不是野兽）",
+   "avoid": "不要恐怖、不要真实动物吼叫",
+   "level_peak_dbfs": -10,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS乱码 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "roar_small",
+   "folder": "audio/samples/roar_small/",
+   "name": "小蛇冒出的小小 hi",
+   "group": "动作",
+   "used_for": "火柴人VS乱码 第一幕：小蛇学着吼，只冒出一个很小的 hi",
+   "trigger": "冒出那一帧",
+   "duration_ms": [
+    150,
+    300
+   ],
+   "character": "很小很尖的\"吱\"/\"嗨\"，可爱、有点泄气",
+   "avoid": "不要像报错",
+   "level_peak_dbfs": -18,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS乱码 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "car_clack",
+   "folder": "audio/samples/car_clack/",
+   "name": "列表车厢扣上",
+   "group": "物体",
+   "used_for": "火柴人VS乱码 第一幕：三节车厢落地后一节节扣在一起（逗号是挂钩）",
+   "trigger": "扣上那一帧",
+   "duration_ms": [
+    120,
+    250
+   ],
+   "character": "金属挂钩\"咔哒\"，清脆、短",
+   "avoid": "不要像枪声",
+   "level_peak_dbfs": -15,
+   "variants": 2,
+   "reference": "原片没有完全一样的声音（火柴人VS乱码 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "pop_open",
+   "folder": "audio/samples/pop_open/",
+   "name": "车厢弹出东西",
+   "group": "物体",
+   "used_for": "火柴人VS乱码 第一幕：索引 toys[1] / toys[0]：车厢一亮，里面的词蹦出来",
+   "trigger": "蹦出那一帧",
+   "duration_ms": [
+    150,
+    300
+   ],
+   "character": "\"啵\"一声弹出，轻快",
+   "avoid": "不要像爆炸",
+   "level_peak_dbfs": -15,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS乱码 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "glitch",
+   "folder": "audio/samples/glitch/",
+   "name": "乱码电流声",
+   "group": "乱码",
+   "used_for": "火柴人VS乱码 第一幕：乱码的标志声：开场 / 结尾远处那个 � 闪一下；红字开始抖",
+   "trigger": "闪出那一帧",
+   "duration_ms": [
+    80,
+    250
+   ],
+   "character": "短促的数字电流\"滋\"，像信号坏掉的一下",
+   "avoid": "不要太响（开场那次几乎听不见）",
+   "level_peak_dbfs": -18,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS乱码 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "garble",
+   "folder": "audio/samples/garble/",
+   "name": "字母变成乱码",
+   "group": "乱码",
+   "used_for": "火柴人VS乱码 第一幕：报错的红字一个个变成乱码；之后乱码咬字母也用它",
+   "trigger": "开始变的那一帧",
+   "duration_ms": [
+    300,
+    600
+   ],
+   "character": "\"滋啦\"+ 几声细碎的数字咔哒，像字在被搅乱",
+   "avoid": "不要像报错声",
+   "level_peak_dbfs": -16,
+   "variants": 2,
+   "reference": "原片没有完全一样的声音（火柴人VS乱码 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "assemble",
+   "folder": "audio/samples/assemble/",
+   "name": "乱码聚成一团",
+   "group": "乱码",
+   "used_for": "火柴人VS乱码 第一幕：散落的乱码一跳一跳地聚到一起（之后拼成人形也用）",
+   "trigger": "开始聚的那一帧",
+   "duration_ms": [
+    400,
+    700
+   ],
+   "character": "一串快速的小咔哒由疏到密，最后\"咔\"地合上",
+   "avoid": "不要像机械齿轮太写实",
+   "level_peak_dbfs": -16,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS乱码 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "glitch_crawl",
+   "folder": "audio/samples/glitch_crawl/",
+   "name": "乱码团爬动",
+   "group": "乱码",
+   "used_for": "火柴人VS乱码 第一幕：乱码团第一次动（之后它爬来爬去，可循环）",
+   "trigger": "动起来那一帧",
+   "duration_ms": [
+    300,
+    800
+   ],
+   "character": "细碎的数字\"嗒嗒嗒\"+ 一点电流，像很多小脚在键盘上跑",
+   "avoid": "可循环；不要像昆虫太写实",
+   "level_peak_dbfs": -17,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS乱码 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": "glitch_crawl 需要能无缝循环"
   }
  ]
 }

@@ -47,7 +47,9 @@ class Code {
     this.moves = [];
     this.jiggles = [];
     this.bright = o.bright ?? 1;
+    this.topY = o.topY ?? null;                     // 滚动的窗口：基线高于 topY 的旧行在一行高度内淡出（交互式窗口往上滚）
   }
+  rowAlpha(y) { return this.topY === null ? 1 : clamp((y - this.topY) / (this.size * 1.32) + 1); }
   last() { return this.snaps[this.snaps.length - 1]; }
   push(t, ch) { this.snaps.push({ ...this.last(), ...ch, t }); }
   key(t, kind = 'key') { if (this.sfx) cues.add(t, kind, { v: 0.6 + this.rand() * 0.4 }); }
@@ -83,7 +85,8 @@ class Code {
   // 选中一段（深灰块）；之后的 type 会替换它
   select(t, a, b) { this.push(t, { sel: [a, b], cur: b }); this.key(t, 'click'); return this; }
   // 运行：整块盖一层浅灰，dur 秒；sound 默认是原片的"运行"音，跑出错的代码用 'touch2'（只有回车的"啵"，紧接着报错）
-  run(t, dur = 0.32, sound = 'run') { this.runs.push({ t, dur }); if (sound) cues.add(t, sound); this.push(t, { typing: false }); return this; }
+  // o.line：只盖住这一行（交互式窗口：回车只运行最新那一行；-1 = 最后一行）
+  run(t, dur = 0.32, sound = 'run', o = {}) { this.runs.push({ t, dur, line: o.line }); if (sound) cues.add(t, sound); this.push(t, { typing: false }); return this; }
   // 光标闪烁的"嘀嗒"：原片只在安静的段落里听得到（开头那几秒），所以只在给定时段登记
   blinkSound(t0, t1) {
     let prev = null;
@@ -137,6 +140,11 @@ class Code {
     if (!this.cw) { ctx.save(); ctx.font = `400 ${this.size}px Code`; this.cw = ctx.measureText('M').width; ctx.restore(); }
     return { cw: this.cw, lh: this.size * 1.32 };
   }
+  // 不需要 ctx 的版本：第 off 个字符的中心 [x, y]（Inconsolata 字宽正好 0.5 em）
+  charAt(t, off) {
+    const s = this.snap(t), cw = this.cw || this.size * 0.5, [x0, y0] = this.pos(t), [r, c] = this.rc(s.text, off);
+    return [x0 + (c + 0.5) * cw, y0 + r * this.size * 1.32 - this.size * 0.32];
+  }
   // 屏幕上某个字符的位置（给特效和道具用）：返回 [x, 基线 y]
   charPos(ctx, t, off) {
     const s = this.snap(t), { cw, lh } = this.layout(ctx), [x0, y0] = this.pos(t);
@@ -167,11 +175,14 @@ class Code {
     ctx.textBaseline = 'alphabetic';
     lines.forEach((ln, r) => {
       let cx = x0;
+      const ra = this.rowAlpha(y0 + r * lh); if (ra <= 0.003) return;
+      ctx.globalAlpha = alpha * ra;
       for (const [tok, col] of tokenize(ln)) {
         if (col) { ctx.fillStyle = rgba(K.mix(C.bg, col, this.bright)); ctx.fillText(tok, cx, y0 + r * lh); }
         cx += tok.length * cw;
       }
     });
+    ctx.globalAlpha = alpha;
     // 光标：白色下划线，打字时常亮，空闲时 1 秒一闪
     const blinkOn = s.typing || Math.floor((t - s.t) / 0.53) % 2 === 0;   // 和 blinkSound 用同一个公式
     if (blinkOn && this.cursorOn !== false) {
@@ -206,8 +217,13 @@ class Code {
       const age = t - rn.t;
       if (age < 0 || age > rn.dur + 0.12) continue;
       const a = age < rn.dur ? 0.62 : 0.62 * (1 - (age - rn.dur) / 0.12);
-      const wmax = Math.max(...lines.map(l => l.length), 1);
       ctx.fillStyle = `rgba(200,200,200,${a})`;
+      if (rn.line !== undefined) {
+        const r = rn.line < 0 ? lines.length + rn.line : rn.line;
+        ctx.fillRect(x0 - sz * 0.15, y0 + r * lh - sz * 0.95, Math.max(lines[r] ? lines[r].length : 1, 1) * cw + sz * 0.3, lh + sz * 0.05 - (lh - sz));
+        continue;
+      }
+      const wmax = Math.max(...lines.map(l => l.length), 1);
       ctx.fillRect(x0 - sz * 0.15, y0 - sz * 0.95, wmax * cw + sz * 0.3, lines.length * lh + sz * 0.05);
     }
     ctx.restore();

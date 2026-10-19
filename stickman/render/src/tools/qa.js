@@ -14,7 +14,7 @@
 const fs = require('fs'), path = require('path');
 const K = require('../core');
 const { W, H } = K;
-const S = require({ v4: '../scene_v4', loop: '../scene_loop', loop2: '../scene_loop2', fight: '../scene_fight_demo' }[process.env.SCENE] || '../scene_loop');
+const S = require({ v4: '../scene_v4', loop: '../scene_loop', loop2: '../scene_loop2', fight: '../scene_fight_demo', garble: '../scene_garble' }[process.env.SCENE] || '../scene_loop');
 const cues = require('../cues');
 const hero = S.hero, cam = S.cam, clock = S.clock;
 const issues = [];
@@ -53,7 +53,8 @@ for (const code of S.codes || []) {
     if (code.visible ? !code.visible(ta) : ta < code.vis[0] || ta > code.vis[1]) return false;
     const sn = code.snap(ta); if (!sn.text) return false;
     const lines = sn.text.split('\n'), cw = code.size * 0.55, lh = code.size * 1.32, [x0, y0] = code.pos(ta), c = cam.at(t);
-    const a = scr(c, [x0, y0 - code.size]), b = scr(c, [x0 + Math.max(...lines.map(l => l.length)) * cw, y0 + (lines.length - 1) * lh + code.size * 0.3]);
+    const r0 = code.topY === null || code.topY === undefined ? 0 : Math.max(0, Math.ceil((code.topY - y0) / lh)), vl = lines.slice(r0);
+    const a = scr(c, [x0, y0 + r0 * lh - code.size]), b = scr(c, [x0 + Math.max(...vl.map(l => l.length), 1) * cw, y0 + (lines.length - 1) * lh + code.size * 0.3]);
     const visible = b[0] > 0 && a[0] < W && b[1] > 0 && a[1] < H;                       // 完全在画面外不算（镜头故意不拍它）
     return visible && (a[0] < -2 || a[1] < -2 || b[0] > W + 2 || b[1] > H + 2);
   }, 0.25, s => `代码被画面切掉（"${code.snap(clock.anim(s)).text.split('\n')[0].slice(0, 24)}…"）`);

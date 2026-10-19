@@ -76,4 +76,18 @@ function keyCombo(ctx, t, combo) {
   ctx.restore();
 }
 
-module.exports = { laptop, word, keyCombo };
+// 变量便签（第三部）：写着变量名的小吊牌，左边一个穿绳的小孔；和代码标签同一种蓝灰色
+function nameTag(ctx, text, x, y, rot = 0, size = 34, a = 1) {
+  if (a <= 0.003) return;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha *= a;
+  ctx.font = `400 ${size}px Code`;
+  const w = ctx.measureText(text).width + size * 1.15, h = size * 1.2;
+  ctx.fillStyle = 'rgb(70,90,130)';
+  ctx.beginPath(); ctx.moveTo(-w / 2 + h * 0.3, -h / 2); ctx.lineTo(w / 2 - h * 0.12, -h / 2); ctx.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + h * 0.12);
+  ctx.lineTo(w / 2, h / 2 - h * 0.12); ctx.quadraticCurveTo(w / 2, h / 2, w / 2 - h * 0.12, h / 2); ctx.lineTo(-w / 2 + h * 0.3, h / 2); ctx.lineTo(-w / 2, 0); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(-w / 2 + h * 0.36, 0, h * 0.1, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, h * 0.14, size * 0.04);
+  ctx.restore();
+}
+
+module.exports = { laptop, word, keyCombo, nameTag };

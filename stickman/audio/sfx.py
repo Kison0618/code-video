@@ -474,6 +474,9 @@ GEN = {
     'bonk': lambda c: s_bonk(c.get('v', 1)), 'tap': lambda c: s_tap(c.get('v', 1)), 'block_drop': lambda c: s_block_drop(c.get('v', 1)),
     'snake_bite': lambda c: s_snake_bite(c.get('v', 1)), 'snake_slither': lambda c: s_snake_slither(c.get('dur', 3), c.get('v', 1)),
     'scale_drone': lambda c: s_scale_drone(c.get('dur', 3.6), c.get('v', 1)), 'cond_true': lambda c: s_cond(True), 'cond_false': lambda c: s_cond(False),
+    'label_stick': lambda c: s_tap(0.6), 'label_tear': lambda c: s_whoosh_short(0.4), 'roar_big': lambda c: s_whoosh(1.0), 'roar_small': lambda c: s_cond(True),
+    'car_clack': lambda c: s_tick(1.0), 'pop_open': lambda c: s_output(), 'glitch': lambda c: s_select(), 'garble': lambda c: s_dissolve(),
+    'assemble': lambda c: s_tick(0.8), 'glitch_crawl': lambda c: s_tick(0.5),
     'release': lambda c: s_release(), 'debris': lambda c: s_debris(), 'recoil_slide': lambda c: s_recoil_slide(c.get('dur', 0.5)),
 }
 # 有素材时替换合成音的类型（音量仍按实测值）
