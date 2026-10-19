@@ -76,4 +76,59 @@ class Clump {
   }
 }
 
-module.exports = { GLY, gly, glitchAt, drawGlyph, fall, Clump, hash };
+// 乱码本体（剧本 v3）：一团没有固定形状的乱码，一直在变形；能力只有一个——碰到的字变成乱码、被吸进来，它就变大
+//   new Blob({ seed, center: t → [x, y](底部中心), mass: t → 字数 })
+//   .lash(t0, tHit, t1, to)        甩出一条字带：2 帧伸到 to，停住，再收回（攻击）
+//   .scatter(t, dir)               被打中：字往外散开再聚回来
+//   .tipAt(t) / .R(t)              字带末端、半径（给碰撞、镜头用）
+class Blob {
+  constructor(o) { Object.assign(this, { seed: 3, size: 40, lashes: [], hits: [] }, o); }
+  R(t) { return this.size * 0.55 * Math.sqrt(Math.max(1, this.mass(t))); }
+  lash(t0, tHit, t1, to) { this.lashes.push({ t0, tHit, t1, to }); return this; }
+  scatter(t, dir = 0) { this.hits.push({ t, dir }); return this; }
+  lashAt(t) {
+    for (const L of this.lashes) if (t >= L.t0 && t < L.t1) {
+      const ext = t < L.tHit ? E.out(clamp((t - L.t0) / Math.max(0.02, L.tHit - L.t0))) : 1 - E.inOut(clamp((t - (L.t1 - 0.22)) / 0.22));
+      return { L, ext };
+    }
+    return null;
+  }
+  tipAt(t) { const a = this.lashAt(t); if (!a) return null; const c = this.center(t), r = this.R(t); const b = [c[0], c[1] - r]; return [lerp(b[0], a.L.to[0], a.ext), lerp(b[1], a.L.to[1], a.ext)]; }
+  draw(ctx, t, o = {}) {
+    const n = Math.round(this.mass(t)), c = this.center(t), R = this.R(t), a0 = o.alpha ?? 1;
+    if (n <= 0) return;
+    let sc = 0, sdir = 0;
+    for (const h of this.hits) { const d = t - h.t; if (d >= 0 && d < 0.7) { const k = Math.exp(-d * 6) * Math.min(1, d / 0.03); if (k > sc) { sc = k; sdir = h.dir; } } }
+    for (let i = 0; i < n; i++) {
+      const hs = hash(this.seed, i), ha = hash(this.seed + 1, i);
+      // 形状：每个字有自己的角度和半径；整团的轮廓随时间起伏（变形），每 0.4 秒有一部分字换位置（重新排列）
+      const k = Math.floor(t * 2.5 + hs * 7), swap = hash(this.seed + i, k), u = E.inOut(clamp((t * 2.5 + hs * 7 - k) * 3));
+      const ang0 = (i / n + 0.13 * hash(this.seed + 2, i)) * 6.283, ang1 = ang0 + (swap < 0.3 ? (swap - 0.15) * 4 : 0);
+      const ang = lerp(ang0, ang1, u);
+      const wob = 1 + 0.22 * Math.sin(3 * ang + t * 1.7 + this.seed) + 0.14 * Math.sin(5 * ang - t * 2.3);
+      let r = R * Math.sqrt(0.08 + 0.92 * ha) * wob;
+      r *= 1 + sc * (0.9 + hash(this.seed + 4, i)) * (1 + 0.6 * Math.cos(ang - sdir));
+      const x = c[0] + Math.cos(ang) * r * 1.15, y = c[1] - R + Math.sin(ang) * r * 0.9;
+      drawGlyph(ctx, gly(this.seed * 1000 + i, t, 5, 0.3), x, Math.min(y, -this.size * 0.4), (hash(this.seed + 5, i) - 0.5) * 0.6, this.size * (0.75 + 0.5 * hs), a0, glitchAt(this.seed * 1000 + i, t, 0.04));
+    }
+    const la = this.lashAt(t);
+    if (la) {                                                       // 字带：一串字从身体伸到末端
+      const b = [c[0], c[1] - R * 0.9], tip = this.tipAt(t), len = Math.hypot(tip[0] - b[0], tip[1] - b[1]), m = Math.max(2, Math.floor(len / (this.size * 0.75)));
+      const nx = -(tip[1] - b[1]) / (len || 1), ny = (tip[0] - b[0]) / (len || 1);
+      for (let j = 1; j <= m; j++) { const v = j / m, w = Math.sin(v * 9 - t * 30) * this.size * 0.25 * (1 - v);
+        drawGlyph(ctx, gly(this.seed * 3000 + j, t, 9, 0.5), lerp(b[0], tip[0], v) + nx * w, lerp(b[1], tip[1], v) + ny * w, 0, this.size * (1.1 - 0.4 * v), a0, glitchAt(this.seed * 3000 + j, t, 0.1)); }
+    }
+  }
+}
+// 乱码火柴人：沿着骨头每隔一段放一个乱码字，头是一个大大的 �
+function drawGlyphFigure(ctx, j, size, seed, t, a = 1) {
+  const bones = [[j.hip, j.neck], [j.lF[0], j.lF[1]], [j.lF[1], j.lF[2]], [j.lB[0], j.lB[1]], [j.lB[1], j.lB[2]], [j.aF[0], j.aF[1]], [j.aF[1], j.aF[2]], [j.aB[0], j.aB[1]], [j.aB[1], j.aB[2]]];
+  let n = 0;
+  for (const [p, q] of bones) {
+    const len = Math.hypot(q[0] - p[0], q[1] - p[1]), m = Math.max(1, Math.round(len / (size * 0.72))), rot = Math.atan2(q[1] - p[1], q[0] - p[0]);
+    for (let k = 0; k <= m; k++, n++) { const v = k / m; drawGlyph(ctx, gly(seed * 100 + n, t, 6, 0.3), lerp(p[0], q[0], v), lerp(p[1], q[1], v), rot * 0.15, size, a, glitchAt(seed * 100 + n, t, 0.04)); }
+  }
+  drawGlyph(ctx, '�', j.head[0], j.head[1], 0, size * 2.6, a, glitchAt(seed + 77, t, 0.05));
+}
+
+module.exports = { GLY, gly, glitchAt, drawGlyph, fall, Clump, Blob, drawGlyphFigure, hash };

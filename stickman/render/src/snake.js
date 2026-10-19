@@ -10,7 +10,8 @@ const { clamp } = K;
 const PR = require('./props');
 
 // 过关键帧的 Catmull-Rom 曲线：keys = [[t, x, y, z?], ...]，返回 t → [x, y, z]
-function spline(keys) {
+// o.mono：单调插值（关键帧速度差很大时，普通 Catmull-Rom 会冲过头再折回来，蛇身就挤成一团）
+function spline(keys, o = {}) {
   const n = keys.length;
   return t => {
     if (t <= keys[0][0]) return [keys[0][1], keys[0][2], keys[0][3] || 0];
@@ -22,7 +23,12 @@ function spline(keys) {
     const out = [];
     for (let c = 1; c <= 3; c++) {
       const a = p0[c] || 0, b = p1[c] || 0, d = p2[c] || 0, e = p3[c] || 0;
-      const m1 = (d - a) / Math.max(1e-6, p2[0] - p0[0]) * (p2[0] - p1[0]), m2 = (e - b) / Math.max(1e-6, p3[0] - p1[0]) * (p2[0] - p1[0]);
+      let m1 = (d - a) / Math.max(1e-6, p2[0] - p0[0]) * (p2[0] - p1[0]), m2 = (e - b) / Math.max(1e-6, p3[0] - p1[0]) * (p2[0] - p1[0]);
+      if (o.mono) {
+        const s0 = (b - a) / Math.max(1e-6, p1[0] - p0[0]), s1 = (d - b) / Math.max(1e-6, p2[0] - p1[0]), s2 = (e - d) / Math.max(1e-6, p3[0] - p2[0]), h = p2[0] - p1[0];
+        const lim = (m, sa, sb) => (sa * sb <= 0 ? 0 : Math.sign(m) * Math.min(Math.abs(m), 3 * Math.abs(sa) * h, 3 * Math.abs(sb) * h));
+        m1 = i === 0 ? s1 * h : lim(m1, s0, s1); m2 = i + 2 >= n ? s1 * h : lim(m2, s1, s2);
+      }
       const u2 = u * u, u3 = u2 * u;
       out.push((2 * u3 - 3 * u2 + 1) * b + (u3 - 2 * u2 + u) * m1 + (-2 * u3 + 3 * u2) * d + (u3 - u2) * m2);
     }
