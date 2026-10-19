@@ -66,6 +66,7 @@ class Actor2 {
     this.footModes = { F: [{ t: -1e9, mode: 'ground' }], B: [{ t: -1e9, mode: 'ground' }] };
     this.sfxList = [];
     this.dirs = [{ t: -1e9, d: this.dir }];         // 朝向（转身是瞬间的，和原片一样 1 帧翻过去，弹簧负责之后的动作）
+    this.stSegs = [];                               // 手脚允许拉长的时间段（招式 key 的 st 通道）：[t0, t1, t => 倍数]
   }
   hip(t, v, dur = 0, ease = 'inOut') { this.hipT.set(t, v, dur, ease); return this; }
   lean(t, v, dur = 0, ease = 'inOut') {         // 空翻过的整圈不算：新目标就近取（-356° 之后写 8° 就是往前 12°，而不是倒转一圈）
@@ -220,18 +221,30 @@ class Actor2 {
     const g = k => L(R[k][i], R[k][i + 1]);
     return { t: ta, hip: g('hip'), lean: g('lean'), head: g('head'), hF: g('hF'), hB: g('hB'), fF: g('fF'), fB: g('fB'), obj: g('obj'), dir: R.dir[u < 0.5 ? i : i + 1] };
   }
-  jointsAt(ta) { const s = this.stateAt(ta); return body(s, this.H, s.dir); }
+  stAt(ta) { for (const [a, b, fn] of this.stSegs) if (ta >= a && ta <= b) return fn(ta); return 1; }
+  jointsAt(ta) { const s = this.stateAt(ta); s.st = this.stAt(ta); return body(s, this.H, s.dir); }
   // 画：先拖影（手脚快速移动时沿轨迹的带子），再画人
+  //   o.step：按这个帧率出画（24 = 原片的一拍一，12 = 一拍二），姿势在两张画之间不插值——原片"硬"的感觉主要来自这个
+  //   o.smear：false 时不画手脚拖影（原片人身上没有拖影，只有武器有，见 研究/动作逐帧_四集.md）
+  //   o.turn：转身后的第一张画横向压扁成这个比例（原片转身就是 1 张压扁的画，0.4 左右）；要和 o.step 一起用
   draw(ctx, ta, o = {}) {
     const H = this.H;
-    for (const k of ['aF', 'aB', 'lF', 'lB']) {
+    if (o.step) ta = Math.floor(ta * o.step + 1e-6) / o.step;
+    const squash = o.turn && o.step && o.turn !== 1 && this.stateAt(ta).dir !== this.stateAt(ta - 1 / o.step).dir;
+
+    if (o.smear !== false) for (const k of ['aF', 'aB', 'lF', 'lB']) {
       // 拖影只看手脚相对身体的挥动（整个人在飞、在掉的时候不画）
       const hip = this.stateAt(ta).hip, pts = [];
       for (let n = 7; n >= 0; n--) { const j = this.jointsAt(ta - n / 160), e = j[k][2]; pts.push([e[0] - j.hip[0] + hip[0], e[1] - j.hip[1] + hip[1]]); }
       const sp = Math.hypot(pts[7][0] - pts[0][0], pts[7][1] - pts[0][1]) / (7 / 160) / H;
       if (sp > 3.2) smear(ctx, pts, P.lw * H * 1.05, this.color, clamp((sp - 3.2) / 4, 0, 0.9));
     }
-    paint(ctx, this.jointsAt(ta), o.color || this.color, H, this.headStyle);
+    let j = this.jointsAt(ta);
+    if (squash) {      // 关节的横坐标往胯收拢（线宽、头不变形），像一张正对镜头的窄画
+      const hx = j.hip[0], sq = p => [hx + (p[0] - hx) * o.turn, p[1]];
+      j = { ...j, hip: sq(j.hip), neck: sq(j.neck), sh: sq(j.sh), head: sq(j.head), aF: j.aF.map(sq), aB: j.aB.map(sq), lF: j.lF.map(sq), lB: j.lB.map(sq) };
+    }
+    paint(ctx, j, o.color || this.color, H, this.headStyle);
   }
 }
 
