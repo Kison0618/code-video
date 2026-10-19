@@ -27,12 +27,18 @@
 //   没写某只脚、胯又走得离它太远（腿够不着）时，自动在那个 key 补一步（自动跟脚）
 //   turn：true 时在这一帧转身（朝向翻过去，1 帧）。之后这一招的 F / B / lean / wa 按新朝向写；hip / fF / fB 仍按招式开始时的朝向写
 //   没写的通道保持上一个值；第一个 key 之前从当前状态出发。
+//   招式级 behind: [f0, f1]（第 10 轮）：这几帧兵器画在身体后面（缠头裹脑刀背贴后背）；场景里用 a.weaponBehind(ta) 决定先画人还是先画刀
+//
+// 单手持刀剑（第 10 轮，blade1）：actor.blade = { kind: 'jian' | 'dao', tassel, zhi } 就按真刀剑画（剑柄、护手、剑身 / 单刃刀身、剑穗、
+//   握着剑柄的拳头、空手捏剑指），见下面"刀剑的画法"；肘往哪边弯、刀刃朝哪边按剑角自动选（gripGrid，见"持剑"）。
+//   兵器脱手（被磕飞、插地、踢起来、接住；断刀头飞出去再掉下来）用 FlyBlade；慢镜头用 clock.slow（actor2.js 的 Clock）
 'use strict';
 const fs = require('fs'), path = require('path');
 const K = require('./core');
 const { lerp, E, clamp } = K;
 const { Actor2 } = require('./acting');
 const { P } = require('./rig');
+const { body } = require('./rig2');
 
 const A = Actor2.prototype;
 const MOVES = JSON.parse(fs.readFileSync(path.join(__dirname, '../../analysis/fight_moves.json'), 'utf8')).moves;
@@ -182,7 +188,7 @@ A.keys = function (t0, keys, o = {}) {
     if (limb && limb[0].length === 1) point = [hp[0] + D * hk[limb[0]][0] * H, hp[1] - (limb[1] - hk[limb[0]][1]) * H];
     else if (limb) point = [hip0[0] + D * hk[limb[0]][0] * H, -hk[limb[0]][1] * H];
   }
-  if (o.sfx !== false && contact === null && keys.some(k => k.whoosh)) this.sfx(T(keys.find(k => k.whoosh)), 'whoosh_short', { v: 0.5 });
+  if (o.sfx !== false && contact === null && keys.some(k => k.whoosh)) this.sfx(T(keys.find(k => k.whoosh)), this.blade ? 'sword_whoosh' : 'whoosh_short', { v: 0.5 });
   return { t: tE, contact, point, x: hipW(tE)[0], D };
 };
 
@@ -209,13 +215,16 @@ A.move = function (t, name, o = {}) {
   }
   const hiF = keys.find(k => k.hit);
   const r = this.keys(t, keys, { ...o, follow: o.extra === undefined && o.to && reach && hiF ? { f: hiF.f + 1, dx: clamp((o.to.hipNow(t)[0] - this.hipNow(t)[0]) * this.dirAt(t) / this.H - reach, -0.3, 0.9) } : null });
-  if (m.whoosh !== undefined && o.sfx !== false) this.sfx(t + m.whoosh / 24 * (o.slow ?? 1), 'whoosh_short', { v: m.whooshV ?? 0.6 });
+  if (m.whoosh !== undefined && o.sfx !== false) this.sfx(t + m.whoosh / 24 * (o.slow ?? 1), this.blade ? 'sword_whoosh' : 'whoosh_short', { v: m.whooshV ?? 0.6 });   // 拿刀剑的（.blade）挥起来是更细更尖的“咻”
+  // behind: [从第几帧, 到第几帧]——这段时间兵器画在身体后面（缠头裹脑时刀背贴着后背、背剑）。场景用 a.weaponBehind(ta) 决定先画谁
+  if (m.behind) (this.behindSegs = this.behindSegs || []).push([t + m.behind[0] / 24 * (o.slow ?? 1), t + m.behind[1] / 24 * (o.slow ?? 1)]);
   return { ...r, react: m.react, level: m.level, reach, extra };
 };
 
 // 前臂的角度（朝向坐标，度）
+//   用"默认肘向"的关节（raw）：剑的角度定义不随自动换肘变（换肘只改手臂怎么画，手和剑的位置不动）
 A.forearmAng = function (ta, hand = 'F') {
-  const j = this.jointsAt(ta), L = j[hand === 'F' ? 'aF' : 'aB'];
+  const j = this.jointsAt(ta, true), L = j[hand === 'F' ? 'aF' : 'aB'];
   return Math.atan2(-(L[2][1] - L[1][1]), (L[2][0] - L[1][0]) * j.dir) * 180 / Math.PI;
 };
 // 剑此刻的角度（朝向坐标，度）；没写过 wa 返回 null（沿前臂）
@@ -243,6 +252,59 @@ A.bladeK = function (ta) {
   if (!seg) return 1;
   if (!seg.fn) seg.fn = chan([[seg.t0, this.bladeK(seg.t0 - 1e-4), 'linear'], ...seg.L]);
   return seg.fn(ta);
+};
+
+// —— 持剑（第 10 轮）：肘的朝向自动选 + 刀刃朝哪边 ——
+// 问题：肘永远往后下方弯，剑举过头顶、提腕下刺时前臂和剑折成 110°–150°（手腕"断了"，剑像指回肘）。
+// 做法：手和剑的位置都不动，只换肘往哪边弯——每 1/240 秒比较两种肘位下"前臂 → 剑"的夹角（腕角），
+//   默认肘朝下（+1）；+1 的腕角 > 105° 且翻过去（−1）能小 30° 以上就翻；翻过去以后 +1 的腕角回到 60° 以内、或者 −1 比 +1 差 20° 以上才翻回来。
+//   结果按 ±1.5 帧滑动平均 → 换肘用 3 帧，手臂看起来是绕着"肩→手"的轴转过去（ik2 的 bend 支持小数）。
+//   后手：双手握（后手贴着剑柄）时同样按剑选；单手持剑时后手不管（剑指、护手）。
+// 刀（blade.kind = 'dao'）：单刃，刃朝挥动的方向——剑角在减小（往前下劈）刃在"剑角 − 90°"那边，在增大（上撩）就翻到另一边，
+//   翻刃同样按 ±1 帧平滑（刃朝镜头的那一下刀看起来变窄，像真的转了刀）
+const GG = 1 / 240;
+const wrap = d => ((d + 540) % 360) - 180;
+A.gripGrid = function () {
+  if (this._gg && this._gg.rec === this.rec) return this._gg;
+  const N = this.N, H = this.H, raw = { F: new Float32Array(N), B: new Float32Array(N), E: new Float32Array(N) };
+  let sF = 1, sB = 1, sE = 1, prevA = null;
+  const len = ta => (typeof this.weapon === 'function' ? this.weapon(ta) : this.weapon) || 0;
+  const pick = (cur, w1, w2) => cur > 0 ? (w1 > 105 && w2 < w1 - 30 ? -1 : 1) : (w1 < 60 || w2 > w1 + 20 ? 1 : -1);
+  for (let i = 0; i < N; i++) {
+    const t = i * GG, wa = len(t) > 0 ? this.swordAng(t) : null;
+    if (wa === null) { sF = 1; sB = 1; }
+    else {
+      const s = this.stateAt(t); s.st = this.stAt(t);
+      const j1 = body(s, H, s.dir), j2 = body({ ...s, eF: -1, eB: -1 }, H, s.dir), D = s.dir;
+      const sw = Math.atan2(-Math.sin(wa * Math.PI / 180), D * Math.cos(wa * Math.PI / 180)) * 180 / Math.PI;   // 剑的世界角度
+      const fa = L => Math.atan2(L[2][1] - L[1][1], L[2][0] - L[1][0]) * 180 / Math.PI;
+      sF = pick(sF, Math.abs(wrap(sw - fa(j1.aF))), Math.abs(wrap(sw - fa(j2.aF))));
+      // 后手在剑柄上（离剑轴 < 0.05H，在前手后面 0.02–0.2H）才按剑选
+      const h = j1.aF[2], b = j1.aB[2], ux = Math.cos(sw * Math.PI / 180), uy = Math.sin(sw * Math.PI / 180);
+      const along = -((b[0] - h[0]) * ux + (b[1] - h[1]) * uy), off = Math.abs((b[0] - h[0]) * uy - (b[1] - h[1]) * ux);
+      sB = along > 0.02 * H && along < 0.2 * H && off < 0.05 * H ? pick(sB, Math.abs(wrap(sw - fa(j1.aB))), Math.abs(wrap(sw - fa(j2.aB)))) : 1;
+    }
+    if (this.blade && this.blade.kind === 'dao') {
+      const a = wa ?? this.forearmAng(t);
+      if (prevA !== null) { const w = wrap(a - prevA) / GG; if (w < -250) sE = 1; else if (w > 250) sE = -1; }
+      prevA = a;
+    }
+    raw.F[i] = sF; raw.B[i] = sB; raw.E[i] = sE;
+  }
+  const avg = (A, W) => { const o = new Float32Array(N); let acc = 0; for (let i = -W; i <= W; i++) acc += A[clamp(i, 0, N - 1)]; for (let i = 0; i < N; i++) { o[i] = acc / (2 * W + 1); acc += A[Math.min(N - 1, i + W + 1)] - A[Math.max(0, i - W)]; } return o; };
+  this._gg = { rec: this.rec, F: avg(raw.F, 15), B: avg(raw.B, 15), E: avg(raw.E, 10) };
+  return this._gg;
+};
+A.weaponBehind = function (ta) { return !!(this.behindSegs && this.behindSegs.some(([a, b]) => ta >= a && ta < b)); };
+A.elbowAt = function (ta) {
+  if (!this.blade || this.blade.elbow === false || !this.rec || !this.N) return [1, 1];
+  const g = this.gripGrid(), x = clamp(ta / GG, 0, this.N - 1.001), i = Math.floor(x), u = x - i;
+  return [lerp(g.F[i], g.F[i + 1], u), lerp(g.B[i], g.B[i + 1], u)];
+};
+A.edgeAt = function (ta) {
+  if (!this.rec || !this.N) return 1;
+  const g = this.gripGrid(), x = clamp(ta / GG, 0, this.N - 1.001), i = Math.floor(x), u = x - i;
+  return lerp(g.E[i], g.E[i + 1], u);
 };
 
 // —— 打击特效（原片实测：打中不停帧、不震屏；1 帧放射光 + 1–2 帧火花，命中本体再加一个结果字形 5 帧淡出）——
@@ -307,12 +369,135 @@ function segMid(a, b, c, d) {
 }
 //   o.arc：弧形拖影（第 8 轮）——把最近 o.arc 秒（默认 1.5 帧）里剑扫过的面画成一片由淡到浓的月牙，只画剑的外 3/4。
 //          写了 wa 的大弧线劈砍用它；不写就是原来的 1 帧扇面。o.arcFrom：月牙最早从这个时刻画起（剑一帧变长、瞬移这种跳变之前的位置不算）
+// —— 刀剑的画法（第 10 轮）：剑柄、护手、剑身 / 刀身、剑穗、握着剑柄的拳头 ——
+//   actor.blade = { kind: 'jian' | 'dao', color, tassel: '#d8402f'（剑穗颜色，不写不画）, zhi: true（空着的手捏剑指）}
+//   剑长（actor.weapon）仍然是"手 → 剑尖"，打中 / 碰剑的判断不变；剑柄从手往后伸（双手握时伸到后手后面），护手在手前 0.03H
+//   单位都是 H：
+const BLADE = {
+  jian: { w: 0.03, grip: 0.06, guard: 0.03, gw: 0.042, color: '#f0f0f0', gripColor: '#7a5c3e', guardColor: '#d9b45a' },   // 剑：直、双刃、剑尖收窄，有剑脊
+  dao: { w: 0.034, grip: 0.07, guard: 0.025, gw: 0.034, color: '#f0f0f0', gripColor: '#5a4636', guardColor: '#c9a24a' },    // 刀：单刃、刀头宽、微弯，刃朝挥动方向
+};
+const bladeOf = b => ({ ...BLADE[b.kind || 'jian'], ...b });
+// 画一把刀 / 剑：base = 握把上前手的位置（世界坐标），u = 朝剑尖的单位向量，L = 手到剑尖的长度（像素，已含透视缩短）
+//   o.back：剑柄往手后伸多长（像素）；o.k：透视缩短；o.edge：刀刃朝向（−1…1，0 = 刃对着镜头）；o.dir：朝向
+//   o.cut：刀断了——刀身只画到离手 o.cut 像素，断口斜切；o.from：只画 from 之后的那一截（飞出去的断刀头），不画柄和护手
+function paintBlade(ctx, base, u, L, H, B, o = {}) {
+  const k = o.k ?? 1, n = [-u[1], u[0]], g = (o.from ?? B.guard * H * k), P = (sv, off) => [base[0] + u[0] * sv + n[0] * off, base[1] + u[1] * sv + n[1] * off];
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (o.from === undefined) {                                           // 剑柄 + 剑首
+    const back = o.back ?? B.grip * H * k, pe = P(-back, 0), pg = P(g, 0);
+    ctx.strokeStyle = B.gripColor; ctx.lineWidth = 0.034 * H;
+    ctx.beginPath(); ctx.moveTo(pe[0], pe[1]); ctx.lineTo(pg[0], pg[1]); ctx.stroke();
+    ctx.fillStyle = B.guardColor; ctx.beginPath(); ctx.arc(pe[0], pe[1], 0.02 * H, 0, Math.PI * 2); ctx.fill();
+  }
+  const end = o.cut ?? L, col = o.color || B.color, wb = (o.width ?? B.w * H) / 2;
+  const pts = [];
+  if (B.kind === 'dao') {
+    const e = (o.edge ?? 1) * (o.dir ?? 1), sp = 0.4 * wb, span = Math.max(1, L - B.guard * H * k);
+    const we = sv => { const q = clamp((sv - B.guard * H * k) / span); return q < 0.8 ? wb + (0.9 * wb) * q / 0.8 : -sp + (1.9 * wb + sp) * Math.cos((q - 0.8) / 0.2 * Math.PI / 2); };
+    const cv = sv => 0.035 * H * Math.pow(clamp((sv - B.guard * H * k) / span), 2);   // 刀身微弯：越往刀头越往刀背那边弯
+    const N = 12, a0 = g, a1 = Math.min(end, L);
+    const edgeL = [], spineL = [];
+    for (let i = 0; i <= N; i++) { const sv = a0 + (a1 - a0) * i / N; edgeL.push(P(sv, e * (we(sv) - cv(sv)))); spineL.push(P(sv, -e * (sp + cv(sv)))); }
+    if (o.cut !== undefined && o.cut < L) { edgeL[N] = P(a1 + 0.012 * H, e * (we(a1) - cv(a1))); spineL[N] = P(a1 - 0.012 * H, -e * (sp + cv(a1))); }   // 断口斜切
+    pts.push(...edgeL, ...spineL.reverse());
+  } else {
+    const tl = Math.min(0.07 * H, (L - g) * 0.3);
+    if (o.cut !== undefined && o.cut < L - tl) pts.push(P(g, wb), P(end + 0.01 * H, wb * 0.85), P(end - 0.01 * H, -wb * 0.85), P(g, -wb));
+    else pts.push(P(g, wb), P(L - tl, wb * 0.72), P(L, 0), P(L - tl, -wb * 0.72), P(g, -wb));
+  }
+  ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 0.008 * H;
+  ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (const q of pts) ctx.lineTo(q[0], q[1]); ctx.closePath(); ctx.fill(); ctx.stroke();
+  if (B.kind !== 'dao' && o.cut === undefined) {                          // 剑脊
+    const r0 = P(g + 0.01 * H, 0), r1 = P(L - 0.05 * H, 0);
+    ctx.strokeStyle = 'rgba(0,0,0,0.16)'; ctx.lineWidth = 0.006 * H; ctx.beginPath(); ctx.moveTo(r0[0], r0[1]); ctx.lineTo(r1[0], r1[1]); ctx.stroke();
+  }
+  if (o.from === undefined) {                                           // 护手（剑格 / 刀盘）
+    const a = P(g, -B.gw * H), b = P(g, B.gw * H);
+    ctx.strokeStyle = B.guardColor; ctx.lineWidth = (B.kind === 'dao' ? 0.03 : 0.022) * H;
+    ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+  }
+  ctx.restore();
+}
+const weaponLenOf = (actor, ta) => (typeof actor.weapon === 'function' ? actor.weapon(ta) : actor.weapon ?? 0.45);
+function drawBlade(ctx, actor, ta, o) {
+  const B = bladeOf(o.blade || actor.blade), H = actor.H, len = o.len ?? weaponLenOf(actor, ta);
+  const j = actor.jointsAt(ta), fist = K.rgba(o.fist || actor.color);
+  const dot = (p, r) => { ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, Math.PI * 2); ctx.fill(); };
+  if (!(len > 0)) { ctx.fillStyle = fist; dot(j.aF[2], 0.03 * H); return; }   // 手里没剑：只画拳头
+  const [hd, tip] = weaponLine(actor, ta, len, 'F'), k = actor.bladeK ? actor.bladeK(ta) : 1;
+  const Lp = Math.hypot(tip[0] - hd[0], tip[1] - hd[1]) || 1e-6, u = [(tip[0] - hd[0]) / Lp, (tip[1] - hd[1]) / Lp];
+  const bh = j.aB[2], along = -((bh[0] - hd[0]) * u[0] + (bh[1] - hd[1]) * u[1]), off = Math.abs((bh[0] - hd[0]) * u[1] - (bh[1] - hd[1]) * u[0]);
+  const two = along > 0.02 * H && along < 0.22 * H && off < 0.06 * H;    // 后手贴着剑柄 = 双手握：剑柄伸到后手后面
+  const back = Math.max(B.grip * H * k, two ? along + 0.04 * H : 0);
+  const cut = B.broken && ta >= B.broken.t ? B.broken.at * H * k : undefined;
+  // 剑穗：挂在剑首，跟着剑首最近 0.05 / 0.11 秒的位置甩（剑停下就垂下来）
+  if (B.tassel && cut === undefined) {
+    const anc = t => { const [h, tp] = weaponLine(actor, t, len, 'F'), l = Math.hypot(tp[0] - h[0], tp[1] - h[1]) || 1; return [h[0] - (tp[0] - h[0]) / l * (back + 0.02 * H), h[1] - (tp[1] - h[1]) / l * (back + 0.02 * H)]; };
+    const a0 = anc(ta), a1 = anc(ta - 0.05), a2 = anc(ta - 0.11), sg = 0.065 * H;
+    const toward = (from, to, l) => { const d = Math.hypot(to[0] - from[0], to[1] - from[1]) || 1; return [from[0] + (to[0] - from[0]) / d * l, from[1] + (to[1] - from[1]) / d * l]; };
+    const m = toward(a0, [a0[0] + (a1[0] - a0[0]) * 0.9, a0[1] + (a1[1] - a0[1]) * 0.9 + sg * 0.6], sg);
+    const e = toward(m, [m[0] + (a2[0] - a0[0]) * 0.7, m[1] + (a2[1] - a0[1]) * 0.7 + sg * 0.8], sg);
+    ctx.save(); ctx.strokeStyle = B.tassel; ctx.lineCap = 'round'; ctx.lineWidth = 0.011 * H;
+    ctx.beginPath(); ctx.moveTo(a0[0], a0[1]); ctx.quadraticCurveTo(m[0], m[1], (m[0] + e[0]) / 2, (m[1] + e[1]) / 2); ctx.lineTo(e[0], e[1]); ctx.stroke();
+    const da = Math.atan2(e[1] - m[1], e[0] - m[0]); ctx.lineWidth = 0.008 * H;
+    for (const s of [-0.3, 0, 0.3]) { ctx.beginPath(); ctx.moveTo(e[0], e[1]); ctx.lineTo(e[0] + Math.cos(da + s) * 0.04 * H, e[1] + Math.sin(da + s) * 0.04 * H); ctx.stroke(); }
+    ctx.restore();
+  }
+  paintBlade(ctx, hd, u, Lp, H, B, { back, k, color: o.color, width: o.width, edge: actor.edgeAt ? actor.edgeAt(ta) : 1, dir: j.dir, cut });
+  ctx.fillStyle = fist; dot(hd, 0.032 * H);
+  if (two) dot(bh, 0.032 * H);
+  else if (B.zhi) {                                                     // 剑指：食指、中指并拢伸直，顺着前臂
+    const L = j.aB, d = Math.hypot(L[2][0] - L[1][0], L[2][1] - L[1][1]) || 1, q = [(L[2][0] - L[1][0]) / d, (L[2][1] - L[1][1]) / d];
+    ctx.save(); ctx.strokeStyle = fist; ctx.lineCap = 'round'; ctx.lineWidth = 0.02 * H;
+    ctx.beginPath(); ctx.moveTo(L[2][0], L[2][1]); ctx.lineTo(L[2][0] + q[0] * 0.05 * H, L[2][1] + q[1] * 0.05 * H); ctx.stroke(); ctx.restore();
+  } else dot(bh, 0.03 * H);
+}
+
+// 脱手飞出去的刀剑（第 10 轮：被磕飞、插地、被踢起来、接住；刀断了飞出去的刀头）
+//   const fb = new FlyBlade(hero.blade, 0.6, hero.H);
+//   fb.toss(t0, p0, a0, T, p1, a1, spins)   // t0 时握把在 p0、世界角度 a0（度，画布坐标：0 = 向右，90 = 向下）；抛物线飞 T 秒到 p1、角度 a1（多转 spins 圈）
+//   fb.stick(dur)                            // 落下来以后插在地上（剑尖入地，余震晃 dur 秒）；fb.hide(t) 之后不画（被接住了）
+//   p0 / p1 / a0 / a1 都可以是函数（等角色模拟完再算：例如"主角那一刻的手在哪"）
+class FlyBlade {
+  constructor(blade, len, H, o = {}) { this.B = bladeOf(blade); this.len = len; this.H = H; this.ph = []; this.tHide = 1e9; this.o = o; }
+  toss(t0, p0, a0, T, p1, a1, spins = 0) { this.last = { t0, T, p0, a0, p1, a1, spins }; this.ph.push(this.last); this.ph.sort((a, b) => a.t0 - b.t0); return this; }
+  stick(dur = 0.35, amp = 7) { this.last.wob = { dur, amp }; return this; }       // 加在上一次 toss 上
+  hide(t) { this.tHide = t; return this; }
+  get(v) { return typeof v === 'function' ? v() : v; }
+  state(ta) {
+    if (ta >= this.tHide) return null;
+    let ph = null; for (const p of this.ph) if (p.t0 <= ta) ph = p;
+    if (!ph) return null;
+    if (!ph.r) ph.r = { p0: this.get(ph.p0), a0: this.get(ph.a0), p1: this.get(ph.p1), a1: this.get(ph.a1) + 360 * ph.spins };
+    const { p0, a0, p1, a1 } = ph.r, G = this.o.g ?? 9.8 * this.H / 1.7;      // 重力：按身高 1.7 m 换算
+    const dt = Math.min(ta - ph.t0, ph.T), q = dt / ph.T;
+    const vy = (p1[1] - p0[1] - 0.5 * G * ph.T * ph.T) / ph.T;
+    let a = a0 + (a1 - a0) * q;
+    const p = [p0[0] + (p1[0] - p0[0]) * q, p0[1] + vy * dt + 0.5 * G * dt * dt];
+    const late = ta - ph.t0 - ph.T;
+    if (late > 0 && ph.wob && late < ph.wob.dur) a += ph.wob.amp * Math.exp(-late / ph.wob.dur * 3) * Math.sin(late * 2 * Math.PI * 9);   // 插地余震
+    return { p, a, flying: late < 0 };
+  }
+  draw(ctx, ta, o = {}) {
+    const s = this.state(ta);
+    if (!s) return;
+    const H = this.H, a = s.a * Math.PI / 180, u = [Math.cos(a), Math.sin(a)];
+    ctx.save();
+    ctx.beginPath(); ctx.rect(-1e5, -1e5, 2e5, 1e5); ctx.clip();          // 地面（y = 0）以下不画：插进地里的那一截、刚从地里拔出来的剑尖
+    paintBlade(ctx, s.p, u, this.len * H, H, this.B, { color: o.color, from: this.o.from !== undefined ? this.o.from * H : undefined, edge: 1, dir: 1 });
+    ctx.restore();
+  }
+  tip(ta) { const s = this.state(ta); if (!s) return null; const a = s.a * Math.PI / 180; return [s.p[0] + Math.cos(a) * this.len * this.H, s.p[1] + Math.sin(a) * this.len * this.H]; }
+}
+
 function drawWeapon(ctx, actor, ta, o = {}) {
   const len = o.len ?? (typeof actor.weapon === 'function' ? actor.weapon(ta) : actor.weapon ?? 0.45), H = actor.H;
   const [a, b] = weaponLine(actor, ta, len, o.hand);
-  if (o.arc) {
+  const bk = (actor.blade || o.blade || {}).broken, alen = bk && ta >= bk.t ? Math.min(len, bk.at) : len;   // 断刀：拖影只到断口
+  if (o.arc && len > 0) {
     const span = Math.max(0, Math.min(o.arc === true ? 1.5 * F1 : o.arc, ta - (o.arcFrom ?? -1e9))), N = 8, L = [];
-    for (let i = 0; i <= N; i++) { const [h, tp] = weaponLine(actor, ta - span * (1 - i / N), len, o.hand); L.push([[h[0] + (tp[0] - h[0]) * 0.25, h[1] + (tp[1] - h[1]) * 0.25], tp]); }
+    for (let i = 0; i <= N; i++) { const [h, tp] = weaponLine(actor, ta - span * (1 - i / N), alen, o.hand); L.push([[h[0] + (tp[0] - h[0]) * 0.25, h[1] + (tp[1] - h[1]) * 0.25], tp]); }
     const moved = Math.hypot(L[N][1][0] - L[0][1][0], L[N][1][1] - L[0][1][1]);
     if (moved > 0.25 * H) for (let i = 0; i < N; i++) {
       const [p0, q0] = L[i], [p1, q1] = L[i + 1];
@@ -320,6 +505,7 @@ function drawWeapon(ctx, actor, ta, o = {}) {
       ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(q0[0], q0[1]); ctx.lineTo(q1[0], q1[1]); ctx.lineTo(p1[0], p1[1]); ctx.closePath(); ctx.fill();
     }
   }
+  if (actor.blade || o.blade) return drawBlade(ctx, actor, ta, o);
   const [pa, pb] = weaponLine(actor, ta - F1, len, o.hand);
   const moved = Math.hypot(b[0] - pb[0], b[1] - pb[1]);
   if (!o.arc && o.trail !== false && moved > 0.12 * H) {            // 拖影：上一帧和这一帧武器之间的扇面（o.trail: false 不画）
@@ -370,11 +556,11 @@ function exchange(D, beats, fx) {
     }
     if (fx && point) fx.add(tc, point, landed ? level : 'none', { glyph: landed && !blocked ? bt.glyph : null });
     if (D && landed && level === 'heavy') D.cue(tc, 'impact_heavy');
-    else if (D && landed && level !== 'none') D.cue(tc, level === 'clash' ? 'impact_light' : 'impact_medium', { v: 0.8 });
+    else if (D && landed && level !== 'none') D.cue(tc, level !== 'clash' ? 'impact_medium' : (bt.a.blade || bt.b?.blade) ? 'sword_clang' : 'impact_light', { v: 0.8 });   // 刀剑相碰用 sword_clang（金属“铛”）
     out.push({ ...r, tc, landed, point });
     if (D) (D.fights = D.fights || []).push({ tc, a: bt.a, b: bt.b, move: bt.move, react: typeof react === 'function' ? '(函数)' : react, level, landed, tip: bt.tip, reach: r.reach, extra: r.extra, t0: bt.t });   // 给 tools/contact_check.js 用
   }
   return out;
 }
 
-module.exports = { Actor2, exchange, MOVES, FightFX, drawWeapon, weaponLine, segMid };
+module.exports = { Actor2, exchange, MOVES, FightFX, drawWeapon, weaponLine, segMid, paintBlade, FlyBlade, BLADE };

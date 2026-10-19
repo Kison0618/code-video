@@ -478,6 +478,13 @@ GEN = {
     'car_clack': lambda c: s_tick(1.0), 'pop_open': lambda c: s_output(), 'glitch': lambda c: s_select(), 'garble': lambda c: s_dissolve(),
     'assemble': lambda c: s_tick(0.8), 'glitch_crawl': lambda c: s_tick(0.5),
     'release': lambda c: s_release(), 'debris': lambda c: s_debris(), 'recoil_slide': lambda c: s_recoil_slide(c.get('dur', 0.5)),
+    # 刀剑短片 blade1（第 10 轮）新声音：先用现有合成音占位，按 音效需求.json 做好放进 samples/<id>/ 就会替换
+    'sword_whoosh': lambda c: s_whoosh_short(c.get('v', 1)), 'sword_clang': lambda c: s_impact('light') * c.get('v', 1),
+    'sword_scrape': lambda c: s_impact('light') * c.get('v', 1), 'blade_heavy_clang': lambda c: s_impact('heavy'),
+    'sword_slam': lambda c: s_thud(c.get('v', 1)), 'sword_spin': lambda c: s_whoosh_short(c.get('v', 1)),
+    'sword_stick': lambda c: s_thud(c.get('v', 1)), 'sword_kick': lambda c: s_impact('light') * c.get('v', 1),
+    'sword_catch': lambda c: s_impact('light') * c.get('v', 1), 'blade_break': lambda c: s_impact('heavy'),
+    'whistle_fall': lambda c: s_whoosh_short(c.get('v', 1)),
 }
 # 有素材时替换合成音的类型（音量仍按实测值）
 SAMPLE_KINDS = {'key': 'key', 'enter': 'key', 'step': 'step', 'body': 'body', 'thud': 'thud', 'laptop': 'laptop', 'tick': 'tick',

@@ -42,8 +42,10 @@ function ik2(root, target, L1, L2, bend, smax = 1) {
   const dc = clamp(d, dmin, dmax);
   const a = Math.atan2(dy, dx);
   const A = Math.acos(clamp((L1 * L1 + dc * dc - L2 * L2) / (2 * L1 * dc), -1, 1));
-  const a1 = a + bend * A;
-  const mid = [root[0] + L1 * Math.cos(a1), root[1] + L1 * Math.sin(a1)];
+  // bend 可以是 −1…1 之间的小数（第 10 轮）：中间关节 = 沿根→末端方向 L1·cosA + 垂直方向 bend·L1·sinA。±1 和原来完全一样；
+  //   |bend| < 1 = 肘（膝）转出画面平面（投影变短），从 +1 平滑过渡到 −1 时手臂像在三维里绕着肩→手的轴转过去
+  const ux = Math.cos(a), uy = Math.sin(a), c = L1 * Math.cos(A), sn = bend * L1 * Math.sin(A);
+  const mid = [root[0] + c * ux - sn * uy, root[1] + c * uy + sn * ux];
   const end = [root[0] + dc * Math.cos(a), root[1] + dc * Math.sin(a)];
   return [root, mid, end];
 }
@@ -84,7 +86,8 @@ function body(s, H, dir) {
   const L = n => P[n] * H, st = s.st || 1;                       // st：这一刻允许手脚拉长的倍数（招式 key 里写 st）
   return {
     hip, neck, sh, head, dir,
-    aF: ik2(sh, s.hF, L('upper'), L('fore'), dir, st), aB: ik2(sh, s.hB, L('upper'), L('fore'), dir, st),      // 肘往后下方弯
+    // 肘默认往后下方弯（dir）；s.eF / s.eB（−1…1，第 10 轮持剑用）乘上去：−1 = 肘翻到另一边（举剑过顶、提腕下刺时肘朝上）
+    aF: ik2(sh, s.hF, L('upper'), L('fore'), dir * (s.eF ?? 1), st), aB: ik2(sh, s.hB, L('upper'), L('fore'), dir * (s.eB ?? 1), st),
     lF: ik2(hip, s.fF, L('thigh'), L('shin'), -dir, st), lB: ik2(hip, s.fB, L('thigh'), L('shin'), -dir, st),  // 膝往前弯
   };
 }

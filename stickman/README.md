@@ -152,6 +152,17 @@ v1 把所有关节按同一条缓动插值，结果全身一起动、一起停�
 
 `SCENE=loop2 node build.js --from 0 --to 151.4`；体检 `SCENE=loop2 node render/src/tools/qa.js`；音效时间表 `audio/时间表/loop2.md`（新声音：bonk、tap、block_drop、snake_bite、snake_slither、scale_drone、cond_true、cond_false）。
 
+## 刀剑短片 blade1（`render/src/scene_blade1.js`，29.99 秒，第 10 轮）
+
+单手剑（主角，黄）对单手刀（强者，白），武术指导思路是"剑走轻灵、刀如猛虎"：亮相对峙 → 第一回合 13 拍 → 力劈华山磕飞剑、空手连躲、踢剑空中接剑 → 反击五拍 + 连环六拍 → 错身斩断刀 → 刀头掉下来吓一跳 → 抱拳礼。设计稿（拆招逻辑、节拍表、镜头、音效需求、看片清单）：`剧本/刀剑短片_blade1.md`。持剑画法（剑柄、护手、拳头、剑指、剑穗、刀单刃翻刃、肘自动翻）见 `fight.js` 的"持剑""刀剑的画法"两节。
+
+```bash
+SCENE=blade1 node build.js --from 0 --to 30 --jobs 8                # 带占位音效，60fps（在本机渲染）
+(cd render && SCENE=blade1 node src/tools/qa.js)                     # 体检
+(cd render && SCENE=blade1 node src/tools/contact_check.js)          # 28 拍逐拍 + 逐帧
+SCENE=blade1 node render/src/tools/cue_sheet.js                      # 音效时间表 audio/时间表/blade1.md
+```
+
 ## 打斗试做 duel2（`render/src/scene_duel2.js`，7.48 秒，第 8 轮）
 
 按用户对 duel1 的意见（不连贯、中间有停顿、像击剑）重做的动漫刀剑打斗：拖刀对冲撞 X → 六拍连续攻防 → 锁剑 → 推开 → 跳劈 → 燕返し → 回转斩 → 跪滑时打 `sword.len *= 3` → 巨剑上撩打飞空中的强者 → 两人都躺着。双手握剑、剑角单独写（大弧线）、透视、转身、月牙拖影、平滑跟拍，中间不停。设计稿（为什么 duel1 像击剑、原则、节拍表、每招要点、距离、镜头、音效需求、看片清单）在 `剧本/打斗试做_duel2.md`。
