@@ -19,7 +19,7 @@
 const K = require('../core');
 const { P } = require('../rig');
 const { weaponLine, MOVES } = require('../fight');
-const SC = { duel1: '../scene_duel1', duel2: '../scene_duel2', fight: '../scene_fight_demo' };
+const SC = { duel1: '../scene_duel1', duel2: '../scene_duel2', blade1: '../scene_blade1', fight: '../scene_fight_demo' };
 const S = require(SC[process.env.SCENE] || '../scene_duel1');
 const fights = S.fights || [];
 const wl = (a, ta, fb) => (S.weaponLen ? S.weaponLen(a, ta) : fb) || 0;
@@ -187,7 +187,7 @@ if (fights.length > 1 && fights[0].t0 != null) {
   const t0 = fights[0].t0, t1 = fights[fights.length - 1].tc, still = [];
   const pts = (ac, ta) => { const j = ac.jointsAt(ta), l = wl(ac, ta, 0); return [j.hip, j.aF[2], j.head, ...(l > 0 ? [weaponLine(ac, ta, l)[1]] : [])]; };
   for (let fr = Math.ceil(t0 * 24) + 1; fr <= Math.floor(t1 * 24); fr++) {
-    const mv = ac => { const a = pts(ac, (fr - 1) / 24), b = pts(ac, fr / 24); return Math.max(...a.map((p, i) => Math.hypot(p[0] - b[i][0], p[1] - b[i][1]))) / ac.H; };
+    const mv = ac => { const a = pts(ac, (fr - 1) / 24), b = pts(ac, fr / 24); return Math.max(...a.map((p, i) => b[i] ? Math.hypot(p[0] - b[i][0], p[1] - b[i][1]) : 1e9)) / ac.H; };   // 兵器这一帧有、下一帧没了（脱手）算动了
     if (actors.every(ac => mv(ac) < 0.006)) still.push(fr);
   }
   const long = []; { let s = null; for (let i = 0; i <= still.length; i++) { if (i < still.length && (s === null || still[i] === still[i - 1] + 1)) { if (s === null) s = still[i]; } else { if (s !== null && still[i - 1] - s + 1 > 4) long.push(`f${s}–${still[i - 1]}`); s = i < still.length ? still[i] : null; } } }

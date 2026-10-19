@@ -1110,6 +1110,215 @@
    "reference": "原片没有完全一样的声音（火柴人VS乱码 新加的）",
    "sync": "起音在文件第 0 ms（前面不留静音）",
    "notes": "glitch_crawl 需要能无缝循环"
+  },
+  {
+   "id": "sword_whoosh",
+   "folder": "audio/samples/sword_whoosh/",
+   "name": "刀剑挥动的咻",
+   "group": "刀剑（blade1）",
+   "used_for": "刀剑短片里每一次劈、砍、刺、撩（约 38 次）",
+   "trigger": "动作开始，峰值落在刀剑碰到之前",
+   "duration_ms": [
+    120,
+    300
+   ],
+   "character": "比拳风细、尖、快的\"咻\"，带一点金属的哨音；剑比刀更细更高",
+   "avoid": "不要像拳风那样闷；不要长",
+   "level_peak_dbfs": -16,
+   "variants": 4,
+   "reference": "原片没有（刀剑短片 blade1 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": "刀（强者）可以比剑（主角）低半个音、厚一点"
+  },
+  {
+   "id": "sword_clang",
+   "folder": "audio/samples/sword_clang/",
+   "name": "刀剑相碰",
+   "group": "刀剑（blade1）",
+   "used_for": "刀剑短片 blade1 里每一次格挡、架、拨、压（约 17 次）；duel2 的剑碰剑（现在还是 impact_light 占位）也用它",
+   "trigger": "碰上那一帧（随后有 0.06–0.1 秒停顿帧）",
+   "duration_ms": [
+    200,
+    600
+   ],
+   "character": "清脆的\"铛\"+ 短短的金属余震，像真剑相击；起音很硬",
+   "avoid": "不要像敲锅、不要太长的钟声",
+   "level_peak_dbfs": -8,
+   "variants": 4,
+   "reference": "原片没有（刀剑短片 blade1 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": "连环三刺三格、六拍连环要有变化：多做几个轻重高低不同的"
+  },
+  {
+   "id": "sword_scrape",
+   "folder": "audio/samples/sword_scrape/",
+   "name": "刀剑擦滑",
+   "group": "刀剑（blade1）",
+   "used_for": "绞剑（剑贴着刀身磨一圈）、云剑（刀顺着剑身滑开）",
+   "trigger": "滑开始那一帧",
+   "duration_ms": [
+    250,
+    600
+   ],
+   "character": "金属贴着金属\"嚓——\"地刮过去，尾巴往上挑",
+   "avoid": "不要像指甲刮黑板那么刺耳",
+   "level_peak_dbfs": -14,
+   "variants": 2,
+   "reference": "原片没有（刀剑短片 blade1 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "blade_heavy_clang",
+   "folder": "audio/samples/blade_heavy_clang/",
+   "name": "力劈华山硬接",
+   "group": "刀剑（blade1）",
+   "used_for": "强者跳起来一刀劈在主角剑上、把剑磕飞",
+   "trigger": "劈中那一帧（随后有慢镜头）",
+   "duration_ms": [
+    600,
+    1200
+   ],
+   "character": "很重的金属撞击 + 低频下潜，然后剑嗡嗡地抖",
+   "avoid": "不要拖成爆炸",
+   "level_peak_dbfs": -4,
+   "variants": 1,
+   "reference": "原片没有（刀剑短片 blade1 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "sword_slam",
+   "folder": "audio/samples/sword_slam/",
+   "name": "刀劈在地上",
+   "group": "刀剑（blade1）",
+   "used_for": "强者一刀劈空砍进地面",
+   "trigger": "刀砍到地那一帧",
+   "duration_ms": [
+    300,
+    700
+   ],
+   "character": "金属\"咣\"+ 碎石、土块溅起来",
+   "avoid": "不要像玻璃碎",
+   "level_peak_dbfs": -8,
+   "variants": 1,
+   "reference": "原片没有（刀剑短片 blade1 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "sword_spin",
+   "folder": "audio/samples/sword_spin/",
+   "name": "兵器空中打转",
+   "group": "刀剑（blade1）",
+   "used_for": "剑被磕飞在空中转、剑被踢起来飞过头顶、断掉的刀头飞上天",
+   "trigger": "飞起来那一帧",
+   "duration_ms": [
+    500,
+    1000
+   ],
+   "character": "连续的\"呼呼呼\"转圈声，由近到远或者由远到近",
+   "avoid": "不要像直升机",
+   "level_peak_dbfs": -16,
+   "variants": 2,
+   "reference": "原片没有（刀剑短片 blade1 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": "刀头飞上天那一下可以更轻更远"
+  },
+  {
+   "id": "sword_stick",
+   "folder": "audio/samples/sword_stick/",
+   "name": "插在地上",
+   "group": "刀剑（blade1）",
+   "used_for": "剑插进地里、刀头掉下来插在主角脚边",
+   "trigger": "插进去那一帧",
+   "duration_ms": [
+    400,
+    1000
+   ],
+   "character": "\"噗\"一声扎进土里 + 剑身嗡嗡的余震",
+   "avoid": "余震不要太长",
+   "level_peak_dbfs": -8,
+   "variants": 2,
+   "reference": "原片没有（刀剑短片 blade1 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": "刀头插在脚边那一下要吓人一点（主角会吓一跳）"
+  },
+  {
+   "id": "sword_kick",
+   "folder": "audio/samples/sword_kick/",
+   "name": "踢剑出土",
+   "group": "刀剑（blade1）",
+   "used_for": "主角脚背挑到插在地上的剑的护手，剑从地里蹦出来",
+   "trigger": "脚碰到剑那一帧",
+   "duration_ms": [
+    200,
+    500
+   ],
+   "character": "短的\"铛\"+ 剑从土里拔出来的\"嗤\"",
+   "avoid": "不要太重",
+   "level_peak_dbfs": -10,
+   "variants": 1,
+   "reference": "原片没有（刀剑短片 blade1 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "sword_catch",
+   "folder": "audio/samples/sword_catch/",
+   "name": "空中接剑",
+   "group": "刀剑（blade1）",
+   "used_for": "主角跳起来在空中握住打着转落下来的剑柄（慢镜头）",
+   "trigger": "握住那一帧",
+   "duration_ms": [
+    400,
+    1200
+   ],
+   "character": "手掌\"啪\"地握住 + 一声清亮的剑鸣",
+   "avoid": "剑鸣不要太长，后面马上落地",
+   "level_peak_dbfs": -10,
+   "variants": 1,
+   "reference": "原片没有（刀剑短片 blade1 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "blade_break",
+   "folder": "audio/samples/blade_break/",
+   "name": "错身斩断刀",
+   "group": "刀剑（blade1）",
+   "used_for": "两人错身而过，主角一剑把强者的刀斩成两截（慢镜头 + 白闪）",
+   "trigger": "斩断那一帧",
+   "duration_ms": [
+    1000,
+    2500
+   ],
+   "character": "清脆的金属断裂\"锵\"+ 长长的剑鸣慢慢消失",
+   "avoid": "不要像玻璃碎；不要拖成爆炸",
+   "level_peak_dbfs": -4,
+   "variants": 1,
+   "reference": "原片没有（刀剑短片 blade1 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": "这是全片最重要的一个声音；之后有一段安静"
+  },
+  {
+   "id": "whistle_fall",
+   "folder": "audio/samples/whistle_fall/",
+   "name": "下落哨音",
+   "group": "刀剑（blade1）",
+   "used_for": "飞上天的半截刀头从天上掉下来",
+   "trigger": "开始掉那一帧（约 0.6 秒后插地）",
+   "duration_ms": [
+    500,
+    800
+   ],
+   "character": "越来越近、越来越高的下落哨音",
+   "avoid": "不要像炸弹",
+   "level_peak_dbfs": -16,
+   "variants": 1,
+   "reference": "原片没有（刀剑短片 blade1 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": "结尾落点对 sword_stick"
   }
  ]
 }

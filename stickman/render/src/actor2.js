@@ -20,18 +20,30 @@ const cues = require('./cues');
 const DT = 1 / 240;
 
 // —— 时钟：真实时间 ↔ 动画时间（停顿帧期间动画时间暂停，真实时间继续：闪光、震屏照常走）——
+//   freeze(ta, d)：动画时间停在 ta，真实时间走 d 秒
+//   slow(ta, d, k)（第 10 轮）：动画时间 ta…ta+d 这一段按 k 倍速放（k = 0.3 → 真实时间放 d / 0.3 秒）——接剑、错身斩的慢镜头
+//   内部统一成 { ta, da（动画时长）, dr（真实时长）}：冻结 da = 0
 class Clock {
   constructor() { this.f = []; }
-  freeze(ta, d) { this.f.push({ ta, d }); this.f.sort((a, b) => a.ta - b.ta); return this; }
+  seg(ta, da, dr) { this.f.push({ ta, da, dr, d: dr - da }); this.f.sort((a, b) => a.ta - b.ta); return this; }
+  freeze(ta, d) { return this.seg(ta, 0, d); }
+  slow(ta, d, k) { return this.seg(ta, d, d / k); }
   anim(t) {           // 真实 → 动画
     let off = 0;
-    for (const z of this.f) { if (t < z.ta + off) break; if (t < z.ta + off + z.d) return z.ta; off += z.d; }
+    for (const z of this.f) {
+      const r0 = z.ta + off;
+      if (t < r0) break;
+      if (t < r0 + z.dr) return z.da > 0 ? z.ta + (t - r0) * z.da / z.dr : z.ta;
+      off += z.dr - z.da;
+    }
     return t - off;
   }
   real(ta) {          // 动画 → 真实（接触那一刻本身算在冻结之前）
-    let off = 0; for (const z of this.f) if (ta > z.ta) off += z.d; return ta + off;
+    let off = 0;
+    for (const z of this.f) if (ta > z.ta) off += z.da > 0 && ta < z.ta + z.da ? (ta - z.ta) * (z.dr / z.da - 1) : z.dr - z.da;
+    return ta + off;
   }
-  get total() { return this.f.reduce((s, z) => s + z.d, 0); }
+  get total() { return this.f.reduce((s, z) => s + z.dr - z.da, 0); }
 }
 
 class Foot {
@@ -222,7 +234,12 @@ class Actor2 {
     return { t: ta, hip: g('hip'), lean: g('lean'), head: g('head'), hF: g('hF'), hB: g('hB'), fF: g('fF'), fB: g('fB'), obj: g('obj'), dir: R.dir[u < 0.5 ? i : i + 1] };
   }
   stAt(ta) { for (const [a, b, fn] of this.stSegs) if (ta >= a && ta <= b) return fn(ta); return 1; }
-  jointsAt(ta) { const s = this.stateAt(ta); s.st = this.stAt(ta); return body(s, this.H, s.dir); }
+  // raw = true：肘一律按默认方向弯（算剑的"相对前臂角度"用，见 fight.js swordAng）；否则用 elbowAt（持剑时自动选肘的朝向，fight.js）
+  jointsAt(ta, raw) {
+    const s = this.stateAt(ta); s.st = this.stAt(ta);
+    if (!raw && this.elbowAt) { const e = this.elbowAt(ta); s.eF = e[0]; s.eB = e[1]; }
+    return body(s, this.H, s.dir);
+  }
   // 画：先拖影（手脚快速移动时沿轨迹的带子），再画人
   //   o.step：按这个帧率出画（24 = 原片的一拍一，12 = 一拍二），姿势在两张画之间不插值——原片"硬"的感觉主要来自这个
   //   o.smear：false 时不画手脚拖影（原片人身上没有拖影，只有武器有，见 研究/动作逐帧_四集.md）
