@@ -88,7 +88,7 @@ class Actor2 {
   sfx(t, type, o = {}) { this.sfxList.push({ t, type, o }); return this; }
   turn(t, d) { this.dirs.push({ t, d }); this.dirs.sort((a, b) => a.t - b.t); return this; }
   dirAt(t) { let d = this.dirs[0].d; for (const x of this.dirs) if (x.t <= t) d = x.d; return d; }
-  hand(h, t, mode, arg) { this.hands[h].push({ t, mode, arg }); this.hands[h].sort((a, b) => a.t - b.t); return this; }
+  hand(h, t, mode, arg, blend) { this.hands[h].push({ t, mode, arg, blend }); this.hands[h].sort((a, b) => a.t - b.t); return this; }   // blend：切到精确模式时从弹簧位置过渡的秒数（默认 0.1）
   obj(t, mode, arg) { this.objModes.push({ t, mode, arg }); this.objModes.sort((a, b) => a.t - b.t); return this; }
 
   simulate(dur, opt = {}) {
@@ -199,7 +199,7 @@ class Actor2 {
         if (i === 0) { dyn[h + 'x'].snap(g[0]); dyn[h + 'y'].snap(g[1]); }
         const sx = dyn[h + 'x'].step(DT, g[0]), sy = dyn[h + 'y'].step(DT, g[1]);
         if (exact) {     // 贴上去之前的 0.1 秒：从弹簧位置平滑过渡到精确位置，之后完全贴住（出拳用加速曲线）
-          const u = exact === true ? E.inOut((t - sw[h]) / 0.1) : E.in(clamp((t - sw[h]) / exact, 0, 1));
+          const u = exact === true ? E.inOut(clamp((t - sw[h]) / Math.max(DT, m.blend ?? 0.1), 0, 1)) : E.in(clamp((t - sw[h]) / exact, 0, 1));
           hp[h] = u >= 1 ? g : [lerp(sx, g[0], u), lerp(sy, g[1], u)];
           if (u >= 1) { dyn[h + 'x'].snap(g[0]); dyn[h + 'y'].snap(g[1]); }
         } else hp[h] = [sx, sy];

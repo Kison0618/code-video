@@ -10,8 +10,9 @@
 //
 // 姿势（每个 key）：{ f, hip:[x,y], lean, head, F:[x,y], B:[x,y], fF:[x,y], fB:[x,y], e, hit }
 //   f：帧号（24fps，相对招式开始）
-//   hip：相对起始胯，x 沿朝向、y 向下为正，单位 H；lean / head：度（lean 是绝对值，正 = 往前倾）
-//   F / B：前手 / 后手，相对肩膀（同 hand 的 'pose' 模式：[朝前, 朝下]），单位 H
+//   hip：相对起始胯，x 沿朝向、y 向下为正，单位 H；hipY：胯离地的绝对高度（单位 H，写了就覆盖 hip 的 y，架势用）
+//   lean / head：度（lean 是绝对值，正 = 往前倾）
+//   F / B：前手 / 后手，相对肩膀（同 hand 的 'pose' 模式：[朝前, 朝下]，世界方向，不跟着前倾转），单位 H。兵器沿"肘→手"方向伸出去
 //   fF / fB：前脚 / 后脚，x 相对起始胯（沿朝向），y 离地高度（向上为正），单位 H
 //   e：从上一个姿势过来的缓动（默认 'out'：一开始最快——"一下到位"）；hit：这一帧是接触帧
 //   st：这一帧允许手脚拉长到几倍（极限姿势"作弊"，例如 1.4；招式结束后自动回到 1）
@@ -21,6 +22,7 @@ const fs = require('fs'), path = require('path');
 const K = require('./core');
 const { lerp, E, clamp } = K;
 const { Actor2 } = require('./acting');
+const { P } = require('./rig');
 
 const A = Actor2.prototype;
 const MOVES = JSON.parse(fs.readFileSync(path.join(__dirname, '../../analysis/fight_moves.json'), 'utf8')).moves;
@@ -48,9 +50,22 @@ A.keys = function (t0, keys, o = {}) {
   // 起点 = 此刻的实际姿势：上一招的精确路径还没走完（招式叠着接）时取路径上此刻的值，不然人会被拽回上一招开始前的位置
   const pathNow = ch => { const L = this.paths[ch]; for (let n = L.length - 1; n >= 0; n--) if (t0 >= L[n].t0 && t0 < L[n].t1) return L[n].fn(t0); return null; };
   const footNow = f => { let m = null; for (const x of this.footModes[f]) if (x.t <= t0) m = x; return m && m.mode === 'path' ? m.fn(t0) : this.feet[f].target(t0); };
-  const hip0 = pathNow('hip') || this.hipT.at(t0), lean0 = pathNow('lean') ?? this.leanT.at(t0), head0 = this.headT.at(t0);
-  const lw = 360 * Math.round(lean0 / 360);
   const fw = { F: footNow('F'), B: footNow('B') };
+  let hip0 = pathNow('hip') || this.hipT.at(t0);
+  const lean0 = pathNow('lean') ?? this.leanT.at(t0), head0 = this.headT.at(t0);
+  const lw = 360 * Math.round(lean0 / 360);
+  // 弹簧段的胯会被"脚够得着"约束压低（actor2：脚踩地够不到时胯往下沉）。招式从约束后的实际高度出发，不然第一帧胯会往上跳
+  if (!pathNow('hip')) {
+    const LEG = (P.thigh + P.shin) * H * 0.97;
+    hip0 = [hip0[0], hip0[1]];
+    for (const f of ['F', 'B']) {
+      let m = null; for (const x of this.footModes[f]) if (x.t <= t0) m = x;
+      const p = fw[f], dx = p[0] - hip0[0];
+      if (m && m.mode === 'ground' && p[1] > -4 && Math.abs(dx) < LEG) hip0[1] = Math.max(hip0[1], p[1] - Math.sqrt(LEG * LEG - dx * dx));
+    }
+  }
+  // hipY：胯离地的绝对高度（单位 H）。hip 的 y 是相对起点的，架势类招式连着调用会一次比一次低；写 hipY 就总是回到同一高度
+  if (keys.some(k => k.hipY !== undefined)) { let px = 0; keys = keys.map(k => { const hx = k.hip ? k.hip[0] : px; px = hx; return k.hipY === undefined ? k : { ...k, hip: [hx, (-k.hipY * H - hip0[1]) / H] }; }); }
   const T = k => t0 + k.f / fps * sc, tE = T(keys[keys.length - 1]);
   const build = (name, start) => {
     const L = start === undefined ? [] : [[t0, start, 'linear']];
@@ -73,7 +88,7 @@ A.keys = function (t0, keys, o = {}) {
     const L = build(h);
     if (!L) continue;
     const hc = chan(L);
-    this.hand(h, t0, 'pose', s => hc(s));
+    this.hand(h, t0, 'pose', s => hc(s), Math.min(0.1, L[0][0] - t0));   // 第一个 key 的那一帧手必须到位（1 帧就打到的招式，默认 0.1 秒过渡会让手晚 2 帧）
   }
   // 脚：精确的世界坐标轨迹；水平移动时自动抬一点脚
   for (const f of ['F', 'B']) {
@@ -114,9 +129,13 @@ A.move = function (t, name, o = {}) {
   const m = MOVES[name];
   if (!m) throw new Error('没有这个招式：' + name);
   let keys = m.keys;
+  const reach = o.reach ?? m.reach;                 // o.reach 覆盖招式自带的出手距离（例如换了更长的兵器）
   // 打中对方：按招式的出手距离（reach，单位 H）和两人此刻的距离，把差值加到接触帧之前的前移里（够不着就多冲一点，太近就少走一点）
-  if (o.to && m.reach) {
-    const D = this.dirAt(t), gap = (o.to.hipNow(t)[0] - this.hipNow(t)[0]) * D / this.H, extra = clamp(gap - m.reach, -0.3, 0.9);
+  //   reach 的意思：接触时两人胯的间距 = reach − 招式自己在接触帧的胯前移。兵器招式的 reach 含兵器长度，用 tools/contact_check.js 校
+  let extra = 0;
+  if (o.to && reach) {
+    const D = this.dirAt(t), gap = (o.to.hipNow(t)[0] - this.hipNow(t)[0]) * D / this.H;
+    extra = clamp(gap - reach, -0.3, 0.9);
     const hi = keys.findIndex(k => k.hit);
     if (hi >= 0 && Math.abs(extra) > 0.02) keys = keys.map((k, i) => {
       const u = i >= hi ? 1 : clamp(k.f / keys[hi].f, 0, 1), add = v => v && [v[0] + extra * u, v[1]];
@@ -125,9 +144,9 @@ A.move = function (t, name, o = {}) {
     if (hi >= 0 && Math.abs(extra) > 0.02 && !keys[hi].hip) keys[hi] = { ...keys[hi], hip: [extra, 0.05] };
   }
   const hiF = keys.find(k => k.hit);
-  const r = this.keys(t, keys, { ...o, follow: o.to && m.reach && hiF ? { f: hiF.f + 1, dx: clamp((o.to.hipNow(t)[0] - this.hipNow(t)[0]) * this.dirAt(t) / this.H - m.reach, -0.3, 0.9) } : null });
+  const r = this.keys(t, keys, { ...o, follow: o.to && reach && hiF ? { f: hiF.f + 1, dx: clamp((o.to.hipNow(t)[0] - this.hipNow(t)[0]) * this.dirAt(t) / this.H - reach, -0.3, 0.9) } : null });
   if (m.whoosh !== undefined && o.sfx !== false) this.sfx(t + m.whoosh / 24 * (o.slow ?? 1), 'whoosh_short', { v: m.whooshV ?? 0.6 });
-  return { ...r, react: m.react, level: m.level, reach: m.reach };
+  return { ...r, react: m.react, level: m.level, reach, extra };
 };
 
 // —— 打击特效（原片实测：打中不停帧、不震屏；1 帧放射光 + 1–2 帧火花，命中本体再加一个结果字形 5 帧淡出）——
@@ -186,6 +205,8 @@ function drawWeapon(ctx, actor, ta, o = {}) {
 
 // 攻防编排：每一拍 { t, a, move, b, react, level, glyph }。a 出招；打中那一刻 b 做反应，登记打击特效
 //   react：fight_moves 里的反应招式名（stagger、hurt_fold、launched…），或 'block' / 'dodge' / 'lean_dodge' / 'duck'（b 先做这个招式，算没打中），或函数 (b, tc) => {}
+//   tip：兵器长度（单位 H）。给了就把打击点从手挪到兵器尖，但不越过守方身体前沿
+//   opts：传给 move 的额外参数（例如 { reach: 1.85 } 换长兵器；{ to: null } 不自动迈步）
 //   fx：FightFX（不传就不画特效）；heavy 级别额外交给导演登记一次（白闪 1 帧，不停帧不震屏）
 function exchange(D, beats, fx) {
   const out = [];
@@ -203,10 +224,16 @@ function exchange(D, beats, fx) {
       else bt.b.move(tc, react);
     }
     const level = bt.level ?? r.level ?? 'hit';
-    if (fx && (r.point || bt.point)) fx.add(tc, bt.point || r.point, landed ? (react === 'block' ? 'clash' : level) : 'none', { glyph: landed && react !== 'block' ? bt.glyph : null });
+    let point = bt.point || r.point;
+    if (point && bt.tip && !bt.point) {
+      point = [point[0] + r.D * bt.tip * bt.a.H, point[1]];
+      if (bt.b) { const bx = bt.b.hipNow(tc)[0] - r.D * 0.08 * bt.b.H; point[0] = r.D > 0 ? Math.min(point[0], bx) : Math.max(point[0], bx); }
+    }
+    if (fx && point) fx.add(tc, point, landed ? (react === 'block' ? 'clash' : level) : 'none', { glyph: landed && react !== 'block' ? bt.glyph : null });
     if (D && landed && level === 'heavy') D.cue(tc, 'impact_heavy');
     else if (D && landed && level !== 'none') D.cue(tc, level === 'clash' || react === 'block' ? 'impact_light' : 'impact_medium', { v: 0.8 });
-    out.push({ ...r, tc, landed });
+    out.push({ ...r, tc, landed, point });
+    if (D) (D.fights = D.fights || []).push({ tc, a: bt.a, b: bt.b, move: bt.move, react: typeof react === 'function' ? '(函数)' : react, level, landed, tip: bt.tip, reach: r.reach, extra: r.extra, t0: bt.t });   // 给 tools/contact_check.js 用
   }
   return out;
 }

@@ -152,6 +152,17 @@ v1 把所有关节按同一条缓动插值，结果全身一起动、一起停�
 
 `SCENE=loop2 node build.js --from 0 --to 151.4`；体检 `SCENE=loop2 node render/src/tools/qa.js`；音效时间表 `audio/时间表/loop2.md`（新声音：bonk、tap、block_drop、snake_bite、snake_slither、scale_drone、cond_true、cond_false）。
 
+## 打斗试做 duel1（`render/src/scene_duel1.js`，约 14 秒，第 7 轮）
+
+按 `动作设计.md` 的七个问题自己设计的一段打斗：强者几乎不动就化解主角的进攻 → 主角写 `sword.len *= 3` 翻盘 → 举剑庆祝自己倒了。24fps 一拍一出画。设计稿（节拍表、每招七问、距离、镜头、音效需求、看片清单）在 `剧本/打斗试做_duel1.md`。
+
+```bash
+SCENE=duel1 node build.js --fps 24 --from 0 --to 14 --jobs 8          # 带音效（在本机渲染）
+(cd render && SCENE=duel1 node src/tools/qa.js)                      # 体检
+(cd render && SCENE=duel1 node src/tools/contact_check.js)           # 逐拍查剑碰剑 / 打中 / 闪避的距离
+SCENE=duel1 node render/src/tools/cue_sheet.js                       # 音效时间表 audio/时间表/duel1.md
+```
+
 ## 样片 v4：探索开头（`render/src/scene_v4.js`）
 
 按原片的逻辑重做"从 0 到 1 的探索"，角色有内心过程（拆解 第 3.1 节）：看见光标 → 托腮 → 犹豫着戳一下 → 挠头 → 发现电脑 → 按一个键、抬头看到字母、反应过来 → hello 报错、吓一跳、挠头、删掉 → print() 没反应、连按、挠头 → print("hi") → hi 掉出来、吓得坐下、凑过去戳一戳 → 踢飞。
