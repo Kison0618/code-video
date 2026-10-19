@@ -33,9 +33,11 @@ class Dyn {
 }
 
 // —— 两段 IK：根 → 中间关节 → 末端。bend = ±1 决定肘/膝往哪边弯 ——
-function ik2(root, target, L1, L2, bend) {
+// smax > 1：够不着目标时允许整条手脚拉长，最多拉到 smax 倍（原片极限姿势会把手脚画长，见 动作设计.md）
+function ik2(root, target, L1, L2, bend, smax = 1) {
   let dx = target[0] - root[0], dy = target[1] - root[1];
   let d = Math.hypot(dx, dy) || 1e-6;
+  if (smax > 1 && d > (L1 + L2) * 0.999) { const k = Math.min(d / ((L1 + L2) * 0.999), smax); L1 *= k; L2 *= k; }
   const dmax = (L1 + L2) * 0.999, dmin = Math.abs(L1 - L2) + 1e-3;
   const dc = clamp(d, dmin, dmax);
   const a = Math.atan2(dy, dx);
@@ -79,11 +81,11 @@ function body(s, H, dir) {
   const sh = [neck[0] - up[0] * P.shoulderDrop * H, neck[1] - up[1] * P.shoulderDrop * H];
   const ha = (s.lean + s.head) * Math.PI / 180;
   const head = [neck[0] + dir * Math.sin(ha) * P.headR * 0.92 * H, neck[1] - Math.cos(ha) * P.headR * 0.92 * H];
-  const L = n => P[n] * H;
+  const L = n => P[n] * H, st = s.st || 1;                       // st：这一刻允许手脚拉长的倍数（招式 key 里写 st）
   return {
     hip, neck, sh, head, dir,
-    aF: ik2(sh, s.hF, L('upper'), L('fore'), dir), aB: ik2(sh, s.hB, L('upper'), L('fore'), dir),      // 肘往后下方弯
-    lF: ik2(hip, s.fF, L('thigh'), L('shin'), -dir), lB: ik2(hip, s.fB, L('thigh'), L('shin'), -dir),  // 膝往前弯
+    aF: ik2(sh, s.hF, L('upper'), L('fore'), dir, st), aB: ik2(sh, s.hB, L('upper'), L('fore'), dir, st),      // 肘往后下方弯
+    lF: ik2(hip, s.fF, L('thigh'), L('shin'), -dir, st), lB: ik2(hip, s.fB, L('thigh'), L('shin'), -dir, st),  // 膝往前弯
   };
 }
 

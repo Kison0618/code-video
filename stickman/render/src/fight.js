@@ -14,6 +14,7 @@
 //   F / B：前手 / 后手，相对肩膀（同 hand 的 'pose' 模式：[朝前, 朝下]），单位 H
 //   fF / fB：前脚 / 后脚，x 相对起始胯（沿朝向），y 离地高度（向上为正），单位 H
 //   e：从上一个姿势过来的缓动（默认 'out'：一开始最快——"一下到位"）；hit：这一帧是接触帧
+//   st：这一帧允许手脚拉长到几倍（极限姿势"作弊"，例如 1.4；招式结束后自动回到 1）
 //   没写的通道保持上一个值；第一个 key 之前从当前状态出发。
 'use strict';
 const fs = require('fs'), path = require('path');
@@ -62,6 +63,9 @@ A.keys = function (t0, keys, o = {}) {
   this.path('hip', t0, tE, hipW).hip(tE, hipW(tE));
   const lk = build('lean', lean0 - lw);
   if (lk) { const lc = chan(lk); this.path('lean', t0, tE, s => lw + lc(s)); this.lean(tE, lw + lc(tE)); }
+  // 手脚拉长（只在招式这段时间内有效）
+  const sk = build('st', 1);
+  if (sk) this.stSegs.push([t0, tE, chan(sk)]);
   // 头：交给头的轨道（软一点，像原片头会晚半拍）
   for (let i = 0, prev = t0; i < keys.length; i++) if (keys[i].head !== undefined) { const tk = T(keys[i]); this.head(prev, keys[i].head, Math.max(0.001, tk - prev), 'out'); prev = tk; }
   // 手：'pose' 模式（精确、相对肩膀）
