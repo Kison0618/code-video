@@ -125,10 +125,75 @@ function drawGlyphFigure(ctx, j, size, seed, t, a = 1) {
   const bones = [[j.hip, j.neck], [j.lF[0], j.lF[1]], [j.lF[1], j.lF[2]], [j.lB[0], j.lB[1]], [j.lB[1], j.lB[2]], [j.aF[0], j.aF[1]], [j.aF[1], j.aF[2]], [j.aB[0], j.aB[1]], [j.aB[1], j.aB[2]]];
   let n = 0;
   for (const [p, q] of bones) {
-    const len = Math.hypot(q[0] - p[0], q[1] - p[1]), m = Math.max(1, Math.round(len / (size * 0.72))), rot = Math.atan2(q[1] - p[1], q[0] - p[0]);
-    for (let k = 0; k <= m; k++, n++) { const v = k / m; drawGlyph(ctx, gly(seed * 100 + n, t, 6, 0.3), lerp(p[0], q[0], v), lerp(p[1], q[1], v), rot * 0.15, size, a, glitchAt(seed * 100 + n, t, 0.04)); }
+    const len = Math.hypot(q[0] - p[0], q[1] - p[1]), m = Math.max(1, Math.round(len / (size * 0.62))), rot = Math.atan2(q[1] - p[1], q[0] - p[0]);
+    ctx.save(); ctx.strokeStyle = `rgba(30,30,30,${0.9 * a})`; ctx.lineWidth = size * 1.1; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); ctx.stroke(); ctx.restore();   // 暗底：骨头有粗细
+    for (let k = 0; k <= m; k++, n++) { const v = k / m; drawGlyph(ctx, gly(seed * 100 + n, t, 6, 0.3), lerp(p[0], q[0], v), lerp(p[1], q[1], v), rot + Math.PI / 2, size, a, glitchAt(seed * 100 + n, t, 0.04)); }
   }
   drawGlyph(ctx, '�', j.head[0], j.head[1], 0, size * 2.6, a, glitchAt(seed + 77, t, 0.05));
 }
 
-module.exports = { GLY, gly, glitchAt, drawGlyph, fall, Clump, Blob, drawGlyphFigure, hash };
+// ———— v4 设计稿的造型（拆解 3.6：轮廓 + 核心、平时整齐、只有吃 / 被打时乱）————
+// drawMound(ctx, x, y, R, o)：画一团乱码，(x, y) 是底部中心，R 是半径
+//   o.style：'A' 鳞片土堆（外圈顺着轮廓排）| 'B' 绕核心的环 | 'C' 被搅乱的几行字（水滴形）
+//   o.t 时间；o.sx / o.sy 缩放（预备时缩、弹）；o.aim 盯住的方向（弧度，给了就所有字一起转向那里、不转动）
+//   o.mess 0~1 乱的程度（吃东西 / 被打）；o.hit 被打的方向（那一侧的字飞散）；o.core 核心显示的字（打嗝时闪被吃的字）
+//   o.alpha；o.col
+const CORE_COL = [250, 250, 250], BODY_COL = [214, 214, 214], DIM_COL = [120, 120, 120];
+function drawMound(ctx, x, y, R, o = {}) {
+  const t = o.t ?? 0, style = o.style || 'A', sx = o.sx ?? 1, sy = o.sy ?? 1, mess = o.mess ?? 0, a0 = o.alpha ?? 1, seed = o.seed ?? 21;
+  const sz = o.size ?? Math.max(20, R * 0.3);
+  const lean = o.lean ?? 0;                                                    // 往一侧倾（盯住时倾向主角）：顶部横移 lean × R
+  if (o.fill !== false) {                                                      // 实心暗底：让它有体积、轮廓一眼看得出
+    ctx.save(); ctx.fillStyle = `rgba(30,30,30,${0.9 * a0})`; ctx.beginPath();
+    for (let k = 0; k <= 40; k++) { const u = k / 40, ang = Math.PI + u * Math.PI, py = style === 'C' ? -R * 2 * Math.sin(u * Math.PI) ** 0.8 : Math.sin(ang) * R * 1.02, px = style === 'C' ? (u - 0.5) * 2 * R * 0.95 * (0.6 + 0.4 * Math.sin(u * Math.PI)) : Math.cos(ang) * R * 1.3;
+      const qx = x + (px + lean * R * (-py / (2 * R))) * sx, qy = y + py * sy; k ? ctx.lineTo(qx, qy) : ctx.moveTo(qx, qy); }
+    ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  const put = (i, px, py, rot, s, col, a = 1) => {
+    let qx = px, qy = py, r = rot;
+    if (o.aim !== undefined) r = o.aim;                                        // 所有字一个方向
+    if (o.aimAt) r = Math.atan2(o.aimAt[1] - py, o.aimAt[0] - px);             // 盯住：每个字像指南针一样指向主角
+    qx += lean * R * (-py / (2 * R));
+    if (mess > 0) { qx += (hash(seed + i, 3) - 0.5) * R * 0.5 * mess; qy += (hash(seed + i, 4) - 0.5) * R * 0.4 * mess; r += (hash(seed + i, 5) - 0.5) * 3 * mess; }
+    if (o.hit !== undefined) { const d = Math.cos(Math.atan2(py, px) - o.hit); if (d > 0.3) { qx += Math.cos(o.hit) * R * 0.9 * d * d; qy += Math.sin(o.hit) * R * 0.6 * d * d; r += d * 2; } }
+    drawGlyph(ctx, gly(seed * 1000 + i, t, 4, 0.25 + 0.5 * mess), x + qx * sx, y + qy * sy, r, s, a * a0, mess > 0.5 ? glitchAt(seed + i, t, 0.3) : 0, col);
+  };
+  const spin = o.aim !== undefined || o.aimAt ? 0 : t * 0.6;                              // 平时慢慢绕核心转（约 10 秒一圈）
+  let i = 0;
+  if (style === 'A') {                                                        // 外圈：沿半椭圆轮廓排的"鳞片"
+    for (let ring = 0; ring < 3; ring++) {
+      const rr = R * (1 - ring * 0.2), n = Math.round(rr * Math.PI / (sz * (ring ? 1.05 : 0.82)));
+      for (let k = 0; k <= n; k++, i++) {
+        const u = k / n, ang = Math.PI + u * Math.PI + (ring % 2 ? 0.08 : 0) + Math.sin(spin + ring) * 0.03;
+        const px = Math.cos(ang) * rr * 1.25, py = Math.sin(ang) * rr - sz * 0.45;
+        put(i, px, py, ang + Math.PI / 2, sz * (ring ? 0.85 : 1.05), ring ? BODY_COL : CORE_COL, ring ? 0.75 : 1);
+      }
+    }
+  } else if (style === 'B') {                                                 // 三个倾斜的环绕着核心转
+    for (let ring = 0; ring < 3; ring++) {
+      const tilt = [-0.5, 0.15, 0.8][ring], rx = R * 1.15, ry = R * 0.38, n = Math.round(2 * Math.PI * R * 0.8 / sz);
+      for (let k = 0; k < n; k++, i++) {
+        const ang = k / n * 2 * Math.PI + spin * (ring % 2 ? -1 : 1) * 1.4, ex = Math.cos(ang) * rx, ey = Math.sin(ang) * ry;
+        const px = ex * Math.cos(tilt) - ey * Math.sin(tilt), py = ex * Math.sin(tilt) + ey * Math.cos(tilt) - R * 0.95;
+        const front = Math.sin(ang) > 0;
+        put(i, px, py, Math.atan2(py + R * 0.95, px) + Math.PI / 2, sz * (front ? 1 : 0.8), front ? CORE_COL : DIM_COL, front ? 1 : 0.7);
+      }
+    }
+  } else {                                                                     // C：几行"被搅乱的文本"，越往下越宽，像一滴往下坠的字
+    const rows = Math.max(4, Math.round(R * 1.9 / (sz * 1.05)));
+    for (let r = 0; r < rows; r++) {
+      const v = (r + 0.5) / rows, w = R * 1.3 * Math.sin(Math.PI * Math.min(1, v * 0.82 + 0.1)) * (0.35 + 0.65 * v), n = Math.max(1, Math.round(2 * w / (sz * 0.9)));
+      const py = -R * 2 + v * R * 2 - sz * 0.3, bend = Math.sin(v * 5 + spin * 2) * R * 0.08;
+      for (let k = 0; k < n; k++, i++) put(i, -w + (k + 0.5) * 2 * w / n + bend, py, Math.sin(v * 5 + spin * 2) * 0.15, sz * 0.95, v > 0.75 ? CORE_COL : BODY_COL, 0.65 + 0.35 * v);
+    }
+  }
+  // 核心：最大最亮的 �（打嗝时闪出被吃的字）
+  const cy = style === 'C' ? -R * 0.75 : -R * 0.55;
+  drawGlyph(ctx, o.core || '�', x + (lean * R * (-cy / (2 * R)) + (o.aimAt ? Math.sign(o.aimAt[0]) * R * 0.2 : 0)) * sx, y + cy * sy, 0, sz * 2.6, a0, 0, CORE_COL);
+}
+// 地上的痕迹：被它碰过的字变成暗灰乱码留在原地
+function drawTrace(ctx, x0, x1, y, size, t, a = 0.5) {
+  for (let x = x0, i = 0; x < x1; x += size * 2.2, i++) drawGlyph(ctx, gly(4000 + i, 0), x, y, (hash(i, 9) - 0.5) * 0.6, size, a, 0, DIM_COL);
+}
+
+module.exports = { GLY, gly, glitchAt, drawGlyph, fall, Clump, Blob, drawGlyphFigure, drawMound, drawTrace, hash };
