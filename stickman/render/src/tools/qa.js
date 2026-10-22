@@ -8,6 +8,8 @@
 //   5. 主角太小：连续 3 秒以上身高不到画面的 8%（远景太久）
 //   6. 音效 id 在 audio/音效需求.json 里找不到
 //   7. 每次"运行"时屏幕上的代码不是合法的 Python（运行后 0.6 秒内报错的算故意写错，跳过）
+//   9. 隔空抓：手的目标离肩膀比胳膊还远（手够不着东西却像抓到了）
+//  10. 小蛇挤成一团（场景导出 snakes）
 //   8. 节奏空档：连续 5 秒以上没有新事件（出字、报错、运行、打击、键帽……；脚步、打字、环境声不算）
 // 另外打印景别分布（主角高度占画面的比例），对照原片实测（拆解 2.1 / 2.2）
 'use strict';
@@ -15,6 +17,15 @@ const fs = require('fs'), path = require('path');
 const K = require('../core');
 const { W, H } = K;
 const S = require({ v4: '../scene_v4', loop: '../scene_loop', loop2: '../scene_loop2', fight: '../scene_fight_demo', duel1: '../scene_duel1', duel2: '../scene_duel2', blade1: '../scene_blade1', blade2: '../scene_blade2', garble: '../scene_garble', garble2: '../scene_garble2', cur1: '../scene_cur1', cur2: '../scene_cur2', cur3: '../scene_cur3', cur4: '../scene_cur4', cur5: '../scene_cur5', cursor: '../scene_cursor' }[process.env.SCENE] || '../scene_loop');
+// 总片（只是把几段拼起来，自己没有人和镜头）：逐段体检，时间加上这一段在总片里的起点
+if (S.parts && !S.cam) {
+  const { execFileSync } = require('child_process');
+  for (const p of S.parts) {
+    const out = execFileSync(process.execPath, [__filename], { env: { ...process.env, SCENE: p.scene }, encoding: 'utf8', maxBuffer: 1 << 26 });
+    console.log(out.trimEnd().replace(/^(\s+)(\d+\.\d+)(–(\d+\.\d+))?s/gm, (m, sp, a, _, b) => `${sp}${a}${b ? '–' + b : ''}s（总片 ${(+a + p.t0).toFixed(2)}s）`));
+  }
+  process.exit(0);
+}
 const cues = require('../cues');
 const hero = S.hero, cam = S.cam, clock = S.clock;
 const issues = [];
@@ -46,6 +57,21 @@ for (let t = 0; t <= S.DUR; t += 1 / 30) {
   }
   prev = { ta, j, s };
 }
+// 9 隔空抓：手的目标（world / obj）离肩膀超过胳膊长度的 1.12 倍，持续 0.12 秒以上（手其实够不着，看起来像远程抓取）
+//   手刚切过去的 0.2 秒不算：那是手和身体还在路上（伸手、弯腰的过程）；定下来以后还够不着才是隔空抓。修法：a.reach()（moves.js）
+{
+  const arm = (() => { const j = hero.jointsAt(clock.anim(0.5)); const d = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]); return d(j.aF[0], j.aF[1]) + d(j.aF[1], j.aF[2]); })();
+  const at = (L, t) => { let m = L[0]; for (const x of L) if (x.t <= t) m = x; return m; };
+  for (const h of ['F', 'B']) runs(t => {
+    const ta = clock.anim(t), m = at(hero.hands[h], ta); if ((m.mode !== 'world' && m.mode !== 'obj') || ta - m.t < 0.2) return false;
+    const s = hero.stateAt(ta), j = hero.jointsAt(ta); let g;
+    if (m.mode === 'world') g = typeof m.arg === 'function' ? m.arg(ta) : m.arg;
+    else { if (!s.obj) return false; const p = typeof m.arg === 'function' ? m.arg(ta) : m.arg, c = Math.cos(s.obj[2]), sn = Math.sin(s.obj[2]); g = [s.obj[0] + s.dir * (p[0] * c - p[1] * sn), s.obj[1] + p[0] * sn + p[1] * c]; }
+    return g && Math.hypot(g[0] - j.sh[0], g[1] - j.sh[1]) > arm * 1.12;
+  }, 0.12, `手够不着（隔空抓，${h === 'F' ? '前' : '后'}手）`);
+}
+// 10 小蛇挤成一团：场景导出 snakes: [{ segs(t), gap }]，相邻两节比节距的一半还近，持续 0.25 秒以上
+for (const sk of S.snakes || []) runs(t => { const ta = clock.anim(t), g = sk.segs(ta), gap = sk.gap || (sk.snake && sk.snake.gap) || 60; for (let i = 1; i < g.length; i++) if (Math.hypot(g[i].x - g[i - 1].x, g[i].y - g[i - 1].y) < 0.5 * gap) return true; return false; }, 0.25, '小蛇挤成一团');
 // 4 代码被切
 for (const code of S.codes || []) {
   runs(t => {

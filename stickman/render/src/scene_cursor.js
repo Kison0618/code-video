@@ -21,4 +21,4 @@ function draw(ctx, t) { const p = at(t); p.S.draw(ctx, Math.min(t - p.t0, p.S.DU
 function post(ctx, t, base) { const p = at(t); if (p.S.post) p.S.post(ctx, Math.min(t - p.t0, p.S.DUR - 1e-3), base); }
 const bloomAt = t => { const p = at(t); return p.S.bloomAt ? p.S.bloomAt(t - p.t0) : 0; };
 
-module.exports = { DUR, draw, post, bloomAt, parts: parts.map(p => ({ t0: +p.t0.toFixed(2), dur: p.S.DUR })) };
+module.exports = { DUR, draw, post, bloomAt, parts: parts.map((p, i) => ({ scene: 'cur' + (i + 1), t0: +p.t0.toFixed(2), dur: p.S.DUR })) };

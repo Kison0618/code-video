@@ -396,6 +396,8 @@ const F1 = 1 / 24;
 class FightFX {
   constructor(H = 300) { this.H = H; this.list = []; }
   add(t, p, level = 'hit', o = {}) { if (level !== 'none' && p) this.list.push({ t, p, level, glyph: o.glyph, dir: o.dir ?? 1, seed: this.list.length * 7 + 3 }); return this; }
+  // 打中时画面上下震 1–2 帧（约 0.02–0.05H，研究/动作逐帧_四集.md 规律 10）：返回此刻镜头的竖直偏移
+  joltAt(t) { let y = 0; for (const e of this.list) { const age = t - e.t; if (age < 0 || age >= 2 * F1 || e.level === 'clash') continue; const k = e.level === 'heavy' ? 0.045 : 0.025; y = (age < F1 ? 1 : -0.5) * k * this.H; } return y; }
   flashAt(t) { let a = 0; for (const e of this.list) if (e.level === 'heavy' && t >= e.t && t < e.t + F1) a = 0.9; return a; }
   draw(ctx, t) {
     const H = this.H;

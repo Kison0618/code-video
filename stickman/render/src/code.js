@@ -101,6 +101,15 @@ class Code {
   clearErr(t) { this.push(t, { err: null }); return this; }
   hide(t) { this.vis = [this.vis[0], t]; return this; }
   // 中途淡出一段（t0 开始 0.3 秒淡出，t1 开始 0.2 秒淡入；t1 省略就是不再出现）
+  // 只在这几段时间里露出来：wins = [[t0, t1], ...]（构图规则：动作段代码只露 1–4 秒）
+  showOnly(wins) { let prev = -1e9; for (const [a, b] of [...wins].sort((x, y) => x[0] - y[0])) { this.fadeOut(prev, a); prev = b; } return this.fadeOut(prev, 1e9); }
+  // 此刻露出来的那几行的范围 [[x0, y0], [x1, y1]]（滚动窗口里淡掉的旧行不算），给镜头用
+  boxAt(t) {
+    const sn = this.snap(t); if (!sn.text) return null;
+    const lines = sn.text.split('\n'), lh = this.size * 1.32, cw = this.cw || this.size * 0.5, [x0, y0] = this.pos(t);
+    const r0 = this.topY == null ? 0 : Math.max(0, Math.ceil((this.topY - y0) / lh)), vl = lines.slice(r0);
+    return [[x0 - 20, y0 + r0 * lh - this.size - 10], [x0 + Math.max(1, ...vl.map(l => l.length)) * cw + 20, y0 + (lines.length - 1) * lh + this.size * 0.35]];
+  }
   fadeOut(t0, t1 = 1e9) { (this.gaps = this.gaps || []).push([t0, t1]); return this; }
   alphaAt(t) { let a = 1; for (const [t0, t1] of this.gaps || []) a = Math.min(a, 1 - clamp((t - t0) / 0.3) + clamp((t - t1) / 0.2)); return clamp(a); }
   visible(t) { return t >= this.vis[0] && t <= this.vis[1] && this.alphaAt(t) > 0.02; }

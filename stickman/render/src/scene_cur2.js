@@ -13,13 +13,14 @@ const { Snake, spline } = require('./snake');
 const PR = require('./props');
 const CL = require('./cursorlib');
 
+const DRAW = { step: 'auto', smear: false, turn: 0.4 };                    // 一拍一 / 一拍二出画、身上不画拖影、转身压扁一张（研究/动作逐帧_四集.md）
 const HH = 300, LW = CL.LW, GAP = 80, F = 1 / 24;
 const D = new Director(), clock = D.clock, cam = D.cam;
 const R = CL.keyRig();
 const fx = new FightFX(HH);
 // 接第 1 段的结尾：他在 X0 空着手；电脑在远处；它（站着的 |）在中间；小蛇在他身后
 const X0 = -180, XLAP = 1640, XCUR = 695;
-const hero = new Actor2({ H: HH, x0: X0, dir: 1, clock, lean: 2, headTilt: 0 });
+const hero = new Actor2({ H: HH, x0: X0, dir: 1, clock, lean: 2, headTilt: 0, noise: 0 });   // noise 0：定格就是完全不动（原片规律 3）
 const ST = hero.STAND;
 const cur = new CL.Cur({ x: XCUR, y: 0, form: 'ibeam', size: 0.68 * HH, blink: 'slow' });
 let t;
@@ -46,9 +47,10 @@ const Dv = hero.move(TDIVE, 'dive');
 letter('O', XB + 0.75 * HH, TDIVE + 0.2);
 cur.hop(TDIVE - 0.05, XCUR + 2.6 * HH);                                       // 它往后跳开，让他扑空
 const XPRONE = Dv.x;
+hero.hand('B', Dv.t - 0.1, 'world', [XPRONE + 0.33 * HH, -5]);               // 趴着：后手撑在胸前地上（不写会垂到地底下）
 letter('O', XPRONE + 0.95 * HH, Dv.t + 0.15);                                 // 第二个 O 砸在他头前面
 letter('M', XLAP - 0.2 * LW, Dv.t + 0.55);                                    // M 砸在电脑边上——电脑被翘起来，飞回他面前
-const TLAP = Dv.t + 0.57, XLAP2 = XPRONE + 0.42 * HH;
+const TLAP = Dv.t + 0.57, XLAP2 = XPRONE + 1.1 * HH;                    // 名义落点：物理里有弹跳和滑动，实际停在他头前面 ~0.55H（底座在他下巴底下，手够得着键盘）
 const lapBody = new Body({ t0: TLAP, x: XLAP, y: -0.05 * LW, vx: (XLAP2 - XLAP) / 0.85, vy: -1450, vrot: -7, r: 0.05 * LW, bounce: 0.15, friction: 0.4, sfx: 'laptop_drop', defer: true });
 hero.obj(0, 'rest', [XLAP, -0.045 * LW, 0]);
 hero.obj(TLAP, 'rest', s => lapBody.at(s));
@@ -80,7 +82,7 @@ const TGROW = TR1 + 0.15;
 const XSN = kS[kS.length - 1][1];
 kS.push([TGROW + 0.6, XSN + 0.3 * HH, -30]);
 const TUPH = TGROW + 0.9;                                                     // 他撑起来、指着它
-const U1 = hero.getUp(TUPH, { from: 'front' });
+const U1 = hero.getUp(TUPH, { from: 'front', speed: 1.7 });
 R.oneHand(hero, U1.t - 0.1);
 hero.obj(U1.t - 0.1, 'held', { fwd: 0.24, up: 0.05 });
 const CURX2 = XCUR + 2.6 * HH;
@@ -156,14 +158,14 @@ cur.hops(THA - 0.4, L1.x + 0.9 * HH, { dt: 0.1 });
 cur.say(THA, 'hahaha', { cps: 8, dur: 0.4 });
 const HAS = [0, 1, 2].map(i => ({ t0: THA + 0.9 + i * 0.22, x: L1.x + (0.1 - 0.12 * i) * HH }));
 for (const h of HAS) D.cue(h.t0 + 0.35, 'tap', { v: 0.5 });
-const U2 = hero.getUp(HAS[2].t0 + 0.9, { from: 'back' });
+const U2 = hero.getUp(HAS[2].t0 + 0.9, { from: 'back', speed: 1.7 });
 hero.hand('F', U2.t + 0.1, 'local', s => [0.08 + 0.05 * Math.sin((s - U2.t) * 28), 0.05]).sfx(U2.t + 0.15, 'rustle', { v: 0.6 });   // 扒拉掉身上的 ha
 hero.hand('F', U2.t + 0.8, 'free', [0.05, 0.35]);
 hero.look(U2.t + 0.9, [cur.posAt(U2.t).x, -0.5 * HH], { dur: 0.2 });
 D.shot(L1.t, 0.5, { on: [hero, cur], kind: 'full' });
 const ADUR = U2.t + 1.0;
 // 代码只在打字的时候露出来（动作段代码不常驻）
-code.fadeOut(-1e9, TTYPE - 0.3).fadeOut(TR1 + 1.2, THB - 0.3).fadeOut(THB + 1.1, TSQ - 0.3).fadeOut(TRAM + 0.9, 1e9);
+code.fadeOut(-1e9, TTYPE - 0.3).fadeOut(TR1 + 1.2, THB - 0.3).fadeOut(THB + 1.1, TSQ - 0.3).fadeOut(TRAM + 0.5, 1e9);
 
 // ———— 小蛇 ————
 kS.push([TCATCH + 1.5, XH2 - 1.7 * HH, -30], [ADUR, XH2 - 1.75 * HH, -30]);
@@ -180,6 +182,7 @@ const ws = new CL.WordSnake({ snake, n: nAt, words: wordAt, hl: hlAt, size: 42 }
 
 // ———— 模拟 ————
 R.KEYS.push(...R.keyTimes(code)); R.KEYS.sort((a, b) => a - b);
+D.codes = [code];                                                           // 镜头自动把露出来的代码框进来（director.js）
 D.finalize({ actors: [hero], bodies: [lapBody], dur: ADUR, start: { x: 0, y: -330, z: 1 } });
 if (lapFly.body()) { const { flushSfx } = require('./phys'); flushSfx([lapFly.body()], clock); }
 const DUR = D.DUR;
@@ -202,15 +205,15 @@ function drawHa(ctx, s) {
 function draw(ctx, tr) {
   const ta = clock.anim(tr), c = cam.at(tr);
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
-  ctx.save(); cam.apply(ctx, c);
+  ctx.save(); cam.apply(ctx, c); ctx.translate(0, fx.joltAt(ta));
   CL.drawGround(ctx, c.x - W / 2 / c.z - 60, c.x + W / 2 / c.z + 60, ta);
   code.draw(ctx, ta);
   drawLetters(ctx, ta);
   ws.draw(ctx, ta);
   cur.draw(ctx, ta);
   const s = hero.stateAt(ta);
-  hero.draw(ctx, ta);
-  PR.laptop(ctx, s.obj[0], s.obj[1], LW, s.obj[2], 1, ta < U1.t - 0.1 ? -1 : s.dir);
+  hero.draw(ctx, ta, DRAW);
+  PR.laptop(ctx, s.obj[0], s.obj[1], LW, s.obj[2], 1, ta < TLAP + 0.4 ? -1 : s.dir);   // 在空中翻的时候换面：落下来屏幕朝他、键盘在他手边
   drawHa(ctx, ta);
   for (const k of KC) PR.keyCombo(ctx, ta, { ...k, at: k.at(ta) });
   fx.draw(ctx, ta);
@@ -220,5 +223,5 @@ function draw(ctx, tr) {
 }
 function post(ctx, tr, base) { D.imp.post(ctx, tr, base); }
 
-module.exports = { DUR, draw, post, cam, hero, clock, codes: [code], beats: [], cur,
+module.exports = { snakes: [ws], DUR, draw, post, cam, hero, clock, codes: [code], beats: [], cur,
   marks: { Ra: Ra.t, J1: J1.t, TDIVE, TLAP, TTYPE, TGROW, TS1, TS2, TF, TH, TLEAVE, THB, TBACK, TSQ, TSP0, TRAM, THA, ADUR } };

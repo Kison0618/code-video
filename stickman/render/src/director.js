@@ -44,7 +44,7 @@ class Director {
   // 平滑跟拍（第 8 轮，打斗用）：每 1/24 秒算一次机位，再按 ±smooth 秒做滑动平均，镜头不会一顿一顿地追
   follow(t0, t1, spec, smooth = 0.25) { this.plan.push({ type: 'follow', t0, t1, spec, smooth }); return this; }
   // 景别 → 机位（在动作模拟完之后调用）
-  frame(ta, spec) {
+  frame(ta, spec, until = ta) {
     const pts = [], actors = [];
     const add = o => {
       if (!o) return;
@@ -55,6 +55,9 @@ class Director {
       else if (Array.isArray(o)) o.forEach(add);
     };
     add(spec.on);
+    // 自动把此刻露出来的代码框进来（D.codes = [code, ...]；spec.code === false 时不管）——省掉"代码被切"的反复修改
+    //   机位停住期间（到下一个镜头之前）代码才出现 / 变长，也算进来：每 0.1 秒看一次
+    if (this.codes && spec.code !== false && spec.kind !== 'wide' && spec.kind !== 'extreme') for (const c of this.codes) for (let s = ta; s <= Math.max(ta, until) + 1e-6; s += 0.1) if (c.visible(s) && c.alphaAt(s) > 0.5) { const b = c.boxAt(s); if (b) pts.push(...b); }
     const a = actors[0], Hh = a ? a.H : 300;
     let z = spec.z ?? (KIND[spec.kind || 'full'] * H / Hh);
     let cx, cy;
@@ -84,10 +87,11 @@ class Director {
     let cur = { ...start };
     const keys = [{ ta: 0, ...cur, ease: 'linear' }];
     const items = [...this.plan].sort((p, q) => (p.ta ?? p.t0) - (q.ta ?? q.t0));
+    items.forEach((p, i) => { const q = items[i + 1]; p.until = q ? (q.ta ?? q.t0) : dur; });   // 这个机位一直用到下一个镜头
     for (const p of items) {
       if (p.type === 'move') {
         keys.push({ ta: p.ta, ...cur, ease: 'linear' });
-        cur = this.frame(p.ta + p.dur, p.spec); keys.push({ ta: p.ta + p.dur, ...cur, ease: p.ease });
+        cur = this.frame(p.ta + p.dur, p.spec, p.until); keys.push({ ta: p.ta + p.dur, ...cur, ease: p.ease });
       } else if (p.type === 'follow') {
         const st = 1 / 24, raw = [];
         for (let ta = p.t0 - p.smooth; ta < p.t1 + p.smooth + 1e-6; ta += st) raw.push([ta, this.frame(clamp(ta, 0, dur), p.spec)]);

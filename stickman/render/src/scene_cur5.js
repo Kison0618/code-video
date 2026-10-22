@@ -19,29 +19,30 @@ const n0 = cues.list.length;
 const V1 = require('./scene_cur1');
 cues.list.length = n0;
 
+const DRAW = { step: 'auto', smear: false, turn: 0.4 };                    // 一拍一 / 一拍二出画、身上不画拖影、转身压扁一张（研究/动作逐帧_四集.md）
 const HH = 300, LW = CL.LW, F = 1 / 24, GAP = 80, CS = 45, LH = CS * 1.32;
 const D = new Director(), clock = D.clock, cam = D.cam;
 const R = CL.keyRig();
 const fx = new FightFX(HH);
 const X0 = 0;
-const hero = new Actor2({ H: HH, x0: X0, dir: 1, clock, lean: -6, headTilt: 30 });
+const hero = new Actor2({ H: HH, x0: X0, dir: 1, clock, lean: -6, headTilt: 30, noise: 0 });   // noise 0：定格就是完全不动（原片规律 3）
 const ST = hero.STAND;
 const KC = [];
 const capHero = (tk, keys, size = 56) => KC.push({ at: () => { const o = hero.stateAt(tk).obj; return [o[0], o[1] - 0.45 * HH]; }, size, keys: keys.map((l, i) => ({ label: l, t: tk + i * 0.15 })), t1: tk + 0.15 * keys.length + 0.4 });
 let t;
 
 // ════════════════ 一片白：他坐着；站起来，拿起电脑 ════════════════
-const XLAP = X0 + 0.55 * HH;
-hero.hip(0, [X0, -0.16 * HH]).foot('F', 0, [X0 + 0.42 * HH, 0], 0).foot('B', 0, [X0 + 0.32 * HH, 0], 0);
-hero.hand('F', 0, 'world', [X0 - 0.18 * HH, 0]).hand('B', 0, 'world', [X0 - 0.24 * HH, 0]);
+const XLAP = X0 + 0.42 * HH;
+hero.hip(0, [X0, -0.09 * HH]).lean(0, -22).foot('F', 0, [X0 + 0.42 * HH, 0], 0).foot('B', 0, [X0 + 0.32 * HH, 0], 0);
+hero.hand('F', 0, 'world', [X0 - 0.14 * HH, 0]).hand('B', 0, 'world', [X0 - 0.2 * HH, 0]);   // 往后仰、两手撑在身后
 hero.obj(0, 'rest', [XLAP + 0.2 * HH, -0.045 * LW, 0]);
 hero.look(0.7, [X0 - 1500, -300], { dur: 0.3, turn: false }); hero.look(1.3, [X0 + 1500, -300], { dur: 0.3, turn: false });
 const TUP = 1.9;
-hero.hip(TUP, [X0 + 0.1 * HH, -ST], 0.45).lean(TUP, 4, 0.4).head(TUP, 20, 0.3);
-hero.foot('F', TUP + 0.1, [X0 + 0.2 * HH, 0], 0.3, 10).foot('B', TUP + 0.15, [X0 + 0.0 * HH, 0], 0.3, 10);
+hero.hip(TUP, [X0 + 0.3 * HH, -ST], 0.45).lean(TUP, 4, 0.4).head(TUP, 20, 0.3);
+hero.foot('F', TUP + 0.1, [X0 + 0.4 * HH, 0], 0.3, 10).foot('B', TUP + 0.15, [X0 + 0.2 * HH, 0], 0.3, 10);
 hero.hand('F', TUP, 'free', [0.05, 0.35]).hand('B', TUP, 'free', [-0.04, 0.35]);
 const TPK = TUP + 0.9;
-hero.lean(TPK - 0.3, 44, 0.25).hand('F', TPK - 0.25, 'world', [XLAP + 0.2 * HH - 0.05 * LW, -0.05 * LW]).hand('B', TPK - 0.2, 'world', [XLAP + 0.2 * HH - 0.3 * LW, -0.03 * LW]);
+hero.reach('B', TPK - 0.3, [XLAP + 0.2 * HH - 0.3 * LW, -0.03 * LW], { dur: 0.25, back: TPK }).hand('F', TPK - 0.25, 'world', [XLAP + 0.2 * HH - 0.05 * LW, -0.05 * LW]);   // 弯腰（不够就蹲）拿起电脑
 hero.obj(TPK, 'held', { fwd: 0.24, up: 0.05 }).lean(TPK, 2, 0.25);
 R.oneHand(hero, TPK + 0.05);
 hero.head(TPK + 0.3, 34, 0.3);                                              // 低头看着电脑……停一下
@@ -166,19 +167,20 @@ for (let tk = -4; tk < TSN; tk += 0.25) kS.push([tk, X0 - 4.5 * HH + (tk + 4) * 
 kS.length = 0;
 for (let tk = -4; tk <= TSN; tk += 0.25) kS.push([tk, X0 - 4.6 * HH + (tk + 4) / (TSN + 4) * 3.4 * HH, -30]);
 kS.push([TSN + 0.8, X0 - 0.6 * HH, -30]);
-kS.push([TJOIN + 0.2, X0 - 0.5 * HH, -30], [TJOIN + 0.9, XD - 0.4 * HH, -30]);                // 接上新的一节以后游到他脚边，他摸摸它
+kS.push([TJOIN + 0.2, X0 - 0.5 * HH, -30], [TJOIN + 0.9, XD + 0.35 * HH, -30], [TJOIN + 2.0, XD + 0.35 * HH, -30]);   // 摸完之前一直待在他脚前                // 接上新的一节以后游到他脚前，他弯腰摸摸它
 const TPET = TPAT;
-for (let tk = TWALK + 0.3; tk <= ADUR; tk += 0.2) kS.push([tk, Math.max(XD - 0.4 * HH, hero.hipNow(tk)[0] + 0.9 * HH), -30]);   // 走的时候小蛇在前面带路（和上一集结尾一样）
+for (let tk = TWALK + 0.3; tk <= ADUR; tk += 0.2) kS.push([tk, Math.max(XD + 0.35 * HH, hero.hipNow(tk)[0] + 0.9 * HH), -30]);   // 走的时候小蛇在前面带路（和上一集结尾一样）
 kS.sort((a, b) => a[0] - b[0]);
 const snake = new Snake({ t0: -4, t1: ADUR, gap: GAP, max: 14, head: spline(kS, { mono: true }), size: 42, plain: true,
   bob: s => (s > TSN + 0.8 && s < TSN + 1.4 ? [0, -16 * Math.sin(Math.PI * (s - TSN - 0.8) / 0.6)] : s > TJOIN && s < TJOIN + 0.8 ? [0, -12 * Math.abs(Math.sin((s - TJOIN) * 12))] : [0, 0]) });
 const nAt = s => (s < TSN ? 0 : s < TJOIN ? Math.min(10, 1 + Math.floor((s - TSN) / 0.07)) : 11);
 const ws = new CL.WordSnake({ snake, n: nAt, size: 42 });
-hero.hand('F', TPET, 'world', s => { const g = snake.segs(s); const q = g[0] || { x: X0, y: -30 }; return [q.x + 4, q.y - 26 - 8 * Math.max(0, Math.sin((s - TPET) * 12))]; });
-hero.lean(TPET, 30, 0.3).hand('F', TPET + 1.2, 'obj', R.keyPoint).lean(TPET + 1.2, 2, 0.3);
+hero.reach('F', TPET, s => { const g = snake.segs(s); const q = g[0] || { x: X0, y: -30 }; return [q.x + 4, q.y - 26 - 8 * Math.max(0, Math.sin((s - TPET) * 12))]; }, { dur: 0.3, at: [XD + 0.35 * HH + 4, -60], back: TPET + 1.2 });
+hero.hand('F', TPET + 1.2, 'obj', R.keyPoint).lean(TPET + 1.2, 2, 0.3);
 
 // ———— 模拟 ————
 R.KEYS.push(...R.keyTimes(code2)); R.KEYS.sort((a, b) => a - b);
+D.codes = [code, code2];                                                    // 镜头自动把露出来的代码框进来（director.js）
 D.finalize({ actors: [hero], dur: ADUR, start: { x: 0, y: -330, z: 1 } });
 const DUR = D.DUR;
 const offscreen = [[clock.real(TFB0), clock.real(TFB1)]];
@@ -207,7 +209,7 @@ function draw(ctx, tr) {
   const flick = flickers.some(f => t2 >= f && t2 < f + 2 * F);               // 键帽撞碎那一下，世界闪一下白
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
   if (wk > 0) { ctx.fillStyle = `rgba(255,255,255,${wk})`; ctx.fillRect(0, 0, W, H); }
-  ctx.save(); cam.apply(ctx, c);
+  ctx.save(); cam.apply(ctx, c); ctx.translate(0, fx.joltAt(t2));
   const gr = groundR(t2);
   if (gr > 0) CL.drawGround(ctx, Math.max(c.x - W / 2 / c.z - 60, X0 - gr), Math.min(c.x + W / 2 / c.z + 60, X0 + gr), t2);
   code.draw(ctx, t2); code2.draw(ctx, t2);
@@ -217,7 +219,7 @@ function draw(ctx, tr) {
   cur.draw(ctx, t2);
   drawSpits(ctx, t2);
   const st = hero.stateAt(t2);
-  hero.draw(ctx, t2);
+  hero.draw(ctx, t2, DRAW);
   PR.laptop(ctx, st.obj[0], st.obj[1], LW, st.obj[2], 1, t2 < TPK ? 1 : st.dir);
   for (const f of flies) drawFly(ctx, t2, f);
   for (const k of KC) { if (k.ghost) { ctx.save(); ctx.globalAlpha = 0.6; } PR.keyCombo(ctx, k.ghost ? Math.min(t2, THOVER + 0.15) : t2, { ...k, at: k.at(t2) }); if (k.ghost) ctx.restore(); }
@@ -235,5 +237,5 @@ function post(ctx, tr, base) {
   if (f > 0) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = `rgba(0,0,0,${f})`; ctx.fillRect(0, 0, W, H); ctx.restore(); }
 }
 
-module.exports = { DUR, draw, post, cam, hero, clock, codes: [code, code2], beats: [], offscreen, cur,
+module.exports = { snakes: [ws], DUR, draw, post, cam, hero, clock, codes: [code, code2], beats: [], offscreen, cur,
   marks: { TUP, TPK, U0: U[0], U1: U[1], U2: U[2], TCUR, TAIM, TSMALL, TIN, THOVER, TFB0, TFB1, TP, TFILL, TRUN, TJOIN, TPAT, TWALK, ADUR } };

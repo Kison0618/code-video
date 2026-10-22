@@ -18,12 +18,13 @@ const n0 = cues.list.length;
 const V2 = require('./scene_loop2');
 cues.list.length = n0;
 
+const DRAW = { step: 'auto', smear: false, turn: 0.4 };                    // 一拍一 / 一拍二出画、身上不画拖影、转身压扁一张（研究/动作逐帧_四集.md）
 const HH = 300, LW = CL.LW, F = 1 / 24, GAP = 80;
 const D = new Director(), clock = D.clock, cam = D.cam;
 const R = CL.keyRig();
 const fx = new FightFX(HH);
 const X0 = 0;
-const hero = new Actor2({ H: HH, x0: X0, dir: 1, clock, lean: 2, headTilt: 0 });
+const hero = new Actor2({ H: HH, x0: X0, dir: 1, clock, lean: 2, headTilt: 0, noise: 0 });   // noise 0：定格就是完全不动（原片规律 3）
 const ST = hero.STAND;
 const XC0 = X0 + 1.9 * HH;
 const c0 = new CL.Cur({ x: XC0, form: 'ibeam', size: 0.68 * HH, blink: 'slow' });
@@ -79,7 +80,7 @@ D.shot(TA - 0.4, 0.4, { on: [hero, c0, [passTo(X0) - 0.4 * HH, -0.3 * HH]], kind
 // 第 1 个（在他身后）又冲回来：他转身一把抓住；它在手里乱闪
 const TG = M4.t + 0.6;
 copies[0].hops(TG - 0.5, X0 - 0.45 * HH, { dt: 0.07 });
-hero.turn(TG - 0.25, -1).hand('F', TG - 0.12, 'world', s => { const p = copies[0].posAt(s); return [p[0], p[1] - 0.25 * HH]; });
+hero.turn(TG - 0.25, -1).reach('F', TG - 0.12, s => { const p = copies[0].posAt(s); return [p[0], p[1] - 0.25 * HH]; }, { dur: 0.12 });
 const TGOT = TG + 0.05;
 copies[0].blink(TGOT, 'fast');
 D.cue(TGOT, 'grab');
@@ -87,10 +88,10 @@ let handF = null;                                                           // �
 // 跪到电脑边，把它塞进电脑；电脑拿起来
 const Kn = hero.kneel(TGOT + 0.35, { front: XLAP0 + 0.5 * LW + 16, head: 30, lean: 30, dur: 0.4 });
 const TSTUFF = Kn.t + 0.25;
-hero.hand('F', TSTUFF - 0.2, 'world', [XLAP0, -0.25 * LW]);
+hero.reach('F', TSTUFF - 0.2, [XLAP0, -0.25 * LW], { dur: 0.15 });
 D.cue(TSTUFF, 'pop_open', { v: 0.6 });
 const TPICK = TSTUFF + 0.45;
-hero.hand('F', TPICK - 0.15, 'world', [XLAP0 - 0.05 * LW, -0.05 * LW]).hand('B', TPICK - 0.1, 'world', [XLAP0 - 0.3 * LW, -0.03 * LW]);
+hero.reach('B', TPICK - 0.15, [XLAP0 + 0.25 * LW, -0.03 * LW], { dur: 0.1 }).hand('F', TPICK - 0.15, 'world', [XLAP0 - 0.05 * LW, -0.05 * LW]);
 hero.obj(TPICK, 'held', { fwd: 0.24, up: 0.05 });
 const Rz = hero.rise(TPICK + 0.15, { head: 10 });
 R.oneHand(hero, TPICK + 0.2);
@@ -138,17 +139,18 @@ hero.path('hip', TFALL, TFALL + FD, s => { const u = (s - TFALL) / FD; return [X
 hero.hip(TFALL + FD, [XHERO, YHANG]);
 hero.footFree('F', TFALL, [0.06, 0.44]).footFree('B', TFALL + 0.02, [-0.04, 0.44]);
 hero.obj(TFALL + 0.05, 'rest', [HX1 + 0.25 * LW, -0.045 * LW, 0]);           // 电脑掉在缺口边上
-hero.hand('B', TFALL + 0.05, 'world', [HX0 + 6, -4]).hand('F', TFALL + 0.05, 'world', [HX1 - 6, -4]);
+hero.hand('B', TFALL + 0.6 * FD, 'world', [HX0 + 6, -4]).hand('F', TFALL + 0.6 * FD, 'world', [HX1 - 6, -4]);   // 掉到一半手才扒住两边（之前够不着）
 hero.head(TFALL, -30).sfx(TFALL + FD, 'body', { v: 0.6 });
 const TCLIMB = TFALL + FD + 0.75;                                            // 扒着边：先挂一下，再撑上去
 hero.path('hip', TCLIMB, TCLIMB + 0.45, s => { const u = E.inOut((s - TCLIMB) / 0.45); return [lerp(XHERO, HX1 + 0.2 * HH, u), lerp(YHANG, -ST, u) - 0.1 * HH * Math.sin(Math.PI * u)]; });
 hero.lean(TCLIMB, 40, 0.2).lean(TCLIMB + 0.4, 4, 0.2);
 hero.hand('F', TCLIMB, 'world', [HX1 + 10, -6]).hand('B', TCLIMB + 0.05, 'world', [HX1 + 30, -6]);
+hero.hand('F', TCLIMB + 0.3, 'free', [0.05, 0.35]).hand('B', TCLIMB + 0.32, 'free', [-0.04, 0.35]);   // 撑上来就松手（人站起来手还按在身后的地上 = 隔空）
 const XUP = HX1 + 0.2 * HH;
 hero.foot('F', TCLIMB + 0.35, [XUP + 0.1 * HH, 0], 0.12, 10).foot('B', TCLIMB + 0.42, [XUP - 0.08 * HH, 0], 0.12, 10);
 hero.hip(TCLIMB + 0.45, [XUP, -ST], 0.15);
 const TGRL = TCLIMB + 0.55;
-hero.hand('F', TGRL, 'world', [HX1 + 0.25 * LW - 0.05 * LW, -0.05 * LW]).lean(TGRL, 40, 0.15);
+hero.reach('F', TGRL, [HX1 + 0.25 * LW - 0.05 * LW, -0.05 * LW], { dur: 0.15, back: TGRL + 0.2 });
 hero.obj(TGRL + 0.15, 'held', { fwd: 0.24, up: 0.05 }); R.oneHand(hero, TGRL + 0.2); hero.lean(TGRL + 0.2, 2, 0.2);
 D.shot(T3 - 0.3, 0.4, { on: [hero, c0, [XHERO, 0.7 * HH]], kind: 'full' });
 
@@ -214,6 +216,7 @@ R.KEYS.push(...R.keyTimes(code), ...R.keyTimes(code2)); R.KEYS.sort((a, b) => a 
 hero.simulate(ADUR, { sfx: false });
 handF = s => hero.jointsAt(s).aF[2];
 copies[0].pos.push({ t: TGOT, x: 0, y: 0, mode: 'hop' });                     // 抓住以后跟着手（画的时候换成手的位置）
+D.codes = [code, code2];                                                    // 镜头自动把露出来的代码框进来（director.js）
 D.finalize({ actors: [hero], dur: ADUR, start: { x: 0, y: -330, z: 1 } });
 const DUR = D.DUR;
 const offscreen = [[clock.real(TFB0), clock.real(TFB1)]];
@@ -245,7 +248,7 @@ function draw(ctx, tr) {
     return;
   }
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
-  ctx.save(); cam.apply(ctx, c);
+  ctx.save(); cam.apply(ctx, c); ctx.translate(0, fx.joltAt(ta));
   CL.drawGround(ctx, c.x - W / 2 / c.z - 60, c.x + W / 2 / c.z + 60, ta, { holes, sel: selGround });
   if (ta >= TDEL) { ctx.save(); ctx.translate(0, 0.72 * HH); CL.drawGround(ctx, HX0 - 0.6 * HH, HX1 + 0.6 * HH, ta, { alpha: 0.12 }); ctx.restore(); }   // 下一行
   code.draw(ctx, ta); code2.draw(ctx, ta);
@@ -255,7 +258,7 @@ function draw(ctx, tr) {
   for (const cp of copies) drawCopy(ctx, cp, ta);
   if (ta >= TSEL && ta < TSEL + 0.5) { const p = c0.posAt(ta), f = c0.formAt(ta); ctx.fillStyle = 'rgba(38,79,160,0.6)'; ctx.fillRect(p.x - f.size * 0.25, p.y - f.size * 1.05, f.size * 0.5, f.size * 1.1); }
   const st = hero.stateAt(ta);
-  hero.draw(ctx, ta);
+  hero.draw(ctx, ta, DRAW);
   PR.laptop(ctx, st.obj[0], st.obj[1], LW, st.obj[2], 1, ta < TPICK ? -1 : st.dir);
   for (const k of KC) PR.keyCombo(ctx, ta, { ...k, at: k.at(ta) });
   fx.draw(ctx, ta);
@@ -266,5 +269,5 @@ function draw(ctx, tr) {
 }
 function post(ctx, tr, base) { D.imp.post(ctx, tr, base); }
 
-module.exports = { DUR, draw, post, cam, hero, clock, codes: [code, code2], beats: [], offscreen, c0, copies,
+module.exports = { snakes: [ws], DUR, draw, post, cam, hero, clock, codes: [code, code2], beats: [], offscreen, c0, copies,
   marks: { TSEL, TA, A3, A4, TG, TSTUFF, TRJ, TM, T3, TFALL, TCLIMB, TPUSH, TSTARE, TFB0, TFB1, TRW, TWALL, TBOX, ADUR } };

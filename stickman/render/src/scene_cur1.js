@@ -11,10 +11,11 @@ const { Snake, spline } = require('./snake');
 const PR = require('./props');
 const CL = require('./cursorlib');
 
+const DRAW = { step: 'auto', smear: false, turn: 0.4 };                    // 一拍一 / 一拍二出画、身上不画拖影、转身压扁一张（研究/动作逐帧_四集.md）
 const HH = 300, LW = CL.LW, GAP = 80;                                   // 节距要比 hi5 宽，不然挤在一起
 const D = new Director(), clock = D.clock, cam = D.cam;
 const R = CL.keyRig();
-const hero = new Actor2({ H: HH, x0: -1500, dir: 1, clock, lean: 2, headTilt: 0 });
+const hero = new Actor2({ H: HH, x0: -1500, dir: 1, clock, lean: 2, headTilt: 0, noise: 0 });   // noise 0：定格就是完全不动（原片规律 3）
 const ST = hero.STAND;
 let t;
 
@@ -129,18 +130,18 @@ hero.foot('B', TSTA + 0.03, [XB0 - 0.32 * HH, 0], 0.12, 10, 'out3', false);
 hero.hand('F', TSTA, 'local', [0.12, -0.16]);
 hero.lean(TSTA + 0.35, 4, 0.15).head(TSTA + 0.35, 0, 0.15);
 // ———— 冲过去一把拎起小蛇，退回来放在身后 ————
-const TRUN = TSTA + 0.5, XGRAB = XS2 - 2.4 * GAP - 0.28 * HH;
+const TRUN = TSTA + 0.5, XGRAB = XS2 - 2.4 * GAP - 0.12 * HH;
 const Wg = hero.walk(TRUN, XGRAB, { stepDur: 0.22 });
 const TGRAB = Wg.t - 0.05;
-hero.hand('F', TGRAB - 0.15, 'world', s => segXY(s, 2)).lean(TGRAB - 0.15, 30, 0.12);
+hero.reach('F', TGRAB - 0.15, s => segXY(s, 2), { dur: 0.12, at: [XGRAB + 0.31 * HH, -26] });
 const THANG = TGRAB + 0.05;                                                 // 小蛇挂在他手上
 hero.hand('F', THANG, 'local', [0.24, -0.18]).lean(THANG + 0.05, -6, 0.2);
 D.cue(THANG, 'rustle', { v: 0.8 }); D.cue(THANG + 0.05, 'roar_small', { v: 0.6 });
 const XBACK = XH - 0.6 * HH;
 const Wb = hero.walk(THANG + 0.1, XBACK, { stepDur: 0.24 });
 const TSET = Wb.t + 0.05, SNAKE_REST = k => [XBACK - 0.35 * HH - k * GAP, -30];   // 放在他身后（左边）的地上
-hero.hand('F', TSET - 0.25, 'world', [XBACK - 0.3 * HH, -0.25 * HH]).lean(TSET - 0.25, 34, 0.2).turn(TSET - 0.3, -1);
-hero.turn(TSET + 0.25, 1).lean(TSET + 0.25, 2, 0.2);
+hero.turn(TSET - 0.3, -1).reach('F', TSET - 0.25, [XBACK - 0.3 * HH, -0.25 * HH], { dur: 0.2, back: TSET + 0.25 });
+hero.lean(TSET + 0.25, 2, 0.15).turn(TSET + 0.42, 1);                       // 先直起身再转回来（弯着腰转身 = 头一帧甩过去）
 R.oneHand(hero, TSET + 0.3);
 D.shot(TDEL2 + 0.1, 0.4, { on: [hero, cur, [XS2 - 5 * GAP, -40]], kind: 'full' });
 
@@ -206,6 +207,7 @@ R.KEYS.push(...R.keyTimes(code)); R.KEYS.sort((a, b) => a - b);
 hero.simulate(ADUR, { sfx: false });
 handAt = s => hero.jointsAt(s).aF[2];
 LAP0 = hero.stateAt(TPRESS - 0.01).obj;
+D.codes = [code];                                                    // 镜头自动把露出来的代码框进来（director.js）
 D.finalize({ actors: [hero], dur: ADUR, start: { x: -600, y: -200, z: 0.3 } });
 const DUR = D.DUR;
 
@@ -243,7 +245,7 @@ function draw(ctx, tr) {
   drawSnake(ctx, ta);
   cur.draw(ctx, ta);
   const s = hero.stateAt(ta);
-  hero.draw(ctx, ta);
+  hero.draw(ctx, ta, DRAW);
   PR.laptop(ctx, s.obj[0], s.obj[1], LW, s.obj[2], 1, ta >= TPRESS ? -1 : s.dir);
   drawFlyers(ctx, ta);
   drawArrow(ctx, ta);

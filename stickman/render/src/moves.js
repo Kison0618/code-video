@@ -10,6 +10,7 @@
 //   const k = a.kneel(t, { front: x })              单膝跪下（前脚踩在 x，后膝着地），a.rise(t) 站起来
 //   a.jump(t, { to: x, h: 160, dur: 0.55 })        跳（running: true 跑着起跳不下蹲；skid: 落地后往前滑的距离；gy: 落在多高的台子上，往上是负）
 //   a.bonk(t, { amt: 1 })                          被东西砸到头：头一缩、肩膀一沉，马上恢复（只改头和胯，不打断手上的动作）
+//   a.reach('F', t, [x, y], { back })               伸手够东西：自动前倾 / 下蹲到够得着（不再隔空抓）
 // 时间都是动画时间；返回值里的时间也是。
 'use strict';
 const K = require('./core');
@@ -331,6 +332,29 @@ A.kneel = function (t, o = {}) {
   this.sfx(t + 0.26 + md, 'body', { v: 0.6 });
   this._kneel = { front, hx, D };
   return { t: t + 0.3 + md, x: hx };
+};
+// 伸手去够一个点（地上的东西、半空中的光标、身边的电脑）：手按世界坐标走，身体自动弯到够得着——
+//   先只前倾（最多 o.maxLean，默认 80°）；还不够就往下蹲（胯降低，最多 o.maxDrop，默认 0.22H）；坐着 / 跪着时只前倾
+//   原片里手从来不"隔空抓"：手到东西上的那一刻，肩膀离它不超过一条胳膊（体检第 9 项查这个）
+//   target：[x, y] 或 t 的函数（移动的东西按 t + dur 时的位置算身体）；o.dur 弯下去的时间；o.back：这个时间点（绝对时间）身体回到原来的姿势
+//   返回 this（可以接着写 .hand / .lean）；算出来的姿势在 a.lastReach = { t: 够到的时间, lean, hip }
+A.reach = function (h, t, target, o = {}) {
+  const H = this.H, D = this.dirAt(t), dur = o.dur ?? 0.12, T1 = t + dur;
+  const g = o.at ?? (typeof target === 'function' ? target(T1) : target);   // o.at：目标是函数、但这时还算不出来（依赖后面才定的东西）时，给一个估计位置
+  const hip0 = this.hipT.at(t), lean0 = this.leanT.at(t), R = 0.375 * H * (o.k ?? 0.92), S = 0.255 * H;
+  const sitting = hip0[1] > -0.3 * H, maxDrop = sitting ? 0 : (o.maxDrop ?? 0.22) * H, maxLean = o.maxLean ?? 80;
+  const fits = (hy, l) => { const a = l * Math.PI / 180; return Math.hypot(hip0[0] + D * Math.sin(a) * S - g[0], hy - Math.cos(a) * S - g[1]) <= R; };
+  const leans = []; for (let l = -30; l <= maxLean; l += 2) leans.push(l); leans.sort((a, b) => Math.abs(a - lean0) - Math.abs(b - lean0));
+  let best = null;
+  for (let dy = 0; dy <= maxDrop + 1e-6 && !best; dy += 0.01 * H) for (const l of leans) if (fits(hip0[1] + dy, l)) { best = { dy, l }; break; }
+  if (!best) best = { dy: maxDrop, l: maxLean };                  // 怎么弯都够不着：弯到最大（体检会报出来，该让人走近一点）
+  const hip = [hip0[0], hip0[1] + best.dy];
+  if (best.dy > 0) this.hip(t, hip, dur, 'out');
+  if (Math.abs(best.l - lean0) > 1) this.lean(t, best.l, dur, 'out');
+  this.hand(h, t, 'world', target, o.blend);
+  if (o.back !== undefined) { if (best.dy > 0) this.hip(o.back, hip0, 0.15); this.lean(o.back, lean0, 0.15); }
+  this.lastReach = { t: T1, lean: best.l, hip };
+  return this;
 };
 A.rise = function (t, o = {}) {
   const { front, D } = this._kneel, H = this.H, x = front - D * 0.07 * H;

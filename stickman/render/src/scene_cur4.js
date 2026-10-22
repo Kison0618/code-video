@@ -12,12 +12,13 @@ const { Snake, spline } = require('./snake');
 const PR = require('./props');
 const CL = require('./cursorlib');
 
+const DRAW = { step: 'auto', smear: false, turn: 0.4 };                    // 一拍一 / 一拍二出画、身上不画拖影、转身压扁一张（研究/动作逐帧_四集.md）
 const HH = 300, LW = CL.LW, F = 1 / 24, GAP = 80, CS = 45, LH = CS * 1.32;
 const D = new Director(), clock = D.clock, cam = D.cam;
 const R = CL.keyRig();
 const fx = new FightFX(HH);
 const X0 = 0, WX = X0 - 0.8 * HH, CWB = 56, CHB = 62;
-const hero = new Actor2({ H: HH, x0: X0, dir: -1, clock, lean: 2, headTilt: 0 });
+const hero = new Actor2({ H: HH, x0: X0, dir: -1, clock, lean: 2, headTilt: 0, noise: 0 });   // noise 0：定格就是完全不动（原片规律 3）
 const ST = hero.STAND;
 const cur = new CL.Cur({ x: WX - 0.95 * HH, form: 'ibeam', size: 1.0 * HH, blink: 'slow' });
 const KC = [];
@@ -60,17 +61,18 @@ for (let i = 0; i < GAPS.length; i++) {
 D.shot(TJW, 0.5, { on: [hero, cur, ...CB(3)], kind: 'full' });
 // 他发现不用管了：干脆侧躺、手撑着头；它扑来，身体自己滚开
 const TLIE = tk + 0.3, XL = hero.hipNow(TLIE)[0];
-hero.hip(TLIE, [XL, -0.16 * HH], 0.35).lean(TLIE, -72, 0.35).head(TLIE, 50, 0.3);
+hero.hip(TLIE, [XL, -0.12 * HH], 0.35).lean(TLIE, 74, 0.35).head(TLIE, -40, 0.3);   // 侧躺：头朝电脑、脚朝后
 hero.foot('F', TLIE + 0.05, [XL + 0.5 * HH, 0], 0.3, 6).foot('B', TLIE + 0.1, [XL + 0.42 * HH, 0], 0.3, 6);
 hero.hand('B', TLIE + 0.1, 'local', [-0.06, -0.28]);                         // 手撑着头
-hero.obj(TLIE + 0.1, 'rest', [XL - 0.35 * HH, -0.045 * LW, 0]);              // 电脑放在面前地上
+hero.obj(TLIE + 0.1, 'rest', [XL - 0.62 * HH, -0.045 * LW, 0]);              // 电脑放在面前地上（头前面，手够得着）
 hero.hand('F', TLIE + 0.3, 'obj', R.keyPoint);
 const ROLLS = [TLIE + 1.0, TLIE + 1.7];
 for (const tr of ROLLS) {
   const x = hero.hipNow(tr)[0];
   cur.hop(tr - 0.05, x - 0.3 * HH); cur.hop(tr + 0.08, x, undefined, { v: 0.9 }); cur.hop(tr + 0.2, x - 0.85 * HH, undefined, { sfx: false });
-  hero.path('hip', tr - 0.06, tr + 0.18, s => { const u = (s - tr + 0.06) / 0.24; return [x + 0.0 * HH * u, -0.16 * HH - 0.35 * HH * Math.sin(Math.PI * u)]; });   // 整个人往上弹一下躲开
-  hero.hip(tr + 0.18, [x, -0.16 * HH]);
+  hero.path('hip', tr - 0.06, tr + 0.18, s => { const u = (s - tr + 0.06) / 0.24; return [x + 0.0 * HH * u, -0.12 * HH - 0.35 * HH * Math.sin(Math.PI * u)]; });   // 整个人往上弹一下躲开
+  hero.hip(tr + 0.18, [x, -0.12 * HH]);
+  hero.hand('F', tr - 0.06, 'local', [0.2, 0.05]).hand('F', tr + 0.22, 'obj', R.keyPoint);   // 弹起来时手离开键盘，落回去再放上
   code.tag(tr - 0.1, tr + 0.25, IFL, IFE, 'True', [62, 150, 80], 'right'); D.cue(tr - 0.1, 'cond_true', { v: 0.5 });
 }
 cur.blink(ROLLS[1] + 0.3, 'fast');                                           // 它气得乱闪
@@ -84,7 +86,7 @@ const TR2 = code.tEnd + 0.15;
 code.run(TR2, 0.3);
 const IEL = RF2.indexOf('elif'), IEE = RF2.indexOf(':', IEL);
 const LETS = [['H', TR2 + 0.5], ['E', TR2 + 0.75], ['Y', TR2 + 1.0]];
-for (const [, tl] of LETS) { const x = hero.hipNow(tl)[0]; hero.path('hip', tl - 0.12, tl + 0.12, s => { const u = (s - tl + 0.12) / 0.24; return [x, -0.16 * HH - 0.3 * HH * Math.sin(Math.PI * u)]; }); hero.hip(tl + 0.12, [x, -0.16 * HH]); code.tag(tl - 0.15, tl + 0.2, IEL, IEE, 'True', [62, 150, 80], 'right'); D.cue(tl, 'thud', { v: 0.6 }); }
+for (const [, tl] of LETS) { const x = hero.hipNow(tl)[0]; hero.path('hip', tl - 0.12, tl + 0.12, s => { const u = (s - tl + 0.12) / 0.24; return [x, -0.12 * HH - 0.3 * HH * Math.sin(Math.PI * u)]; }); hero.hip(tl + 0.12, [x, -0.12 * HH]); hero.hand('F', tl - 0.12, 'local', [0.2, 0.05]).hand('F', tl + 0.16, 'obj', R.keyPoint); code.tag(tl - 0.15, tl + 0.2, IEL, IEE, 'True', [62, 150, 80], 'right'); D.cue(tl, 'thud', { v: 0.6 }); }
 D.shot(TTY - 0.2, 0.4, { on: [hero, cur, ...CB(5, 24)], kind: 'full' });
 // 它停住、常亮……在 dodge 下面画红波浪线，改成 doge → 下一次扑来：NameError，循环断了，被打飞
 const TSQ = LETS[2][1] + 0.8;
@@ -102,12 +104,12 @@ fx.add(TLN, [XLN - 0.1 * HH, -0.3 * HH], 'heavy'); D.cue(TLN, 'impact_heavy');
 D.shot(TLN, 8 * F, { on: [hero, cur, [L1.x + 0.5 * HH, 0]], kind: 'wide' }, 'out3');
 
 // ════════════════ 回合 4：def combo ════════════════
-const U1 = hero.getUp(L1.t + 0.4, { from: 'back' });
-const XLAP = XL - 0.35 * HH;
+const U1 = hero.getUp(L1.t + 0.4, { from: 'back', speed: 1.7 });
+const XLAP = XL - 0.62 * HH;                                                 // 电脑还在他躺着时放的地方
 hero.turn(U1.t, -1);
 const Wk = hero.walk(U1.t + 0.05, XLAP + 0.45 * HH, { stepDur: 0.24 });
-const K2 = hero.kneel(Wk.t - 0.05, { front: XLAP + 0.5 * LW + 14, head: 30, lean: 26 });
-hero.hand('B', K2.t, 'world', [XLAP - 0.3 * LW, -0.03 * LW]).hand('F', K2.t, 'obj', R.keyPoint);   // 跪着、双手在键盘上（认真了）
+const K2 = hero.kneel(Wk.t - 0.05, { front: XLAP + 0.5 * LW + 4, head: 30, lean: 26 });
+hero.reach('B', K2.t - 0.1, [XLAP + 0.02 * LW, -0.03 * LW], { dur: 0.15 }).hand('F', K2.t, 'obj', R.keyPoint);   // 跪着、俯身、双手在键盘上（认真了）
 const code2 = new Code({ x: XLAP - 0.3 * HH, y: -1.95 * HH, size: CS, seed: 43, cps: 16 });
 const CB2 = (n = 4, w = 14) => [[code2.x - 20, code2.y - 60], [code2.x + w * CS * 0.5, code2.y + n * LH]];
 const DEF = 'def combo():\n    jab()\n    jab()\n    kick()';
@@ -115,6 +117,7 @@ code2.type(K2.t + 0.2, DEF, 18);
 const TDR = code2.tEnd + 0.3;
 code2.run(TDR);
 const Rz2 = hero.rise(TDR + 0.35, { head: 0 });
+hero.hand('F', TDR + 0.35, 'free', [0.05, 0.35]).hand('B', TDR + 0.37, 'free', [-0.04, 0.35]);   // 站起来手就离开键盘
 hero.move(Rz2.t + 0.05, 'guard');
 const TWAIT = Rz2.t + 0.3;                                                   // 什么都没发生：两个人干等 2 秒
 cur.hops(TWAIT - 0.6, XLAP - 0.4 * HH + 0.0, { dt: 0.1 });
@@ -125,26 +128,28 @@ D.shot(TWAIT, 0.5, { on: [hero, cur], kind: 'medium' });
 // 恍然：跪下打 combo() → 刺拳、刺拳、踢，它连退三格
 const TAH = TWAIT + 2.0;
 hero.head(TAH, -20).lean(TAH, -6).hip(TAH, [hero.hipNow(TAH)[0], -ST - 0.02 * HH]).lean(TAH + 0.2, 4, 0.15);
+hero.hand('F', TAH, 'local', [0.14, -0.1]).hand('B', TAH, 'local', [0.1, -0.06]);   // 一下站起来，手离开键盘
 const CALL1 = TAH + 0.3;
 code2.cursor(CALL1, DEF.length).type(CALL1 + 0.05, '\ncombo()', 24);
 D.cue(CALL1, 'key', { v: 0.8 });
-hero.hand('F', CALL1 - 0.15, 'world', [XLAP - 0.1 * LW, -0.08 * LW]).lean(CALL1 - 0.15, 40, 0.1);   // 弯腰点一下键盘
+hero.reach('F', CALL1 - 0.1, [XLAP + 0.1 * LW, -0.05 * LW], { dur: 0.1 });   // 弯腰点一下键盘（自动弯到够得着）
 const TC1 = code2.tEnd + 0.15;
 code2.run(TC1, 0.25);
-hero.lean(TC1 + 0.05, 4, 0.1);
+hero.lean(TC1 + 0.05, 4, 0.1).hip(TC1 + 0.05, [hero.hipNow(TC1)[0], -ST], 0.1);
 let tc = TC1 + 0.15;
 const hitCur = (tt, back, lvl = 'hit') => { const p = cur.posAt(tt); cur.hit(tt + 2 * F, -1); fx.add(tt + 2 * F, [p.x + 0.15 * HH, -0.55 * HH], lvl); D.cue(tt + 2 * F, lvl === 'heavy' ? 'impact_heavy' : 'impact_light'); cur.hop(tt + 0.12, p.x - back); };
 for (const m of ['jab', 'jab', 'front_kick']) { const r = hero.move(tc, m, { to: null }); hitCur(tc + (m === 'front_kick' ? 5 : 3) * F, 0.3 * HH); tc = r.t - 0.05; }
 D.shot(CALL1 - 0.3, 0.3, { on: [hero, cur, ...CB2(5)], kind: 'full' });
 D.shot(TC1 + 0.5, 0.4, { on: [hero, cur, [cur.posAt(TC1).x - 1.2 * HH, 0]], kind: 'full' });
 // combo(3)：九连击越打越快，最后一脚把它踢飞
-const C3 = tc + 0.4;
+const Wbk = hero.walk(tc + 0.05, XLAP + 0.45 * HH, { stepDur: 0.15 });      // 退回电脑边（打完人站在电脑上方，够不着键盘）
+const C3 = Math.max(tc + 0.4, Wbk.t + 0.05);
 code2.back(C3, 1, 30).type(C3 + 0.08, '3)', 20);
 D.shot(C3 - 0.4, 0.3, { on: [hero, cur, ...CB2(5)], kind: 'full' });
-hero.hand('F', C3 - 0.1, 'world', [XLAP - 0.1 * LW, -0.08 * LW]).lean(C3 - 0.1, 30, 0.08);
+hero.reach('F', C3 - 0.1, [XLAP + 0.1 * LW, -0.05 * LW], { dur: 0.08 });
 const TC3 = code2.tEnd + 0.1;
 code2.run(TC3, 0.25);
-hero.lean(TC3, 4, 0.08);
+hero.lean(TC3, 4, 0.08).hip(TC3, [hero.hipNow(TC3)[0], -ST], 0.08).hand('F', TC3, 'free', [0.05, 0.35]);
 // 他先追上去
 const XCH = cur.posAt(TC3).x + 0.85 * HH;
 hero.walk(TC3 + 0.02, XCH, { stepDur: 0.18 });
@@ -168,10 +173,10 @@ cur.hops(T100 + 0.1, XC100 - 0.7 * HH, { dt: 0.12 });                        // 
 tc = T100 + 0.35;
 for (let i = 0; i < 12; i++) { const r = hero.move(tc, 'jab'); if (i < 5) hitCur(tc + 3 * F, 0.05 * HH); tc = r.t - 0.1 + i * 0.03; D.cue(tc, 'punch_soft', { v: Math.max(0.15, 0.8 - i * 0.06) }); }
 const TTIRED = tc + 0.1, XT = hero.hipNow(TTIRED)[0];
-hero.hip(TTIRED, [XT, -0.16 * HH], 0.4).lean(TTIRED, -10, 0.4).head(TTIRED, 30, 0.4);   // 累瘫坐下
+hero.hip(TTIRED, [XT, -0.09 * HH], 0.4).lean(TTIRED, -22, 0.4).head(TTIRED, 30, 0.4);   // 累瘫坐下（往后仰、两手撑在身后地上）
 hero.foot('F', TTIRED + 0.1, [XT - 0.45 * HH, 0], 0.4, 6).foot('B', TTIRED + 0.15, [XT - 0.35 * HH, 0], 0.4, 6);
-hero.hand('F', TTIRED + 0.1, 'world', [XT + 0.18 * HH, 0]).hand('B', TTIRED + 0.12, 'world', [XT + 0.24 * HH, 0]);
-for (let k = 0; k < 5; k++) hero.lean(TTIRED + 0.5 + k * 0.4, k % 2 ? -14 : -6, 0.2);   // 喘气
+hero.hand('F', TTIRED + 0.1, 'world', [XT + 0.14 * HH, 0]).hand('B', TTIRED + 0.12, 'world', [XT + 0.2 * HH, 0]);
+for (let k = 0; k < 5; k++) hero.lean(TTIRED + 0.5 + k * 0.4, k % 2 ? -25 : -19, 0.2);   // 喘气
 D.shot(T100, 0.4, { on: [hero, cur, ...CB2(5)], kind: 'full' });
 
 // ════════════════ 它 Ctrl+/ 把他的代码注释掉、吃掉，长到 2H ════════════════
@@ -211,6 +216,7 @@ const ws = new CL.WordSnake({ snake, n: () => 10, size: 42, alpha: s => (s < TDE
 
 // ———— 模拟 ————
 R.KEYS.push(...R.keyTimes(code), ...R.keyTimes(code2)); R.KEYS.sort((a, b) => a - b);
+D.codes = [code, code2];                                                    // 镜头自动把露出来的代码框进来（director.js）
 D.finalize({ actors: [hero], dur: ADUR, start: { x: 0, y: -330, z: 1 } });
 const DUR = D.DUR;
 
@@ -237,10 +243,10 @@ function draw(ctx, tr) {
   const ta = clock.anim(tr), c = cam.at(tr);
   const blue = ta >= TALL && ta < TDEL, white = ta >= TDEL;
   ctx.fillStyle = white ? '#fff' : blue ? K.rgba(CL.BLUE) : '#000'; ctx.fillRect(0, 0, W, H);
-  ctx.save(); cam.apply(ctx, c);
+  ctx.save(); cam.apply(ctx, c); ctx.translate(0, fx.joltAt(ta));
   if (!white) drawWorld(ctx, ta, c);
   const s = hero.stateAt(ta);
-  hero.draw(ctx, ta);
+  hero.draw(ctx, ta, DRAW);
   PR.laptop(ctx, s.obj[0], s.obj[1], LW, s.obj[2], 1, s.dir);
   for (const k of KC) PR.keyCombo(ctx, ta, { ...k, at: k.at(ta) });
   if (!white) fx.draw(ctx, ta);
@@ -250,6 +256,6 @@ function draw(ctx, tr) {
 }
 function post(ctx, tr, base) { D.imp.post(ctx, tr, base); }
 
-module.exports = { DUR, draw, post, cam, hero, clock, codes: [code, code2], beats: [], cur,
+module.exports = { snakes: [ws], DUR, draw, post, cam, hero, clock, codes: [code, code2], beats: [], cur,
   end: { heroX: hero.hipNow(ADUR)[0], laptop: hero.stateAt ? null : null, curX: cur.posAt(ADUR).x },
   marks: { TR1, TJW, TLIE, TTY, TSQ, TLN, TDR, TWAIT, TC1, TC3, TKO, C100, TTIRED, TCM, TSP0, TALL, TDEL, ADUR } };

@@ -243,9 +243,16 @@ class Actor2 {
   // 画：先拖影（手脚快速移动时沿轨迹的带子），再画人
   //   o.step：按这个帧率出画（24 = 原片的一拍一，12 = 一拍二），姿势在两张画之间不插值——原片"硬"的感觉主要来自这个
   //   o.smear：false 时不画手脚拖影（原片人身上没有拖影，只有武器有，见 研究/动作逐帧_四集.md）
+  //   o.step = 'auto'：动的时候一拍一（24），几乎不动的时候一拍二（12）——原片低能量的动作（趴着喘、爬、微调）就是一拍二（研究/动作逐帧_四集.md 规律 2）
   //   o.turn：转身后的第一张画横向压扁成这个比例（原片转身就是 1 张压扁的画，0.4 左右）；不写 o.step 时压扁 1/24 秒
   draw(ctx, ta, o = {}) {
     const H = this.H;
+    if (o.step === 'auto') {
+      const t24 = Math.floor(ta * 24 + 1e-6) / 24, a = this.jointsAt(t24), b = this.jointsAt(t24 - 1 / 24);
+      let d = 0; for (const k of ['head', 'hip']) d = Math.max(d, Math.hypot(a[k][0] - b[k][0], a[k][1] - b[k][1]));
+      for (const k of ['aF', 'aB', 'lF', 'lB']) d = Math.max(d, Math.hypot(a[k][2][0] - b[k][2][0], a[k][2][1] - b[k][2][1]));
+      o = { ...o, step: d / H < 0.025 ? 12 : 24 };
+    }
     if (o.step) ta = Math.floor(ta * o.step + 1e-6) / o.step;
     const squash = o.turn && o.turn !== 1 && this.stateAt(ta).dir !== this.stateAt(ta - 1 / (o.step || 24)).dir;   // 不按帧率出画时，转身后 1/24 秒内压扁
 
