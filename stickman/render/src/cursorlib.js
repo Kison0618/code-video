@@ -24,6 +24,7 @@ class Cur {
     this.spins = []; this.says = []; this.hits = []; this.fades = [];
     this.show = o.show || [-1e9, 1e9];
     this.sfx = o.sfx ?? true;
+    this.seed = o.seed ?? (Cur.n = (Cur.n || 0) + 1) * 17;                    // 每个光标的不规则闪烁各不相同
   }
   sort(L) { L.sort((a, b) => a.t - b.t); return this; }
   hop(t, x, y, o = {}) { const p = this.posAt(t); this.pos.push({ t, x, y: y ?? p.y, mode: 'hop' }); this.sort(this.pos); if (this.sfx && o.sfx !== false) cues.add(t, 'cursor_hop', { v: o.v ?? 0.6 }); return t; }
@@ -67,7 +68,7 @@ class Cur {
     if (m === 'slow') return ((t % 1) + 1) % 1 < 0.6;
     if (m === 'fast') return Math.floor(t * 12) % 2 === 0;
     if (m === 'sync') return Math.floor(t / 0.53) % 2 === 0;
-    return hash(31, Math.floor(t * 6)) < 0.62;                                // irregular
+    return hash(this.seed, Math.floor(t * 6)) < 0.62;                          // irregular
   }
   alphaAt(t) { let a = 1; for (const f of this.fades) if (t >= f.t0) a = lerp(f.a0, f.a1, clamp((t - f.t0) / Math.max(1e-3, f.t1 - f.t0))); return a; }
   // 顶部中心（头顶打字、加载圈、镜头用）
