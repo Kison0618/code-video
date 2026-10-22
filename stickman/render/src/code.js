@@ -140,6 +140,10 @@ class Code {
     if (!this.cw) { ctx.save(); ctx.font = `400 ${this.size}px Code`; this.cw = ctx.measureText('M').width; ctx.restore(); }
     return { cw: this.cw, lh: this.size * 1.32 };
   }
+  // 第二个光标（多光标）：t0–t1 之间在 off(t) 处画一个光标，on(t) 决定此刻亮不亮
+  extra(t0, t1, off, on = () => true) { (this.extras = this.extras || []).push({ t0, t1, off, on }); return this; }
+  // 拼写检查式的红波浪线（a–b 字符）
+  squiggle(t0, t1, a, b) { (this.squiggles = this.squiggles || []).push({ t0, t1, a, b }); return this; }
   // 不需要 ctx 的版本：第 off 个字符的中心 [x, y]（Inconsolata 字宽正好 0.5 em）
   charAt(t, off) {
     const s = this.snap(t), cw = this.cw || this.size * 0.5, [x0, y0] = this.pos(t), [r, c] = this.rc(s.text, off);
@@ -189,6 +193,19 @@ class Code {
       const [r, c] = this.rc(s.text, s.cur);
       ctx.fillStyle = rgba(C.white);
       ctx.fillRect(x0 + c * cw + cw * 0.08, y0 + r * lh + sz * 0.1, cw * 0.84, Math.max(3, sz * 0.075));
+    }
+    for (const ex of this.extras || []) {
+      if (t < ex.t0 || t > ex.t1 || !ex.on(t)) continue;
+      const [r, c] = this.rc(s.text, Math.min(ex.off(t), s.text.length));
+      ctx.fillStyle = rgba(C.white); ctx.fillRect(x0 + c * cw + cw * 0.08, y0 + r * lh + sz * 0.1, cw * 0.84, Math.max(3, sz * 0.075));
+    }
+    for (const q of this.squiggles || []) {
+      if (t < q.t0 || t > q.t1) continue;
+      const [r, c0] = this.rc(s.text, q.a), [, c1] = this.rc(s.text, q.b), k = Math.min(1, (t - q.t0) / 0.25);
+      ctx.strokeStyle = 'rgb(240,60,60)'; ctx.lineWidth = Math.max(2, sz * 0.05); ctx.beginPath();
+      const xa = x0 + c0 * cw, xb = xa + (c1 - c0) * cw * k, yb = y0 + r * lh + sz * 0.2;
+      for (let x = xa; x <= xb; x += 2) { const y = yb + Math.sin((x - xa) / (sz * 0.12)) * sz * 0.05; x === xa ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
+      ctx.stroke();
     }
     // 报错的小红字
     if (s.err) {
