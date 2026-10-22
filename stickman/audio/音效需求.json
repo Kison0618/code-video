@@ -1319,6 +1319,329 @@
    "reference": "原片没有（刀剑短片 blade1 新加的）",
    "sync": "起音在文件第 0 ms（前面不留静音）",
    "notes": "结尾落点对 sword_stick"
+  },
+  {
+   "id": "cursor_hop",
+   "folder": "audio/samples/cursor_hop/",
+   "name": "光标跳格",
+   "group": "光标",
+   "used_for": "火柴人VS光标：它在世界里一格一格瞬移，每一格一声",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    40,
+    90
+   ],
+   "character": "很短、很干的\"嗒\"，像按方向键，带一点电子味",
+   "avoid": "不要像脚步、不要有回声",
+   "level_peak_dbfs": -18,
+   "variants": 2,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "cursor_stand",
+   "folder": "audio/samples/cursor_stand/",
+   "name": "光标站起来",
+   "group": "光标",
+   "used_for": "火柴人VS光标：从趴着的 _ 一下竖成 |",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    150,
+    300
+   ],
+   "character": "\"噌\"地一下立起来，短促、有弹性",
+   "avoid": "不要像金属",
+   "level_peak_dbfs": -15,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "cursor_stare",
+   "folder": "audio/samples/cursor_stare/",
+   "name": "光标盯住",
+   "group": "光标",
+   "used_for": "火柴人VS光标：停止闪烁、常亮：全场突然安静的那一下",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    200,
+    500
+   ],
+   "character": "一声很轻的\"咔\"，后面完全安静（声音本身要短）",
+   "avoid": "不要有旋律",
+   "level_peak_dbfs": -16,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "cursor_load",
+   "folder": "audio/samples/cursor_load/",
+   "name": "加载圈蓄力",
+   "group": "光标",
+   "used_for": "火柴人VS光标：头顶的加载圈从 0 转到满（时长按 cue 的 dur）",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    600,
+    1200
+   ],
+   "character": "旋转上升的\"呜——\"，越转越高，满的一下\"叮\"",
+   "avoid": "要能按时长拉伸",
+   "level_peak_dbfs": -14,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "click",
+   "folder": "audio/samples/click/",
+   "name": "鼠标点击",
+   "group": "光标",
+   "used_for": "火柴人VS光标：单击 / 双击 / 三击（每一下一个 cue）",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    30,
+    80
+   ],
+   "character": "干净的鼠标点击声",
+   "avoid": "不要像键盘",
+   "level_peak_dbfs": -14,
+   "variants": 2,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "backspace_eat",
+   "folder": "audio/samples/backspace_eat/",
+   "name": "退格吃字",
+   "group": "光标",
+   "used_for": "火柴人VS光标：被选中的字一个个消失、被它吃掉",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    300,
+    700
+   ],
+   "character": "一串很快的\"哒哒哒\"，最后一下稍重",
+   "avoid": "不要像打字机铃",
+   "level_peak_dbfs": -14,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "drag",
+   "folder": "audio/samples/drag/",
+   "name": "拖拽",
+   "group": "光标",
+   "used_for": "火柴人VS光标：鼠标箭头按住电脑把它拖走（时长按 dur）",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    500,
+    1000
+   ],
+   "character": "滑动的\"嗖——\"加一点摩擦",
+   "avoid": null,
+   "level_peak_dbfs": -16,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "caps_lock",
+   "folder": "audio/samples/caps_lock/",
+   "name": "大写锁定",
+   "group": "光标",
+   "used_for": "火柴人VS光标：它打 BOOM 之前按下大写锁定",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    80,
+    200
+   ],
+   "character": "比普通键沉一点的\"咔嗒\"",
+   "avoid": null,
+   "level_peak_dbfs": -15,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "find_hit",
+   "folder": "audio/samples/find_hit/",
+   "name": "查找命中",
+   "group": "光标",
+   "used_for": "火柴人VS光标：Ctrl+F：所有 hi 一起亮黄",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    200,
+    400
+   ],
+   "character": "一声明亮的\"叮\"（像荧光笔一下划亮）",
+   "avoid": null,
+   "level_peak_dbfs": -15,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "replace",
+   "folder": "audio/samples/replace/",
+   "name": "替换",
+   "group": "光标",
+   "used_for": "火柴人VS光标：一个字被换成另一个字（hi→bye、u→m），每个一声",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    60,
+    150
+   ],
+   "character": "短促的翻牌声\"啪嗒\"",
+   "avoid": null,
+   "level_peak_dbfs": -17,
+   "variants": 2,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "punch_soft",
+   "folder": "audio/samples/punch_soft/",
+   "name": "软绵绵的拳",
+   "group": "打斗",
+   "used_for": "火柴人VS光标：combo(100) 后面越打越没力气的拳（音量按 v 递减）",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    80,
+    200
+   ],
+   "character": "空气被轻轻推一下的\"噗\"",
+   "avoid": "不要有打中的实感",
+   "level_peak_dbfs": -18,
+   "variants": 2,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "select_all",
+   "folder": "audio/samples/select_all/",
+   "name": "全选",
+   "group": "光标",
+   "used_for": "火柴人VS光标：Ctrl+A：整个世界一下变蓝",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    400,
+    900
+   ],
+   "character": "低沉的\"嗡\"一下铺满，带一点上扬",
+   "avoid": "要大、但不要爆炸",
+   "level_peak_dbfs": -10,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "delete_all",
+   "folder": "audio/samples/delete_all/",
+   "name": "全部删除",
+   "group": "光标",
+   "used_for": "火柴人VS光标：Delete：蓝色一帧变成纯白，什么都没了",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    600,
+    1500
+   ],
+   "character": "一声干净的\"咻——\"被吸走，后面是真空般的安静",
+   "avoid": "不要有残响",
+   "level_peak_dbfs": -10,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "undo",
+   "folder": "audio/samples/undo/",
+   "name": "撤销",
+   "group": "光标",
+   "used_for": "火柴人VS光标：Ctrl+Z：东西倒着长回来（每次一个 cue）",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    400,
+    800
+   ],
+   "character": "倒放的吸气声 / 倒带声，\"呼——\"往回收",
+   "avoid": null,
+   "level_peak_dbfs": -13,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "key_clash",
+   "folder": "audio/samples/key_clash/",
+   "name": "键帽相撞",
+   "group": "光标",
+   "used_for": "火柴人VS光标：Delete 和 Ctrl+Z 两个键帽在空中撞碎",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    150,
+    350
+   ],
+   "character": "两个塑料键帽撞在一起\"咔啦\"碎开",
+   "avoid": "不要像玻璃",
+   "level_peak_dbfs": -12,
+   "variants": 2,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "flashback_in",
+   "folder": "audio/samples/flashback_in/",
+   "name": "进入回忆",
+   "group": "剪辑",
+   "used_for": "火柴人VS光标：白闪进入回忆（灰度 / 暖色）",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    500,
+    1000
+   ],
+   "character": "\"嗡\"的一声 + 倒吸气，声音变闷（像隔着水）",
+   "avoid": null,
+   "level_peak_dbfs": -14,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
+  },
+  {
+   "id": "flashback_out",
+   "folder": "audio/samples/flashback_out/",
+   "name": "离开回忆",
+   "group": "剪辑",
+   "used_for": "火柴人VS光标：白闪回到现实",
+   "trigger": "cue 那一帧",
+   "duration_ms": [
+    300,
+    600
+   ],
+   "character": "回忆声反向收回，\"啪\"地回到清晰",
+   "avoid": null,
+   "level_peak_dbfs": -14,
+   "variants": 1,
+   "reference": "原片没有完全一样的声音（火柴人VS光标 新加的）",
+   "sync": "起音在文件第 0 ms（前面不留静音）",
+   "notes": null
   }
  ]
 }

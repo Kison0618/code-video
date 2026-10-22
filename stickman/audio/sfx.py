@@ -477,6 +477,10 @@ GEN = {
     'label_stick': lambda c: s_tap(0.6), 'label_tear': lambda c: s_whoosh_short(0.4), 'roar_big': lambda c: s_whoosh(1.0), 'roar_small': lambda c: s_cond(True),
     'car_clack': lambda c: s_tick(1.0), 'pop_open': lambda c: s_output(), 'glitch': lambda c: s_select(), 'garble': lambda c: s_dissolve(),
     'assemble': lambda c: s_tick(0.8), 'glitch_crawl': lambda c: s_tick(0.5),
+    'cursor_hop': lambda c: s_tick(c.get('v', 0.6)), 'cursor_stand': lambda c: s_select(), 'cursor_stare': lambda c: s_select(), 'cursor_load': lambda c: s_charge(c.get('dur', 0.8)),
+    'click': lambda c: s_select(), 'backspace_eat': lambda c: s_dissolve(), 'drag': lambda c: s_whoosh(0.6), 'caps_lock': lambda c: s_key(), 'find_hit': lambda c: s_cond(True),
+    'replace': lambda c: s_tick(c.get('v', 0.5)), 'punch_soft': lambda c: s_impact('light'), 'select_all': lambda c: s_scale_drone(0.9, 0.8), 'delete_all': lambda c: s_whoosh(1.0),
+    'undo': lambda c: s_whoosh_short(0.8), 'key_clash': lambda c: s_shatter(), 'flashback_in': lambda c: s_whoosh(0.7), 'flashback_out': lambda c: s_whoosh_short(0.7),
     'release': lambda c: s_release(), 'debris': lambda c: s_debris(), 'recoil_slide': lambda c: s_recoil_slide(c.get('dur', 0.5)),
     # 刀剑短片 blade1（第 10 轮）新声音：先用现有合成音占位，按 音效需求.json 做好放进 samples/<id>/ 就会替换
     'sword_whoosh': lambda c: s_whoosh_short(c.get('v', 1)), 'sword_clang': lambda c: s_impact('light') * c.get('v', 1),

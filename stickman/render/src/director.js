@@ -49,6 +49,7 @@ class Director {
     const add = o => {
       if (!o) return;
       if (o.jointsAt) { actors.push(o); const j = o.jointsAt(ta); pts.push(j.head, j.hip, j.lF[2], j.lB[2], j.aF[2], j.aB[2]); }
+      else if (o.posAt && o.topAt) { const p = o.posAt(ta); pts.push([p.x, p.y], o.topAt(ta)); }   // 光标这类有位置、有顶部的东西
       else if (typeof o === 'function') add(o(ta));
       else if (Array.isArray(o) && typeof o[0] === 'number') pts.push(o);
       else if (Array.isArray(o)) o.forEach(add);
