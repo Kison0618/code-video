@@ -1,4 +1,4 @@
-// 本地并行逐帧输出（8 个进程）：0–208.5 秒 @30fps，帧图片放在 .render-tmp/frames（竖屏见 render-local-9x16.cjs）
+// 本地并行逐帧输出（8 个进程）：0–285.55 秒 @30fps，帧图片放在 .render-tmp/frames（竖屏见 render-local-9x16.cjs）
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -7,7 +7,7 @@ const AR = process.env.AR === '9x16' ? '9x16' : '16x9';
 const frameDir = path.join(root, '.render-tmp', AR === '9x16' ? 'frames-9x16' : 'frames');
 fs.mkdirSync(frameDir, { recursive: true });
 const browser = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
-const END = 208.5, FPS = 30, TOTAL = Math.round(END * FPS);
+const END = 285.55, FPS = 30, TOTAL = Math.round(END * FPS);
 const workers = +(process.env.RENDER_WORKERS || 4);
 const children = [];
 const timer = setInterval(() => console.log(`Frames ${fs.readdirSync(frameDir).filter(n => n.endsWith('.jpg')).length}/${TOTAL}`), 15000);

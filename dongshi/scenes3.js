@@ -6,12 +6,14 @@ const CAM3H = [[S3 + 59.7, 990, 540, 1], [S3 + 62.2, 990, 540, 1], [S3 + 62.715,
   [S3 + 68.165, 1200, 585, 1.75], [S3 + 70.3, 1215, 580, 1.8], [S3 + 70.89, 1580, 585, 1.75], [S3 + 73.1, 1565, 580, 1.8], [S3 + 73.615, 990, 540, 1], [S3 + 75.79, 990, 540, 1.03],
   [S3 + 75.795, 960, 550, 1], [S3 + 94.96, 1040, 565, 1.1], [S3 + 94.965, 1300, 585, 1.55], [S3 + 104.24, 1300, 600, 1.72],
   [S3 + 104.25, 960, 545, 1], [S3 + 108.6, 965, 543, 1.01], [S3 + 110.0, 930, 525, 1.3], [S3 + 111.9, 930, 525, 1.3], [S3 + 113.4, 970, 540, 1.03], [S3 + 127.6, 1000, 530, 1.08], [S3 + 140.45, 975, 515, 1],
-  [S3 + 144.4, 960, 535, 1.04], [S3 + 145.0, 980, 500, 1.2], [S3 + 146.4, 1015, 440, 1.75], [S3 + 148.3, 1015, 435, 1.8], [S3 + 149.6, 960, 520, 1.08], [S3 + 159.97, 930, 545, 1.12]];
+  [S3 + 144.4, 960, 535, 1.04], [S3 + 145.0, 980, 500, 1.2], [S3 + 146.4, 1015, 440, 1.75], [S3 + 148.3, 1015, 435, 1.8], [S3 + 149.6, 960, 520, 1.08], [S3 + 159.97, 930, 545, 1.12],
+  [S3 + 300, 960, 540, 1], [S3 + 308.4, 960, 540, 1], [S3 + 310.0, 1040, 600, 1.22], [S3 + 318.0, 1060, 610, 1.3], [S3 + 320.5, 1000, 560, 1.12], [S3 + 331.0, 990, 545, 1.05], [S3 + 339.3, 960, 530, .96]];
 const CAM3V = [[S3 + 59.7, 960, 772, .94], [S3 + 62.2, 960, 772, .94], [S3 + 62.715, 700, 430, 1.6], [S3 + 64.9, 705, 425, 1.65], [S3 + 65.44, 1180, 430, 1.6], [S3 + 67.6, 1185, 425, 1.65],
   [S3 + 68.165, 700, 1020, 1.6], [S3 + 70.3, 705, 1015, 1.65], [S3 + 70.89, 1180, 1020, 1.6], [S3 + 73.1, 1185, 1015, 1.65], [S3 + 73.615, 960, 772, .94], [S3 + 75.79, 960, 772, .96],
   [S3 + 75.795, 960, 600, 1.0], [S3 + 94.96, 1000, 605, 1.07], [S3 + 94.965, 1300, 560, 1.6], [S3 + 104.24, 1300, 575, 1.75],
   [S3 + 104.25, 960, 560, 1.18], [S3 + 108.6, 962, 559, 1.19], [S3 + 110.0, 940, 480, 1.5], [S3 + 111.9, 940, 480, 1.5], [S3 + 113.4, 965, 555, 1.2], [S3 + 127.6, 985, 555, 1.26], [S3 + 140.45, 965, 520, 1.15],
-  [S3 + 144.4, 960, 545, 1.22], [S3 + 145.0, 985, 500, 1.4], [S3 + 146.4, 1015, 400, 2.2], [S3 + 148.3, 1015, 395, 2.25], [S3 + 149.6, 960, 530, 1.25], [S3 + 159.97, 900, 560, 1.3]];
+  [S3 + 144.4, 960, 545, 1.22], [S3 + 145.0, 985, 500, 1.4], [S3 + 146.4, 1015, 400, 2.2], [S3 + 148.3, 1015, 395, 2.25], [S3 + 149.6, 960, 530, 1.25], [S3 + 159.97, 900, 560, 1.3],
+  [S3 + 300, 1085, 560, 1.12], [S3 + 308.4, 1085, 560, 1.12], [S3 + 310.0, 1060, 610, 1.4], [S3 + 318.0, 1070, 620, 1.48], [S3 + 320.5, 1040, 580, 1.3], [S3 + 331.0, 1030, 560, 1.2], [S3 + 339.3, 1000, 545, 1.08]];
 
 function dim3(t) {
   if (t < 59.7) return 0;
@@ -21,6 +23,7 @@ function dim3(t) {
   if (t < 140.5) return eo(pr(t, 104.55, 105.6));                             // 第二遍：同一间屋子
   if (t < 144.4) return 0;
   if (t < 159.975) return 1 - eio(pr(t, 159.45, 159.975));                    // 面具裂开 → 大字前 0.45 秒黑
+  if (t >= FIN0) return eo(pr(t, FIN0, FIN0 + .35)) * (1 - eio(pr(t, FIN0 + 38.4, FIN0 + 39.3)));   // 新结尾
   return 0;
 }
 function scenes3(t) {
@@ -28,6 +31,7 @@ function scenes3(t) {
   else if (t >= 75.795 && t < 104.25) sceneLone(t);
   else if (t >= 104.25 && t < 140.5) sceneHome(t);
   else if (t >= 144.4 && t < 159.975) sceneMask(t);
+  else if (t >= FIN0) sceneFinale(t - FIN0);
 }
 
 // ===================== 四种样子（成片 59.7–75.8，素材来自 v1） =====================
@@ -325,4 +329,63 @@ function sceneMask(t) {
   // 不是因为你不值得——：当年的大人出现在对面
   const pa = eo(pr(t, 157.3, 158.4));
   if (pa > 0) drawFig({ kind: 'adult', P: { ...PO.stand, hd: 16 }, x: MK3.px, y: fy, h: 440, dir: 1, rim: C.silver, a: pa, refl: fy, draw: pr(t, 157.3, 158.4) });
+}
+
+// ===================== 新结尾（歌里 205.1 转调 → 244.4；u = 0..39.3）：循环到你这里停下 =====================
+// 回到开头那条走廊。这一次站在门口的是长大的你，门里是暖光。你的孩子高兴地跑过来，摔倒了（和开头同一个位置、同一个动作）
+// → 6.4 “叫你别跑”到了嘴边：一个红色气泡在你头上闪，8.4 碎成金色的光尘 → 9.2 你走过去蹲下 → 11 他膝盖上那点红变成金色
+// → 15.0 “对不起”：金色气泡 → 18.48 大字（最响的一拍）→ 22.6 他跳起来欢呼 → 25.3 你胸口的光尘聚成小时候的你，站在旁边 → 28.3 小时候的你也举起手
+const FN = { you: 1305, kid0: 560, fall: 980 };
+function finYou(u) {
+  const L = HALL, walk = eio(pr(u, 9.0, 10.2)), x = lerp(FN.you, FN.fall + 150, walk), ww = eio(pr(u, 9.0, 9.2)) * (1 - eio(pr(u, 10.0, 10.2)));
+  const OPEN = { ...PO.kneel, hd: -2, aN: 62, eN: 34, aF: 52, eF: 40 }, HUG = { ...PO.kneel, hd: 10, aN: 74, eN: 62, aF: 66, eF: 64 }, WATCH = { ...PO.kneel, hd: -8, aN: 40, eN: 30, aF: 24, eF: 30 };
+  let P = poseSeq(u, [[0, { ...PO.stand, hd: 4 }], [6.4, { ...PO.point, aN: 20, eN: 30, hd: 10 }, .35], [8.3, { ...PO.stand, hd: 14 }, .5], [10.2, OPEN, .5], [12.3, HUG, .5], [21.8, WATCH, .7], [28.5, { ...WATCH, aN: 120, eN: 20 }, .8]]);
+  if (ww > 0) P = lerpPose(P, walkPose((FN.you - x) / 70 * Math.PI, 0), ww);
+  return { kind: 'adult', P, x, y: L.fy, h: L.ah, dir: -1, rim: mixC(C.gold, C.white, .2), refl: L.fy, gain: 1.1 };
+}
+function finKid(u) {
+  const L = HALL, run = pr(u, 3.4, 4.85), x = lerp(FN.kid0, FN.fall, Math.pow(run, 1.2)), rw = eio(pr(u, 3.3, 3.6)) * (1 - eio(pr(u, 4.7, 4.85))), ph = (x - FN.kid0) / 95 * Math.PI;
+  let P = poseSeq(u, [[0, PO.stand], [2.6, PO.happy, .4], [4.62, PO_TRIP, .13], [4.75, PO_FALL, .14], [5.4, { ...PO_FALL, hd: 30 }, .5], [12.3, { ...PO.stand, sp: 14, hd: 16, aN: 72, eN: 46, aF: 62, eF: 50 }, .6], [22.6, PO.cheer, .5]]);
+  if (rw > 0) P = lerpPose(P, walkPose(ph, 1), rw);
+  const jump = 18 * Math.max(0, Math.sin((u - 22.6) * Math.PI * 1.8)) * win(u, 22.6, 27.5, .1, .8);
+  return { kind: 'child', P, x: x + 40 * eio(pr(u, 12.3, 12.9)), y: L.fy - 7 * rw * Math.abs(Math.sin(ph)) - jump, h: BOY_H, dir: 1, rim: mixC(mixC(C.silver, C.gold, .35), C.gold, eio(pr(u, 22.6, 23.4))), refl: L.fy, gain: 1 + .5 * eio(pr(u, 22.6, 23.4)) };
+}
+function finDoorPt() { const D = HALL.d; return w2s((D.x0 + D.x1) / 2, D.top + 200); }
+function finKidPt(t) { const p = figGeom(finKid(t - FIN0)).at('chest'); return w2s(p[0], p[1]); }
+function sceneFinale(u) {
+  const c = sx, L = HALL, fy = L.fy, D = { ...L.d, fy };
+  lampPool(c, 900, 420, 950, 1); lampCone(c, 900, -60, fy + 40, 70, 640, lerp(.8, 1.1, eo(pr(u, 0, 2))));
+  floorLine(c, fy, 200, 1800, 1, 1); motes(u + FIN0, 900, 440, 620, 330, 150, C.lamp, 1);
+  // 门：这一次开着，里面是暖光
+  door(c, D, { u: 1, open: eio(pr(u, 0, 1.4)), light: mixC(C.gold, C.lamp, .4), I: eio(pr(u, 0, 1.4)) * 1.15, under: .3 });
+  const Y = finYou(u), GY = drawFig(Y), K = finKid(u), GK = drawFig(K);
+  burst(c, u, 4.75, K.x + 40, fy - 4, { n: 22, seed: 5, col: C.lamp, v0: 30, v1: 170, a0: -Math.PI, spread: Math.PI, g: 260, life: .8 });
+  // 膝盖那点红：11 秒变成金色
+  const gk = eio(pr(u, 10.8, 11.4)), km = u < 4.75 ? 0 : lerp(1, .5, eio(pr(u, 5.5, 7))) * (1 - eio(pr(u, 12.3, 13.5)));
+  kneeMark(c, GK, mixC(C.red, C.gold, gk), km, 4.75, u);
+  const kp = GK.at('knN'); ringPulse(c, u, 10.85, kp[0], kp[1], 8, 120, C.gold, .9, .7); burst(c, u, 10.85, kp[0], kp[1], { n: 26, seed: 23, col: C.gold, v0: 30, v1: 190, a0: -Math.PI, spread: Math.PI, g: -40, life: 1.1 });
+  // “叫你别跑！”到了嘴边：在你头上闪了几下，8.4 碎成金色光尘
+  const hd = GY.at('head');
+  if (u > 6.5 && u < 8.45) { const fl = .55 + .45 * Math.abs(Math.sin(u * 13)) * Math.abs(Math.sin(u * 5.3)), a = eo(pr(u, 6.5, 6.8)) * fl;
+    c.save(); c.translate(hd[0] - 30, hd[1] - 90); pill(c, '叫你别跑！', 0, 0, C.red, a, 40); c.restore(); }
+  burst(c, u, 8.4, hd[0] - 30, hd[1] - 90, { n: 70, seed: 707, col: C.gold, v0: 40, v1: 260, a0: -Math.PI, spread: Math.PI, g: -50, life: 1.4 });
+  // “对不起”：金色气泡
+  if (u > 15.2 && u < 18.3) { const a = eo(pr(u, 15.2, 15.5)) * (1 - eio(pr(u, 17.9, 18.3))); c.save(); c.translate(hd[0] - 10, hd[1] - 92); pill(c, '对不起', 0, 0, C.gold, a, 38); c.restore();
+    ringPulse(c, u, 15.25, hd[0], hd[1], 12, 130, C.gold, .8, .5); }
+  // 孩子胸口的光：被抱住以后亮起来；18.48 大字时一圈金光；22.6 欢呼时炸开一小团
+  const kc = GK.at('chest');
+  chestDot(c, GK, C.gold, eo(pr(u, 12.6, 13.4)) + .4 * win(u, 18.4, 20.5, .1, 1.5), 5.5 + 2 * win(u, 18.4, 20, .1, 1));
+  ringPulse(c, u, 18.48, kc[0], kc[1], 8, 240, C.gold, 1.1, .7);
+  burst(c, u, 22.65, kc[0], kc[1], { n: 70, seed: 731, col: C.gold, v0: 80, v1: 460, g: 120, life: 1.4 });
+  // 你胸口的光尘聚成小时候的你，站在你身后
+  const ic = GY.at('chest'), ia = eo(pr(u, 25.3, 27.2));
+  if (ia > 0) { const IX = Y.x + 150;
+    const F = { kind: 'child', P: poseSeq(u, [[0, { ...PO.stand, hd: 6 }], [28.5, PO.cheer, .7]]), x: IX, y: fy, h: BOY_H, dir: -1, rim: mixC(C.gold, C.white, .35), a: ia, refl: fy,
+      draw: pr(u, 25.3, 27.4), src: (id, s0) => PX.inv(...w2s(ic[0], ic[1])) };
+    const GI = drawFig(F); chestDot(c, GI, C.gold, eo(pr(u, 27.0, 27.6)), 5.5); }
+  // 金色微尘从三个人身边慢慢升起
+  if (u > 22.6) { PX.useM(c); const ga = eo(pr(u, 22.6, 24)) * (1 - eio(pr(u, 37.8, 39.2)));
+    for (let i = 0; i < 140; i++) { const life = 3 + 2.5 * rnd(i, 741), v = ((u - 22.6) / life + rnd(i, 742)) % 1, x = Y.x - 150 + (rnd(i, 743) - .5) * 700 + Math.sin(u * .7 + i) * 18, y = fy - 20 - v * 560;
+      PX.pt(x, y, mixC(C.gold, C.white, .3 * rnd(i, 744)), ga * 1.3 * Math.sin(Math.PI * v) * (.6 + .4 * Math.sin(u * 5 + i)), .3); }
+    PX.flush(c); }
 }

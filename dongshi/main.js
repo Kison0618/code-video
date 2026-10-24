@@ -20,11 +20,17 @@ const SUBS = [
   [127.725, 130.795, '“要是我再好一点，他们就会{g|懂我}。”'], [130.995, 134.065, '可爱不是靠表现好，就能{r|换来}的。'],
   [134.265, 137.335, '长大后，你总被{i|冷淡}的人吸引。'], [137.535, 140.35, '那种冷淡你太熟悉了，熟悉让人{i|安心}。'],
   [140.805, 144.30, '你等的那句{i|对不起}，可能永远不会来。'], [144.62, 147.69, '直到有一天，你{r|撑不住}了。'], [147.89, 150.50, '书里说，撑不住，恰恰是{g|醒过来}的开始。'],
-  [157.155, 159.60, '他们给不了你，不是因为你不值得——'],
+  [153.40, 159.60, '他们给不了你，不是因为你不值得——'],
   [163.695, 166.765, '他们小时候，大人也只要他们{w|听话}。'], [166.965, 168.945, '他们也被一年年{r|修剪}、捆扎，'], [169.145, 172.215, '长成了{w|不是自己本来的样子}。'],
   [172.415, 177.12, '他们顾不上你，像一个一直在{r|疼}的人。'], [177.32, 179.845, '大多数时候，他们不是{w|故意}的。'], [180.045, 182.025, '但伤害，是{r|真的}。'],
   [182.225, 185.295, '你会生气，很正常，这{r|不叫不孝}。'], [185.495, 188.02, '退一步，像旁观者一样{g|看}。'], [188.22, 190.60, '你改变不了他们，但能{g|救自己}。'],
   [190.945, 193.47, '以后摔倒了，先{g|抱抱自己}。'], [193.67, 195.65, '不是你的错，就{g|不用道歉}。'], [195.85, 199.20, '开心，可以{g|大声一点}。'],
+  // —— 新结尾（转调 205.1 → 244.4）：循环到你这里停下 ——
+  [300.30, 303.00, '很多年以后，你也有了自己的孩子。'], [303.20, 306.20, '他高高兴兴地朝你跑过来，{r|摔了一跤}。'],
+  [306.40, 309.00, '那句“{r|叫你别跑}”，已经到了嘴边——'], [309.20, 311.90, '你蹲下来，问他：“{g|疼不疼}？”'],
+  [312.17, 314.80, '他哭了，你没有让他{g|别哭}。'], [315.00, 318.20, '你凶了他，事后跟他说了“{g|对不起}”。'],
+  [322.60, 325.10, '他开心的时候，可以叫得很{g|大声}。'], [325.30, 328.10, '你小时候没得到的，现在你{g|给得出去}了。'],
+  [328.30, 331.60, '那个早早懂事的小孩，也终于可以{g|歇一歇}了。'],
 ];
 const HUDW = [[28.0, 55.5], [59.9, 92.0], [105.6, 121.6], [127.6, 140.4], [144.5, 150.8], [163.4, 190.4]];
 const CONC = [[30.94, 32.6, 'EMOTIONALLY IMMATURE · p.28', '情感不成熟'], [32.74, 36.95, 'EMOTIONAL CONTAGION · CH.3', '情绪传染'], [37.1, 39.7, 'DEFENSIVE · CH.3', '一说就防御'],
@@ -35,12 +41,12 @@ const CONC = [[30.94, 32.6, 'EMOTIONALLY IMMATURE · p.28', '情感不成熟'], 
   [177.32, 182.0, 'NOT ON PURPOSE · CH.2', '并非故意'], [182.225, 185.35, 'ANGER · p.53', '生气是正常反应'], [185.495, 190.3, 'DETACHED OBSERVATION · CH.8', '超脱地观察']];
 const HERO = {
   q: '为什么，你那么早就{g|懂事}了？', big: '孩子，成了{i|父母的父母}。', lone: '没人打你，也没人骂你，可你一直在{i|疼}。', rev: '他们，也曾是{s|那个孩子}。',
-  g1: '看清他们，不是背叛。', g2: '{g|你只是终于站到了自己这边。}',
+  fin: '这一代的懂事，到你这里就{g|够了}。', g1: '看清他们，不是背叛。', g2: '{g|你只是终于站到了自己这边。}',
 };
 const H2 = BAR(25), H3L = BAR(43), H4 = BAR(25) + P2, GOLD = BAR(43) + P2, END = BAR(45) + P2;   // 56.175 / 95.415 / 160.425 / 199.665 / 204.025
 const STEPS = [[186.04, '超脱地观察'], [186.585, '说了就放下'], [187.13, '专注结果，不求关系']];   // 原书第 8 章的三个办法
 window.ALL_TEXT = [...SUBS.map(s => plain(s[2])), ...CONC.flatMap(c => [c[2], c[3]]), ...STEPS.map(s => s[1]),
-  ...Object.values(HERO).map(plain), '懂事', 'EMOTIONALLY IMMATURE PARENTS', '妈妈', '你的错', '不孝', '都怪我，行了吧！', '别烦我', ...HL.map(x => x.s), ...TYPES.flatMap(x => [x.zh, x.say]), ...EXTRA_TEXT, ...PHR.map(p => p[0]),
+  ...Object.values(HERO).map(plain), '叫你别跑！', '对不起', '疼不疼？', '懂事', 'EMOTIONALLY IMMATURE PARENTS', '妈妈', '你的错', '不孝', '都怪我，行了吧！', '别烦我', ...HL.map(x => x.s), ...TYPES.flatMap(x => [x.zh, x.say]), ...EXTRA_TEXT, ...PHR.map(p => p[0]),
   '孩子只该被看见，不该被听见', '“children should be seen and not heard”', '0123456789:.,·–—“”'];
 
 // ---------- 字幕（屏幕层，最后画，保持清晰） ----------
@@ -108,12 +114,17 @@ function heroTexts(t) {
     const a = 1 - eio(pr(t, 162.4, 162.9));
     drawChars(c, parse(HERO.rev), W / 2, V ? 430 : 220, { size: V ? 62 : 70, font: FS.serif, weight: 900, ls: 6, t0: H4, per: .05, fade: .3, t, a, grad: GR, shadow: true, rise: 8 });
   }
+  if (t >= FIN0 + 18.48 && t < FIN0 + 22.4) {   // 新结尾的大字：转调后最响的一拍（歌里 223.58）
+    const a = 1 - eio(pr(t, FIN0 + 21.9, FIN0 + 22.4)), o = { font: FS.serif, weight: 900, per: .06, fade: .35, t, a, grad: GR, shadow: true, rise: 8, t0: FIN0 + 18.48 };
+    if (V) { drawChars(c, parse('这一代的懂事，'), W / 2, 420, { ...o, size: 76, ls: 4 }); drawChars(c, parse('到你这里就{g|够了}。'), W / 2, 540, { ...o, size: 76, ls: 4, t0: FIN0 + 18.48 + 7 * .06 }); }
+    else drawChars(c, parse(HERO.fin), W / 2, 210, { ...o, size: 80, ls: 6 });
+  }
   if (t >= GOLD && t < 203.95) {   // 金句
     const a = 1 - eio(pr(t, 203.45, 203.95)), sz = V ? 62 : 66;
     drawChars(c, parse(HERO.g1), W / 2, V ? 780 : 470, { size: sz, font: FS.serif, weight: 900, ls: 6, t0: GOLD, per: .06, fade: .35, t, a, grad: GRAD_W, shadow: true, rise: 8 });
     drawChars(c, parse(HERO.g2), W / 2, V ? 920 : 610, { size: sz, font: FS.serif, weight: 900, ls: 6, t0: GOLD + 1.5, per: .06, fade: .35, t, a, grad: GR, shadow: true, rise: 8 });
   }
-  if (t >= END) {                  // 片尾卡：只有片名（光尘先聚回字形）；参考文献放在文案.md / 发布简介里
+  if (t >= END && !(t >= FIN0)) {   // 片尾卡：只有片名（光尘先聚回字形）；参考文献放在文案.md / 发布简介里
     const a = 1 - eio(pr(t, 207.95, 208.5));
     drawChars(c, parse('懂事'), TT.x, TT.y, { size: TT.size, font: FS.serif, weight: 900, ls: TT.ls, t0: END + .575, per: .12, fade: .7, t, a, grad: GRAD_W, shadow: true, rise: 0 });
   }
@@ -139,11 +150,11 @@ function goldLine(t) {    // 金句中间那一道金色的横光，之后留一
   const a = .35 * eo(pr(t, GOLD + .2, GOLD + 1)) * (1 - pr(t, 203.45, 203.95)), L = (V ? 300 : 360) * eo(pr(t, GOLD, GOLD + .8));
   if (a > 0) { const g = ctx.createLinearGradient(W / 2 - L, 0, W / 2 + L, 0); g.addColorStop(0, rgba(C.gold, 0)); g.addColorStop(.5, rgba(mixC(C.gold, C.white, .4), a)); g.addColorStop(1, rgba(C.gold, 0)); ctx.fillStyle = g; ctx.fillRect(W / 2 - L, y - 1, L * 2, 2); }
 }
-const HITS = [[T_IN, 5, .22, .35], [H2, 5, 0, .5], [H3L, 5, .16, .4], [H4, 6, .28, .4]];   // 大特效都在小节重拍上，前面各有 0.45 秒黑（第五次是金句的金色横光）
+const HITS = [[T_IN, 5, .22, .35], [H2, 5, 0, .5], [H3L, 5, .16, .4], [H4, 6, .28, .4], [FIN0, 5, .26, .45], [FIN0 + 18.48, 4, .14, .4]];   // 大特效都在小节重拍上，前面各有 0.45 秒黑（第五次是金句的金色横光）
 
 // ---------- 一帧 ----------
-window.render = function (t, frame = Math.round(t * 30)) {
-  t = clamp(t, 0, window.TOTAL); const T = N2O(t);   // T：场景时间
+window.render = function (ts, frame = Math.round(ts * 30)) {
+  ts = clamp(ts, 0, window.TOTAL); const t = W2O(ts), FIN = t >= FIN0, T = FIN ? S3 + t : N2O(t);   // ts：歌里的时间；t：v4 成片时间（结尾新段是 FIN0 + u）；T：场景时间
   PX.t = t; const k = keyCam(V ? CAMV : CAMH, T); CAM = { fx: k[1], fy: k[2], s: k[3] };
   sx.setTransform(1, 0, 0, 1, 0, 0); sx.globalAlpha = 1; sx.globalCompositeOperation = 'source-over';
   const bg = sx.createRadialGradient(W / 2, H * .45, 0, W / 2, H * .45, Math.hypot(W, H) * .6); bg.addColorStop(0, 'rgb(20,17,14)'); bg.addColorStop(1, 'rgb(6,5,5)');
@@ -161,6 +172,8 @@ window.render = function (t, frame = Math.round(t * 30)) {
   if (t >= H3L && t < H3L + 1.5) { const p = lonePt(t); lensRing(t, H3L, p[0], p[1], mixC(C.ice, C.white, .5), true, 1.3); anam(t, H3L, p[0], p[1], C.ice, .9); }
   lensRing(t, H4, W / 2, V ? 430 : 220, mixC(C.ice, C.white, .5), true, 1.25);
   if (t >= 127.725 && t < 129) { const p = dreamPt(); lensRing(t, 127.725, p[0], p[1], mixC(C.gold, C.white, .4), false, 1.1); }   // 第二遍全曲进入：梦泡（中等，不黑场）
+  if (t >= FIN0 && t < FIN0 + 2) { const p = finDoorPt(); lensRing(t, FIN0, p[0], p[1], mixC(C.gold, C.white, .5), true, 1.4); anam(t, FIN0, p[0], p[1], C.gold, 1.0); }
+  if (t >= FIN0 + 18.48 && t < FIN0 + 20) { const p = finKidPt(t); lensRing(t, FIN0 + 18.48, p[0], p[1], mixC(C.gold, C.white, .4), false, 1.2); }
   anam(t, T_IN, TT.x, TT.y, C.gold, .9);
   anam(t, H4, W / 2, V ? 430 : 220, C.ice, .8);
   goldLine(t);

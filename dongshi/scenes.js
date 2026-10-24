@@ -271,7 +271,7 @@ function titleDust(t, T) {
 }
 // 片尾（成片时间）：金色微尘从画面下方升起，聚回同一个“懂事”的字形
 function endDust(t) {
-  if (t < 203.75) return; const P = dustPts(); if (!P) return;
+  if (t < 203.75 || t >= FIN0) return; const P = dustPts(); if (!P) return;
   const hot = mixC(C.gold, C.white, .6), gc = mixC(C.gold, C.lamp, .4), fo = 1 - eio(pr(t, 207.95, 208.5));
   for (let i = 0; i < P.length; i++) {
     const q = P[i], ts = 203.75 + .55 * rnd(i, 81), te = ts + .85 + .3 * rnd(i, 82); if (t < ts) continue;

@@ -30,7 +30,7 @@ if (/[?&]play\b/.test(location.search)) (async () => {
   await Promise.all(["900 40px 'Noto Serif SC'", "500 40px 'Noto Sans SC'", "500 40px 'JetBrains Mono'"].map(f => document.fonts.load(f, txt)));
   const fit = () => { const k = Math.min(innerWidth / W, innerHeight / H); cv.style.transform = `scale(${k})`; cv.style.marginLeft = `${(innerWidth - W * k) / 2}px`; };
   fit(); addEventListener('resize', fit); document.getElementById('tip').style.display = 'block';
-  const au = new Audio('bgm_v3.m4a');
+  const au = new Audio('../reference-videos/泰坦尼克号 我心永恒 钢琴独奏 My Heart Will Go On [BV1RC4y1a7Py].m4a');
   addEventListener('keydown', e => {
     if (e.code === 'Space') { au.paused ? au.play() : au.pause(); e.preventDefault(); }
     if (e.code === 'ArrowRight') au.currentTime = Math.min(window.TOTAL, au.currentTime + 5);
