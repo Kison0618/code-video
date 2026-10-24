@@ -280,6 +280,17 @@ function sceneHome(t) {
       glow(c, ox, oy, 46, C.gold, .55); dot(c, ox, oy, 8, mixC(C.gold, C.white, .4), 1); }
     if (GA) { const ac = GA.at('chest'); ringPulse(c, t, 113.25, ac[0], ac[1], 8, 120, C.gold, .9, .6); glow(c, ac[0], ac[1], 60, C.gold, .4 * win(t, 113.25, 114.6, .1, .9)); }
   }
+  // 有人沉迷游戏：手里一块亮着的屏幕，分数一下一下往上冒（那里的努力，马上有回报）
+  const ph = win(t, 121.0, 124.2, .3, .4);
+  if (ph > 0) { const hN = GK.at('haN'), hF = GK.at('haF'), px = (hN[0] + hF[0]) / 2 - 8, py = (hN[1] + hF[1]) / 2 - 10;
+    glow(c, px, py, 90, C.ice, .35 * ph); c.save(); rrect(c, px - 16, py - 26, 32, 52, 6); c.fillStyle = rgba(mixC(C.ice, C.white, .3), .85 * ph); c.fill(); c.restore();
+    c.font = `500 26px ${FS.mono}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    for (let i = 0; i < 6; i++) { const t0 = 121.3 + i * .45, u = pr(t, t0, t0 + 1.1); if (u <= 0 || u >= 1) continue;
+      c.fillStyle = rgba(C.gold, ph * Math.sin(Math.PI * u)); c.fillText(['+10', '+50', '+100', '+10', '+500', '+50'][i], px + (i % 2 ? 34 : -30), py - 40 - 90 * eo(u)); }
+    c.textAlign = 'left'; }
+  // 有人一辈子讨好别人，只为换一句“你真好”：大人头上很远、很小的一句
+  if (GA && t > 124.3 && t < 127.7) { const hd = GA.at('head'), a = eo(pr(t, 124.6, 125.2)) * (1 - eio(pr(t, 127.2, 127.7)));
+    c.save(); c.translate(hd[0] + 40, hd[1] - 120); c.scale(.8, .8); pill(c, '你真好', 0, 0, C.gold, .8 * a, 26); c.restore(); }
   // 微笑面具：114.75 光尘聚成形，一直戴着（长大以后也戴着）
   if (t > 114.75) smileMask(c, GK, K, { form: pr(t, 114.75, 115.6), a: 1, col: mixC(C.white, C.gray, .55 * eio(pr(t, 118.6, 120.6))) });   // 演久了：面具发灰
   // 梦泡：要是我再好一点，他们就会懂我（127.725 第二遍全曲进入）→ 131.0 裂开 → 131.54 碎掉
