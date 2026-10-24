@@ -2,14 +2,16 @@
 // 四种样子 59.7–75.8 / 情感孤独 75.8–104.25 / 懂事的代价 + 治愈型幻想（同一间屋子）104.25–140.5 / 面具裂开 144.4–160
 // 要在 scenes.js 之前载入（老场景的镜头表接着用这里的 CAM3H / CAM3V）；用到的 scenes.js 里的函数和常量都只在运行时调用
 'use strict';
-const CAM3H = [[S3 + 59.7, 990, 540, 1], [S3 + 75.79, 990, 540, 1],
-  [S3 + 75.795, 960, 550, 1], [S3 + 94.96, 1040, 565, 1.1], [S3 + 94.965, 1290, 590, 1.24], [S3 + 104.24, 1290, 600, 1.32],
-  [S3 + 104.25, 960, 545, 1], [S3 + 127.6, 1000, 530, 1.08], [S3 + 140.45, 975, 515, 1],
-  [S3 + 144.4, 960, 535, 1.04], [S3 + 159.97, 930, 545, 1.12]];
-const CAM3V = [[S3 + 59.7, 960, 772, .94], [S3 + 75.79, 960, 772, .94],
-  [S3 + 75.795, 960, 600, 1.0], [S3 + 94.96, 1000, 605, 1.07], [S3 + 94.965, 1290, 560, 1.3], [S3 + 104.24, 1290, 570, 1.36],
-  [S3 + 104.25, 960, 560, 1.18], [S3 + 127.6, 985, 555, 1.26], [S3 + 140.45, 965, 520, 1.15],
-  [S3 + 144.4, 960, 545, 1.22], [S3 + 159.97, 900, 560, 1.3]];
+const CAM3H = [[S3 + 59.7, 990, 540, 1], [S3 + 62.2, 990, 540, 1], [S3 + 62.715, 440, 585, 1.75], [S3 + 64.9, 455, 580, 1.8], [S3 + 65.44, 820, 585, 1.75], [S3 + 67.6, 835, 580, 1.8],
+  [S3 + 68.165, 1200, 585, 1.75], [S3 + 70.3, 1215, 580, 1.8], [S3 + 70.89, 1580, 585, 1.75], [S3 + 73.1, 1565, 580, 1.8], [S3 + 73.615, 990, 540, 1], [S3 + 75.79, 990, 540, 1.03],
+  [S3 + 75.795, 960, 550, 1], [S3 + 94.96, 1040, 565, 1.1], [S3 + 94.965, 1300, 585, 1.55], [S3 + 104.24, 1300, 600, 1.72],
+  [S3 + 104.25, 960, 545, 1], [S3 + 108.6, 965, 543, 1.01], [S3 + 110.0, 930, 525, 1.3], [S3 + 111.9, 930, 525, 1.3], [S3 + 113.4, 970, 540, 1.03], [S3 + 127.6, 1000, 530, 1.08], [S3 + 140.45, 975, 515, 1],
+  [S3 + 144.4, 960, 535, 1.04], [S3 + 145.0, 980, 500, 1.2], [S3 + 146.4, 1015, 440, 1.75], [S3 + 148.3, 1015, 435, 1.8], [S3 + 149.6, 960, 520, 1.08], [S3 + 159.97, 930, 545, 1.12]];
+const CAM3V = [[S3 + 59.7, 960, 772, .94], [S3 + 62.2, 960, 772, .94], [S3 + 62.715, 700, 430, 1.6], [S3 + 64.9, 705, 425, 1.65], [S3 + 65.44, 1180, 430, 1.6], [S3 + 67.6, 1185, 425, 1.65],
+  [S3 + 68.165, 700, 1020, 1.6], [S3 + 70.3, 705, 1015, 1.65], [S3 + 70.89, 1180, 1020, 1.6], [S3 + 73.1, 1185, 1015, 1.65], [S3 + 73.615, 960, 772, .94], [S3 + 75.79, 960, 772, .96],
+  [S3 + 75.795, 960, 600, 1.0], [S3 + 94.96, 1000, 605, 1.07], [S3 + 94.965, 1300, 560, 1.6], [S3 + 104.24, 1300, 575, 1.75],
+  [S3 + 104.25, 960, 560, 1.18], [S3 + 108.6, 962, 559, 1.19], [S3 + 110.0, 940, 480, 1.5], [S3 + 111.9, 940, 480, 1.5], [S3 + 113.4, 965, 555, 1.2], [S3 + 127.6, 985, 555, 1.26], [S3 + 140.45, 965, 520, 1.15],
+  [S3 + 144.4, 960, 545, 1.22], [S3 + 145.0, 985, 500, 1.4], [S3 + 146.4, 1015, 400, 2.2], [S3 + 148.3, 1015, 395, 2.25], [S3 + 149.6, 960, 530, 1.25], [S3 + 159.97, 900, 560, 1.3]];
 
 function dim3(t) {
   if (t < 59.7) return 0;
@@ -34,8 +36,8 @@ const TY = V ? { fy: [560, 560, 1150, 1150], px: [640, 1120, 640, 1120], kx: [77
              : { fy: [720, 720, 720, 720], px: [360, 740, 1120, 1500], kx: [485, 865, 1245, 1625], ph: 330, kh: 140, o: [990, 720, 420] };
 const TYI = [62.715, 65.44, 68.165, 70.89];
 const TYPES = [
-  { P: PO.storm, en: 'EMOTIONAL', zh: '情绪型' }, { P: PO.point, en: 'DRIVEN', zh: '驱动型' },
-  { P: PO.passive, en: 'PASSIVE', zh: '消极型', turn: 1, dash: 1 }, { P: PO.cross, en: 'REJECTING', zh: '拒绝型', turn: 1 },
+  { P: PO.storm, zh: '情绪型', say: '吵什么吵！' }, { P: PO.point, zh: '驱动型', say: '那 5 分呢？' },
+  { P: PO.passive, zh: '消极型', say: '去问你妈。', turn: 1, dash: 1 }, { P: PO.cross, zh: '拒绝型', say: '早知道不生你。', turn: 1 },
 ];
 function sceneTypes(t) {
   const c = sx, T = TY, gone = eio(pr(t, 73.8, 75.0)), pa = 1 - pr(t, 74.2, 75.2);
@@ -43,45 +45,48 @@ function sceneTypes(t) {
   TYPES.forEach((ty, i) => {
     const u = eio(pr(t, 60.95 + i * .07, 61.8 + i * .07)), ti = TYI[i], on = eo(pr(t, ti, ti + .4));
     const x = lerp(T.o[0], T.px[i], u), y = lerp(T.o[1], T.fy[i], u), h = lerp(T.o[2], T.ph, u), fy = T.fy[i];
-    const a = lerp(lerp(.32, .5, u), 1, on) * pa, P = lerpPose(PO.stand, ty.P, eio(pr(t, ti, ti + .55)));
+    const cur = TYI.findIndex((s0, j) => t >= s0 && t < (TYI[j + 1] ?? 73.615)), fo = cur < 0 || cur === i ? 1 : lerp(1, .1, eio(pr(t, TYI[cur], TYI[cur] + .5)) * (1 - eio(pr(t, 73.3, 73.8))));   // 推近时：没在讲的那几种压暗
+    const a = lerp(lerp(.32, .5, u), 1, on) * pa * fo, P = lerpPose(PO.stand, ty.P, eio(pr(t, ti, ti + .55)));
     const tu = ty.turn ? eio(pr(t, ti + .2, ti + .5)) : 0, rim = ty.dash ? mixC(C.silver, C.gray, .25) : C.silver;
     const F = { kind: 'adult', P, x, y, h, rim, sparse: ty.dash && t > ti + .1, refl: fy, scatter: gone, draw: t < 60.7 ? pr(t, 59.75, 60.7) : undefined };
     if (a > 0) { if (tu < 1) drawFig({ ...F, dir: 1, a: a * (1 - tu) }); if (tu > 0) drawFig({ ...F, dir: -1, a: a * tu }); }
     // 孩子：跟着每一种样子出现；73.615 起低下头，胸口只剩一点冰蓝
     const kd = pr(t, ti + .25, ti + 1.25); if (kd <= 0) return;
     const lone = eio(pr(t, 73.7, 74.5)), KP = lerpPose(PO.stand, PO.bow, lone), krim = mixC(mixC(C.silver, C.gray, .35), mixC(C.ice, C.gray, .5), lone);
-    const kx = T.kx[i], GK = drawFig({ kind: 'child', P: KP, x: kx, y: fy, h: T.kh, dir: -1, rim: krim, draw: kd < 1 ? kd : undefined, refl: fy });
+    const kx = T.kx[i], GK = drawFig({ kind: 'child', P: KP, x: kx, y: fy, h: T.kh, dir: -1, rim: krim, a: fo, draw: kd < 1 ? kd : undefined, refl: fy });
     chestDot(c, GK, C.ice, .85 * eo(pr(t, 73.9 + i * .08, 74.4 + i * .08)), 4.5);
     const mid = (x + kx) / 2;
     if (i === 0 && t > ti + .2) {   // 情绪型：头顶一场随时会来的暴雨
-      const ca = eo(pr(t, ti + .2, ti + .7)) * pa, cy = fy - T.ph - 70, s = .46, [x0, x1, yb] = cloudSpan(mid, cy, s);
+      const ca = eo(pr(t, ti + .2, ti + .7)) * pa * fo, cy = fy - T.ph - 70, s = .46, [x0, x1, yb] = cloudSpan(mid, cy, s);
       rain(c, t, { x0, x1, y0: yb, y1: fy, n: 30, sp: 1100, a: ca * .75 });
       cloud(c, mid, cy, s, ca, t);
     }
     if (i === 1) {                   // 驱动型：一直在打分
       const top = fy - T.kh - 14;
-      [['72', 65.985, 34, -30, 30, C.silver], ['88', 66.53, 70, -70, 30, C.silver], ['59', 67.075, 98, -4, 40, C.red]].forEach(([s, t0, dx, dy, sz, col]) => {
-        const v = eo(pr(t, t0, t0 + .35)) * pa; if (v <= 0) return;
+      [['95', 65.985, 40, -40, 44, mixC(C.gold, C.white, .3)], ['−5', 66.53, 96, -74, 34, C.red]].forEach(([s, t0, dx, dy, sz, col]) => {
+        const v = eo(pr(t, t0, t0 + .35)) * pa * fo; if (v <= 0) return;
         c.font = `500 ${sz}px ${FS.mono}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = rgba(col, v * .95);
         c.fillText(s, kx + dx, top + dy - 14 * v - 4 * pr(t, t0, 76)); c.textAlign = 'left';
       });
     }
     if (i === 2 && t > ti + .6) {    // 消极型：陪你玩，出了事却不在 → 孩子头顶的小雨没人挡
-      const ca = eo(pr(t, ti + .6, ti + 1.1)) * pa, cy = fy - T.kh - 58, s = .2, [x0, x1, yb] = cloudSpan(kx, cy, s);
+      const ca = eo(pr(t, ti + .6, ti + 1.1)) * pa * fo, cy = fy - T.kh - 58, s = .2, [x0, x1, yb] = cloudSpan(kx, cy, s);
       rain(c, t, { x0, x1, y0: yb, y1: fy, n: 9, sp: 900, a: ca * .7, len: 22 });
       cloud(c, kx, cy, s, ca, t);
     }
-    if (i === 3) bricks(c, mid + 4, fy, 34, T.ph * .72, eio(pr(t, ti + .2, ti + 1.2)), C.ice, pa);   // 拒绝型：一堵墙
+    if (i === 3) bricks(c, mid + 4, fy, 34, T.ph * .72, eio(pr(t, ti + .2, ti + 1.2)), C.ice, pa * fo);   // 拒绝型：一堵墙
+    { const sa = eo(pr(t, ti + .35, ti + .6)) * (1 - eio(pr(t, ti + 2.35, ti + 2.6))) * pa, hx = x + (i === 0 ? -150 : ty.turn ? -6 : 10), hy = fy - h - (i === 0 ? -40 : 34), u = pr(t, ti + .35, ti + .55), k = 1 + .16 * Math.sin(Math.PI * u) * (u < 1 ? 1 : 0);
+      if (sa > 0) { c.save(); c.translate(hx, hy); c.scale(k, k); pill(c, ty.say, 0, 0, i === 2 ? mixC(C.ice, C.silver, .3) : C.red, sa, 24); c.restore(); } }
   });
 }
-function typeLabels(t) {   // 屏幕层的清晰小字：英文 + 中文
-  if (t < TYI[0] + .4 || t > 73.9) return;
+function typeLabels(t) {   // 屏幕层：类型名（只留中文）；推近时只亮正在讲的那一个，拉远后四个一起出现
+  if (t < TYI[0] + .4 || t > 75.6) return;
   TYPES.forEach((ty, i) => {
-    const a = eo(pr(t, TYI[i] + .4, TYI[i] + .9)) * (1 - pr(t, 73.4, 73.9)); if (a <= 0) return;
-    const [x, y] = w2s((TY.px[i] + TY.kx[i]) / 2, TY.fy[i] + 46);
+    const on = t < 73.615 ? (t >= TYI[i] && (i === 3 || t < TYI[i + 1]) ? 1 : 0) : 1;
+    const a = (t < 73.615 ? eo(pr(t, TYI[i] + .4, TYI[i] + .9)) * (1 - eio(pr(t, (TYI[i + 1] ?? 73.615) - .3, TYI[i + 1] ?? 73.615))) : eo(pr(t, 73.8, 74.3)) * (1 - eio(pr(t, 75.1, 75.6)))) * on; if (a <= 0) return;
+    const [x, y] = w2s((TY.px[i] + TY.kx[i]) / 2, TY.fy[i] + 30);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = `500 20px ${FS.mono}`; ctx.fillStyle = rgba(C.gray, .95 * a); ctx.fillText(ty.en.split('').join(' '), x, y);
-    ctx.font = `500 34px ${FS.sans}`; ctx.fillStyle = rgba(i === 0 ? C.ice : C.lamp, a); ctx.fillText(ty.zh, x, y + 42);
+    ctx.font = `500 ${t < 73.615 ? (V ? 52 : 50) : (V ? 40 : 36)}px ${FS.sans}`; ctx.fillStyle = rgba(i === 0 || i === 2 ? C.ice : mixC(C.red, C.lamp, .35), a); ctx.fillText(ty.zh, x, y + (t < 73.615 ? 40 : 30));
     ctx.textAlign = 'left';
   });
 }
@@ -149,6 +154,27 @@ function sceneLone(t) {
   const ra = big ? .9 * (1 - eio(pr(t, 100.5, 101.8))) : eo(pr(t, 78.6, 79.7)) * (.55 + .25 * win(t, 88.0, 94.4, .5, .5)) * (1 - eio(pr(t, 94.2, 94.9)));
   iceRing(c, t, F.x - 10, fy - 118, 178, ra);
   if (big) { ringPulse(c, t, 95.415, p[0], p[1], 8, 260, C.ice, 1.2, .7); ringPulse(c, t, 96.5, p[0], p[1], 8, 200, C.ice, 1.4, .35); }
+  // 没人打你，也没人骂你，可你一直在疼：一道扫描线从头扫到脚——身上什么伤都没有，扫过的地方照出胸口一道一跳一跳的裂痕
+  if (big) {
+    const su = eio(pr(t, 95.6, 97.7)), top = fy - 290, sy = lerp(top, fy + 6, su), x0 = F.x - 210, x1 = F.x + 210, fa = 1 - eio(pr(t, 100.4, 101.6));
+    if (t > 95.6 && fa > 0) {
+      c.save(); c.beginPath(); c.rect(x0 - 40, top - 20, x1 - x0 + 80, sy - top + 20); c.clip();
+      for (let yy = top; yy < sy; yy += 12) seg(c, x0, yy, x1, yy, C.ice, .05 * fa, 1);            // 扫过的地方：一层很淡的网格
+      for (let xx = x0; xx <= x1; xx += 42) seg(c, xx, top, xx, sy, C.ice, .035 * fa, 1);
+      const hb = Math.pow(Math.max(0, Math.sin((PX.t - 95.6) * Math.PI * 1.55)), 3), A = (.45 + .55 * hb) * fa;   // 心跳一样，一下一下
+      const cx = p[0] + 2, cy = p[1] + 4, crk = withLen([[cx - 26, cy - 30], [cx - 8, cy - 14], [cx - 18, cy + 2], [cx + 4, cy + 14], [cx - 4, cy + 30], [cx + 16, cy + 44]]);
+      glow(c, cx, cy + 6, 120, C.red, .3 * A); glow(c, cx, cy + 6, 40, mixC(C.red, C.white, .3), .5 * A);
+      c.shadowColor = rgba(C.red, 1); c.shadowBlur = 14; strokePartial(c, crk, 1, rgba(mixC(C.red, C.white, .25), .95 * A), 3);
+      strokePartial(c, withLen([[cx - 8, cy - 14], [cx + 14, cy - 22], [cx + 26, cy - 16]]), 1, rgba(C.red, .7 * A), 2);
+      strokePartial(c, withLen([[cx + 4, cy + 14], [cx - 22, cy + 20]]), 1, rgba(C.red, .7 * A), 2);
+      c.restore();
+    }
+    if (su > 0 && su < 1) {   // 扫描线本身：一道冰蓝白的横光
+      const g = c.createLinearGradient(x0 - 120, 0, x1 + 120, 0); g.addColorStop(0, rgba(C.ice, 0)); g.addColorStop(.5, rgba(mixC(C.ice, C.white, .6), .95)); g.addColorStop(1, rgba(C.ice, 0));
+      c.fillStyle = g; c.fillRect(x0 - 120, sy - 1.5, x1 - x0 + 240, 3); glow(c, F.x, sy, 160, C.ice, .12);
+      const g2 = c.createLinearGradient(0, sy - 60, 0, sy); g2.addColorStop(0, rgba(C.ice, 0)); g2.addColorStop(1, rgba(C.ice, .09)); c.fillStyle = g2; c.fillRect(x0, sy - 60, x1 - x0, 60);
+    }
+  }
   // 想了一个办法：胸口亮起一点金色
   const ga = eo(pr(t, 100.32, 100.6)); if (ga > 0) { chestDot(c, G, C.gold, ga, 6); ringPulse(c, t, 100.32, p[0], p[1], 6, 130, C.gold, .9, .7); }
 }

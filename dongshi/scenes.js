@@ -7,10 +7,10 @@ const HALL = V ? { fy: 770, d: { x0: 1240, x1: 1450, top: 320 }, b0: 720, b1: 95
 const COLD = mixC(C.ice, C.white, .45), WARM = mixC(C.gold, C.lamp, .35);
 
 // ---------- 镜头：每一段只有一个慢推/平移 ----------
-const CAMH = [[0, 960, 540, 1], [12.9, 960, 540, 1], [16.55, 900, 520, 1.12], [16.6, 990, 540, 1], [51.2, 990, 540, 1], [55.4, 990, 480, 1.12], [59.3, 990, 480, 1.12], [59.35, 990, 540, 1],
+const CAMH = [[0, 960, 540, 1], [12.9, 960, 540, 1], [16.55, 900, 520, 1.12], [16.6, 990, 540, 1], [51.2, 990, 540, 1], [55.4, 990, 480, 1.12], [59.72, 990, 480, 1.12], [59.74, 990, 470, 1.0], [63.26, 990, 455, 1.04], [63.3, 990, 540, 1],
   [93.3, 990, 540, 1], [93.5, 960, 540, 1], [112.6, 960, 540, 1], [112.7, 990, 540, 1], [115.9, 990, 540, 1], [117.1, 700, 520, .9], [121.3, 700, 520, .9], [122.7, 990, 540, 1], [138.3, 990, 540, 1],   // 115.9 退一步：镜头拉远、往右让出位置
   [138.5, 960, 540, 1], [145, 960, 540, 1], [151.3, 930, 575, 1.08], [170, 930, 575, 1.08], ...CAM3H];
-const CAMV = [[0, 1085, 560, 1.12], [12.9, 1085, 560, 1.12], [16.55, 905, 540, 1.32], [16.6, 990, 560, 1.18], [51.2, 990, 560, 1.18], [55.4, 990, 470, 1.32], [59.3, 990, 470, 1.32], [59.35, 960, 772, .94],
+const CAMV = [[0, 1085, 560, 1.12], [12.9, 1085, 560, 1.12], [16.55, 905, 540, 1.32], [16.6, 990, 560, 1.18], [51.2, 990, 560, 1.18], [55.4, 990, 470, 1.32], [59.72, 990, 470, 1.32], [59.74, 990, 420, 1.0], [63.26, 990, 405, 1.05], [63.3, 960, 772, .94],
   [76.70, 960, 772, .94], [76.74, 960, 520, 1.35], [93.3, 960, 520, 1.35], [93.5, 960, 620, 1.2], [112.6, 960, 620, 1.2], [112.7, 990, 560, 1.18],
   [115.9, 990, 560, 1.18], [117.1, 990, 470, .96], [121.3, 990, 470, .96], [122.7, 990, 560, 1.18], [138.3, 990, 560, 1.18], [138.5, 1085, 560, 1.12], [145, 1085, 560, 1.12], [151.3, 1000, 600, 1.25],
   [170, 1000, 600, 1.25], ...CAM3V];
@@ -20,7 +20,8 @@ function dimAt(t) {
   if (t >= S3 - 1) return dim3(t - S3);
   if (t < 16.6) return eo(pr(t, 0, .5)) * (1 - eio(pr(t, 15.3, 16.55)));
   if (t < 21.3) return 0;
-  if (t < 59.4) return eo(pr(t, 21.3, 21.6)) * (1 - eio(pr(t, 57.6, 59.3)));
+  if (t < 59.74) return eo(pr(t, 21.3, 21.6)) * lerp(1, .55, eio(pr(t, 57.6, 59.2))) * (1 - eio(pr(t, 59.29, 59.72)));   // 重拍 2 前 0.45 秒黑
+  if (t < 63.3) return eo(pr(t, 59.74, 59.9)) * (1 - eio(pr(t, 62.95, 63.26)));
   if (t < 63.6) return 0;
   if (t < 93.84) return 1 - eio(pr(t, 92.6, 93.4));
   if (t < 112.75) return 1 - eio(pr(t, 112.2, 112.75));
@@ -36,7 +37,7 @@ function dimAt(t) {
 function scenes(t) {
   const d = dimAt(t); if (d <= .001) return;
   if (t < 16.6) sceneHook(t);
-  if (t >= 21.3 && t < 59.4) sceneParent(t);
+  if (t >= 21.3 && t < 63.3) sceneParent(t);
   if (t >= 76.7 && t < 93.5) scenePhone(t);
   if (t >= 93.84 && t < 112.8) sceneRoots(t);
   if (t >= 112.75 && t < 138.5) sceneParent(t);
@@ -96,6 +97,7 @@ function hookDotA(t) {
 }
 // 光尘标签（学参考片：一团光尘聚成关键词；粒子在画面层，字本身在屏幕层——清晰、不发光）
 const HLS = V ? 56 : 50;
+const EXTRA_TEXT = ['我还能害你吗？', '不懂事', '我在学校被欺负了……', '大人说话', '小孩别插嘴'];
 const HL = [
   { s: '从不道歉', x: (HALL.d.x0 + HALL.d.x1) / 2, y: HALL.d.top - 50, t0: 1.3, t1: 14.3, col: mixC(C.red, C.white, .2), lv: [[6.4, 7.2, .45], [11.9, 12.4, 1]], re: 11.9 },
   { s: '总是先道歉', x: HALL.b1 - 50, y: HALL.d.top - 50, t0: 12.0, t1: 14.3, col: C.ice },
@@ -201,16 +203,40 @@ function dustAt(i, t) {
   return [q[0] + Math.sin(i * 1.7 + t * 1.3) * 10 * k + (rnd(i, 27) - .5) * 220 * k, q[1] - (30 + 180 * rnd(i, 28)) * k + Math.cos(i + t * 1.1) * 8 * k];
 }
 const T_IN = BAR(10);   // 23.475：全曲进入
+// 片名前：光尘在黑里拼出大人们常说的那些“懂事”的话，再一起流进“懂事”两个字（这两个字是这些话压出来的）
+const PHR = V ? [['别哭了', 290, 420], ['听话', 800, 380], ['让着点', 250, 640], ['别添乱', 830, 610], ['懂点事', 540, 300], ['要体谅爸妈', 540, 1080], ['乖', 230, 900], ['大人的事你别管', 560, 1240]]
+              : [['别哭了', 420, 290], ['听话', 1500, 270], ['让着点', 300, 540], ['别添乱', 1640, 560], ['懂点事', 760, 170], ['要体谅爸妈', 1180, 160], ['乖', 560, 760], ['大人的事你别管', 1320, 780]];
+const PHS = V ? 64 : 58;
+let PHP = null;
+function phrasePts() {   // 每颗光尘分到一句话里的一个位置（屏幕坐标）
+  if (PHP) return PHP;
+  const f = `500 ${PHS}px 'Noto Sans SC'`; if (!document.fonts.check(f, PHR.map(p => p[0]).join(''))) return null;
+  const L = PHR.map(([s, x, y]) => { const w = Math.ceil(PHS * (s.length + 1) + 40), h = Math.ceil(PHS * 2), cv2 = mk(w, h), c2 = cv2.getContext('2d', { willReadFrequently: true });
+    drawChars(c2, parse(s), w / 2, h / 2, { size: PHS, font: FS.sans, weight: 500, ls: 6, t0: 0 });
+    const d = c2.getImageData(0, 0, w, h).data, o = []; let n = 0;
+    for (let yy = 0; yy < h; yy += 2) for (let xx = 0; xx < w; xx += 2) if (d[(yy * w + xx) * 4 + 3] > 110) { n++; o.push([x + xx - w / 2 + (rnd(n, 71) - .5) * 1.5, y + yy - h / 2 + (rnd(n, 72) - .5) * 1.5]); }
+    return o; });
+  const tot = L.reduce((a, o) => a + o.length, 0), out = [];
+  for (let i = 0; i < 3600; i++) {   // 按字数比例分配，长句分到的光尘多
+    let r = (i + .5) / 3600 * tot, j = 0; while (j < L.length - 1 && r >= L[j].length) { r -= L[j].length; j++; }
+    const o = L[j]; out.push(o[Math.floor(rnd(i, 73) * o.length)]);
+  }
+  return PHP = out;
+}
 function nebAt(i, t, S0) {   // 漂浮阶段第 i 颗光尘的位置：先炸开、停住，再整团移到片名周围（一团松散的星云），一直在慢慢飘
   const q = DUST[i], an = -Math.PI * (.08 + .84 * rnd(i, 23)), d = (V ? 160 : 180) + (V ? 380 : 420) * Math.pow(rnd(i, 24), .7);
   const bx = S0[0] + Math.cos(an) * d * (V ? .9 : 1.3), by = S0[1] + Math.sin(an) * d * .75;
   const gx = q[0] + (rnd(i, 25) - .5) * (V ? 660 : 900), gy = q[1] + (rnd(i, 26) - .5) * (V ? 480 : 340);
   const e = 1 - Math.exp(-3.2 * Math.max(0, t - 15.4)), m = eio(pr(t, 16.6, 21.9)), f = .6 + .8 * rnd(i, 36), ph = rnd(i, 37) * 6.283;
-  return [lerp(S0[0] + (bx - S0[0]) * e, gx, m) + Math.sin(t * .5 * f + ph) * 34, lerp(S0[1] + (by - S0[1]) * e, gy, m) + Math.cos(t * .4 * f + ph) * 24 - 9 * Math.max(0, t - 15.4) * (1 - m)];
+  let x = lerp(S0[0] + (bx - S0[0]) * e, gx, m) + Math.sin(t * .5 * f + ph) * 34, y = lerp(S0[1] + (by - S0[1]) * e, gy, m) + Math.cos(t * .4 * f + ph) * 24 - 9 * Math.max(0, t - 15.4) * (1 - m);
+  const Q = PHP && PHP[i];
+  if (Q) { const s0 = 16.9 + 1.4 * rnd(i, 74), w = eio(pr(t, s0, s0 + 1.1)) * (1 - eio(pr(t, 23.3, 23.5))), dr = Math.max(0, t - 18) * 6;
+    x = lerp(x, Q[0] + Math.sin(t * .9 + i) * .8, w); y = lerp(y, Q[1] - dr * .45, w); }
+  return [x, y];
 }
 function titleDust(t, T) {
   if (t < 15.4 || T > 22.7) return;
-  const P = dustPts(); if (!P) return; const S0 = hookDotScreen(), c = sx;
+  const P = dustPts(); if (!P) return; phrasePts(); const S0 = hookDotScreen(), c = sx;
   const hot = mixC(C.gold, C.white, .6), gc = mixC(C.gold, C.lamp, .4);
   for (let i = 0; i < P.length; i++) {
     const q = P[i]; let x, y, k, ox, oy;
@@ -220,11 +246,18 @@ function titleDust(t, T) {
       const at = tt => { const N = nebAt(i, tt, S0), u = eio(pr(tt, ts, te)), w = Math.sin(Math.PI * u) * sw; return [lerp(N[0], q[0], u) + w, lerp(N[1], q[1], u) - Math.abs(w) * .35, u]; };
       const A = at(t), u = A[2]; x = A[0]; y = A[1];
       const tw = Math.pow(.5 + .5 * Math.sin(t * (1.3 + 2.2 * rnd(i, 35)) + i), 6), base = (.5 + .75 * tw) * (q[2] ? 1.1 : .85);
-      k = eo(pr(t, t0, t0 + .12)) * (u > 0 ? lerp(base, .3 + .4 * u, u) * (1 + 1.2 * Math.sin(Math.PI * u)) : base + .7 * Math.exp(-(t - 15.4) * 2.4));
+      const wp = PHP ? eio(pr(t, 17.4, 18.6)) * (1 - eio(pr(t, 22.4, 23.2))) : 0;   // 拼成那些话的时候
+      k = eo(pr(t, t0, t0 + .12)) * (u > 0 ? lerp(base, .3 + .4 * u, u) * (1 + 1.2 * Math.sin(Math.PI * u)) : base * (1 + .9 * wp) + .7 * Math.exp(-(t - 15.4) * 2.4));
       if (t < 16.3 || (u > 0 && u < 1)) { const B = at(t - .03); ox = B[0]; oy = B[1]; }
     } else if (T < 20.2) {   // 落定：23.475 那一下最亮，之后只剩零星的闪
       x = q[0]; y = q[1]; const tw = Math.pow(.5 + .5 * Math.sin(T * (2 + 3 * rnd(i, 35)) + i), 12);
       k = .5 * Math.exp(-(T - 17.05) * 3) + (q[2] ? .1 : .03) + .55 * tw * q[2];
+      if (i % 3 === 0 && T < 18.4) {   // 冲击波：三分之一的光尘从笔画上被震出去，带一小段光迹
+        const u = pr(T, 17.05, 18.4), an = Math.atan2(q[1] - TT.y, q[0] - TT.x) + (rnd(i, 78) - .5) * .5, dd = (90 + 620 * Math.pow(rnd(i, 79), 1.6)) * eo(u);
+        const sx_ = q[0] + Math.cos(an) * dd, sy_ = q[1] + Math.sin(an) * dd * .7, kk = .9 * (1 - u) * (1 - u);
+        PX.sline(q[0] + Math.cos(an) * dd * .82, q[1] + Math.sin(an) * dd * .7 * .82, sx_, sy_, mixC(C.gold, C.white, .5), 0, kk * .6);
+        PX.spt(sx_, sy_, mixC(C.gold, C.white, .5), kk, .6);
+      }
     } else {   // 散：往上飘，场景时间 22.6 秒以前流进下一场的人物里
       [x, y] = dustAt(i, T); [ox, oy] = dustAt(i, T - .04);
       k = (.12 + .3 * pr(T, 20.2, 20.6) * (1 - pr(T, 20.6, 21.6))) * (1 - eio(pr(T, 21.5, 22.6))) * (.7 + .3 * Math.sin(T * 9 + i));
@@ -270,6 +303,7 @@ function cloudAt(t) {
   const m3 = eio(pr(t, 120.0, 121.2)); x = lerp(x, 800, m3); y = lerp(y, 150, m3); s = [lerp(s[0], .7, m3), lerp(s[1], .6, m3)];
   const g = lerp(.6, 1, eo(pr(t, 32.1, 32.9))); return { x, y, s: [s[0] * g, s[1] * g], a: eo(pr(t, 32.1, 32.8)) };
 }
+const SWAP = t => t < 59.74 || t > 70 ? 0 : eio(pr(t, 59.74, 60.75));   // 重拍 2（成片 56.175）：孩子长高、大人缩小
 function kidParent(t) {
   const L = PWL;
   let x = lerp(L.k0, L.k1, eio(pr(t, 44.0, 45.5)));
@@ -281,7 +315,8 @@ function kidParent(t) {
   let rim = mixC(C.gold, C.ice, eio(pr(t, 34.6, 35.8)));
   rim = mixC(rim, mixC(C.ice, C.gold, .45), eio(pr(t, 113.4, 115.6)));
   rim = mixC(rim, C.gold, eio(pr(t, 122, 123)));
-  return { kind: 'child', P, x, y: L.fy, h: L.kh, rim, refl: L.fy, draw: t < 23.1 ? pr(t, 21.95, 23.1) : undefined, src: t < 23.1 && DUST ? (id, s0) => PX.inv(...dustAt(id, 21.95 + s0 * 1.15)) : undefined };
+  const sw = SWAP(t);
+  return { kind: 'child', tpl: sw < .5 ? 'child' : 'adult', bn: sw > 0 ? bnMix(BN.child, BN.adult, sw) : undefined, P, x, y: L.fy, h: lerp(L.kh, 480, sw), rim: mixC(rim, mixC(C.ice, C.white, .5), .6 * sw), scatter: Math.sin(Math.PI * sw) * .7, gain: 1 + .5 * sw, refl: L.fy, draw: t < 23.1 ? pr(t, 21.95, 23.1) : undefined, src: t < 23.1 && DUST ? (id, s0) => PX.inv(...dustAt(id, 21.95 + s0 * 1.15)) : undefined };
 }
 function sceneParent(t) {
   const c = sx, L = PWL, fy = L.fy;
@@ -299,7 +334,8 @@ function sceneParent(t) {
   // 父母
   const aP = poseSeq(t, [[0, PO.stand], [35.3, PO.cross, .3], [36.45, PO.stand, .5], [44.0, PO.sad, .8], [121.0, PO.holdA, .7]]);
   const tmp = .7 * win(t, 35.28, 36.58, .08, .25);   // 你一提意见：大人一下变红（防御）
-  const GA = drawFig({ kind: 'adult', P: aP, x: L.ax, y: fy, h: L.ah, dir: 1, rim: mixC(C.silver, C.red, tmp), refl: fy, draw: t < 22.9 ? pr(t, 21.5, 22.9) : undefined, src: t < 22.9 && DUST ? (id, s0) => PX.inv(...dustAt(id, 21.5 + s0 * 1.4)) : undefined });
+  const sw = SWAP(t);
+  const GA = drawFig({ kind: 'adult', tpl: sw < .5 ? 'adult' : 'child', bn: sw > 0 ? bnMix(BN.adult, BN.child, sw) : undefined, P: sw > 0 ? lerpPose(aP, { ...PO.shrink, hd: 30 }, sw) : aP, x: L.ax, y: fy, h: lerp(L.ah, 215, sw), dir: 1, rim: mixC(mixC(C.silver, C.red, tmp), C.ember, .45 * sw), scatter: Math.sin(Math.PI * sw) * .7, refl: fy, draw: t < 22.9 ? pr(t, 21.5, 22.9) : undefined, src: t < 22.9 && DUST ? (id, s0) => PX.inv(...dustAt(id, 21.5 + s0 * 1.4)) : undefined });
   let ia = eo(pr(t, 22.2, 23.0)) * (.82 + .18 * Math.sin(t * 7.3) * Math.sin(t * 3.1));
   ia *= 1 + .7 * (1 - pr(t, 25.7, 26.5)) * (t > 25.7 ? 1 : 0); ia *= lerp(1, .35, eio(pr(t, 32.1, 33.2)));
   const GI = innerChild(GA, clamp(ia), t);
@@ -312,7 +348,7 @@ function sceneParent(t) {
   // 你一提意见：“都怪我，行了吧！”——红色气泡从大人头上弹出来
   if (t > 35.28 && t < 36.6) {
     const hd = GA.at('head'), u = pr(t, 35.28, 35.48), k = 1 + .18 * Math.sin(Math.PI * u) * (u < 1 ? 1 : 0), ba = eo(u) * (1 - eio(pr(t, 36.38, 36.58)));
-    c.save(); c.translate(hd[0] - 40, hd[1] - 96); c.scale(k, k); pill(c, '都怪我，行了吧！', 0, 0, C.red, ba, 30); c.restore();
+    c.save(); c.translate(hd[0] - 40, hd[1] - 96); c.scale(k, k); pill(c, '我还能害你吗？', 0, 0, C.red, ba, 30); c.restore();
     ringPulse(c, t, 35.3, hd[0], hd[1], 14, 130, C.red, .8, .6);
   }
   // 伞：孩子举着，替大人挡雨；后来交还给大人
@@ -320,7 +356,16 @@ function sceneParent(t) {
   let dome = null;
   if (ua > 0) {
     const kh = GK.at('haN'), ah = GA.at('haN'), hx = lerp(kh[0], ah[0], hand), hy = lerp(kh[1], ah[1], hand) - 40 * Math.sin(Math.PI * hand);
-    dome = umbrella(c, hx, hy, lerp(820, 835, hand), lerp(200, 236, hand), 190, uo, C.silver, ua);
+    dome = umbrella(c, hx, hy, lerp(820, 835, hand), lerp(lerp(200, 236, hand), 400, sw), lerp(190, 160, sw), uo, mixC(C.silver, C.ice, .4 * sw), ua);
+  }
+  if (t > 59.7 && t < 61.5) { const kc = GK.at('chest'), ac = GA.at('chest');
+    burst(c, t, 59.74, kc[0], kc[1], { n: 90, seed: 41, col: mixC(C.ice, C.white, .4), v0: 120, v1: 620, g: 60, life: 1.4 });
+    burst(c, t, 59.74, ac[0], ac[1], { n: 50, seed: 43, col: C.ember, v0: 60, v1: 320, g: 120, life: 1.2 });
+    ringPulse(c, t, 59.74, kc[0], kc[1], 10, 320, C.ice, 1.1, .8); }
+  // 你有委屈，甚至被霸凌：孩子想说的话，冒出来就被雨打灭（场景 46.8–50.6）
+  if (t > 46.8 && t < 50.8 && GK) {
+    const hk = GK.at('head'), u = eo(pr(t, 46.8, 47.2)), f = eio(pr(t, 49.3, 50.6));
+    c.save(); c.translate(hk[0] + 210, hk[1] + 10 + 30 * f); c.scale(1 - .45 * f, 1 - .45 * f); pill(c, '我在学校被欺负了……', 0, 0, mixC(C.ice, C.gray, f), u * (1 - f), 26); c.restore();
   }
   // 云和雨（雨在 119.6 秒倒流回云里；云缩回大人头顶）
   const CL = cloudAt(t);
@@ -336,7 +381,7 @@ function sceneParent(t) {
   if (t > 39.45 && t < 122.4) {
     const u = pr(t, 39.45, 39.95), y = u < 1 ? lerp(top - 420, top, u * u) : top + 4 * Math.sin(Math.min(1, (t - 39.95) * 4) * Math.PI) * (1 - pr(t, 39.95, 40.4));
     const g = eio(pr(t, 121.7, 122.0)), fa = 1 - pr(t, 121.95, 122.3);
-    pill(c, '你的错', hd[0] + 26, y, mixC(C.red, C.gold, g), fa, 30);
+    pill(c, '不懂事', hd[0] + 26, y, mixC(C.red, C.gold, g), fa * (1 - win(t, 59.5, 63.3, .3, .1)), 30);
     burst(c, t, 121.95, hd[0] + 26, y, { n: 40, seed: 13, col: C.gold, v0: 40, v1: 240, a0: -Math.PI, spread: Math.PI, g: -60, life: 1.2 });
   }
   if (t > 113.5 && t < 115.3) {
@@ -399,17 +444,18 @@ function sceneRoots(t) {
     c.globalAlpha = pfa; c.fillStyle = rgba(C.body, .9 * eo(pu)); c.fillRect(px0, py0, px1 - px0, py1 - py0);
     strokePartial(c, withLen([[px0, py0], [px1, py0], [px1, py1], [px0, py1], [px0, py0]]), eio(pu), rgba(C.silver, .55), 2);
     if (pu >= 1) { c.strokeStyle = rgba(C.silver, .2); c.lineWidth = 1; c.strokeRect(px0 + 10, py0 + 10, px1 - px0 - 20, py1 - py0 - 20); }
-    const cols = V ? [['孩子只该被看见，', pcx, py0 + 50, 1], ['不该被听见', pcx, py0 + 118, 1]] : [['孩子只该被看见', pcx + 35, py0 + 50, 0], ['不该被听见', pcx - 35, py0 + 50, 0]]; let k = 0;
+    const cols = V ? [['大人说话，', pcx, py0 + 50, 1], ['小孩别插嘴', pcx, py0 + 118, 1]] : [['大人说话', pcx + 35, py0 + 50, 0], ['小孩别插嘴', pcx - 35, py0 + 50, 0]]; let k = 0;
     c.font = `900 50px ${FS.serif}`; c.textAlign = 'center'; c.textBaseline = 'middle';
     cols.forEach(([s, x, y, row]) => { const n = [...s].length; [...s].forEach((ch, j) => { const ta = 97.7 + k++ * .09, v = eo(pr(t, ta, ta + .3)); if (v <= 0) return;
       c.fillStyle = rgba(C.lamp, v); if (row) c.fillText(ch, x + (j - (n - 1) / 2) * 56, y + 6 * (1 - v)); else c.fillText(ch, x, y + j * 60 + 6 * (1 - v)); }); });
-    const q = '“children should be seen and not heard”', qa = eo(pr(t, 98.8, 99.6));   // 英文原句：整行淡入（不打字）
-    c.font = `500 22px ${FS.mono}`; c.fillStyle = rgba(C.gray, .95 * qa); c.fillText(q, pcx, py1 + 30 + 4 * (1 - qa));
     c.textAlign = 'left'; c.globalAlpha = 1;
   }
   // 大人 → 那个孩子；孩子 → 光点 → 一棵被修剪、捆扎的树
   const ba = eo(pr(t, 93.84, 93.9)) * (1 - pr(t, 101.2, 101.45)) * fa;
   if (ba > 0) drawFig({ ...RT_BOY(t), a: ba, gain: 1 + 1.5 * (1 - pr(t, 93.84, 94.4)) });
+  const ga = win(t, 93.9, 96.6, .3, 1.0) * fa;   // 一代一代往回倒：缩小的过程留下几道残影，排在他身后
+  if (ga > 0) for (let k = 1; k <= 3; k++) { const m0 = RT_M(t) * (1 - k / 4), B = RT_BOY(94.0 + m0 * 1.3);
+    drawFig({ ...B, x: RT.bx - k * (V ? 150 : 175), P: PO.stand, a: ga * (.42 - k * .1), sparse: true, nobody: true, rim: mixC(C.silver, C.ice, .5), scatter: 0, refl: undefined }); }
   if (t > 101.2 && t < 102.6) {   // 光点按高度一一对应：头顶的光落到树梢，脚下的光落进花盆
     const A = figScreenPts({ ...RT_BOY(101.2), scatter: 0 }); c.save(); bonScale(c); const B = bonsaiScreenPts(BON.x, BON.y, { g: .55, tw: 0, cut: [1, 1, 1], wire: 0 }); c.restore();
     const n = A.length, col = mixC(C.silver, C.ice, .5), hot = mixC(col, C.white, .6);
