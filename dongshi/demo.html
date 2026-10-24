@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>懂事 · 灯下光尘</title>
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-sc/900.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/500.css">
+<link rel="stylesheet" href="node_modules/@fontsource/jetbrains-mono/500.css">
+<style>
+  html, body { margin: 0; background: #000; overflow: hidden; }
+  #c { display: block; transform-origin: 0 0; }
+  #tip { position: fixed; left: 12px; bottom: 10px; color: #777; font: 12px 'JetBrains Mono', monospace; display: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="tip">空格 播放/暂停 · ← → 前后 5 秒</div>
+<script src="core.js"></script>
+<script src="props.js"></script>
+<script src="post.js"></script>
+<script src="fx.js"></script>
+<script src="timeline.js"></script>
+<script src="scenes3.js"></script>
+<script src="scenes.js"></script>
+<script src="main.js"></script>
+<script>
+// 预览：demo.html?play（竖屏 ?play&ar=9x16）。不带 ?play 时什么都不做，只等 render.js 逐帧调用 window.render(t, frame)
+if (/[?&]play\b/.test(location.search)) (async () => {
+  const txt = window.ALL_TEXT.join('');
+  await Promise.all(["900 40px 'Noto Serif SC'", "500 40px 'Noto Sans SC'", "500 40px 'JetBrains Mono'"].map(f => document.fonts.load(f, txt)));
+  const fit = () => { const k = Math.min(innerWidth / W, innerHeight / H); cv.style.transform = `scale(${k})`; cv.style.marginLeft = `${(innerWidth - W * k) / 2}px`; };
+  fit(); addEventListener('resize', fit); document.getElementById('tip').style.display = 'block';
+  const au = new Audio('bgm_v3.m4a');
+  addEventListener('keydown', e => {
+    if (e.code === 'Space') { au.paused ? au.play() : au.pause(); e.preventDefault(); }
+    if (e.code === 'ArrowRight') au.currentTime = Math.min(window.TOTAL, au.currentTime + 5);
+    if (e.code === 'ArrowLeft') au.currentTime = Math.max(0, au.currentTime - 5);
+  });
+  const loop = () => { window.render(Math.min(au.currentTime, window.TOTAL)); requestAnimationFrame(loop); }; loop();
+})();
+</script>
+</body>
+</html>
