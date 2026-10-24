@@ -384,10 +384,10 @@ function sceneParent(t) {
     pill(c, '不懂事', hd[0] + 26, y, mixC(C.red, C.gold, g), fa * (1 - win(t, 59.5, 63.3, .3, .1)), 30);
     burst(c, t, 121.95, hd[0] + 26, y, { n: 40, seed: 13, col: C.gold, v0: 40, v1: 240, a0: -Math.PI, spread: Math.PI, g: -60, life: 1.2 });
   }
-  if (t > 113.5 && t < 115.3) {
-    const u = pr(t, 113.5, 114.0), y = lerp(top - 460, top - 44, u * u), bu = pr(t, 114.0, 114.4);
-    pill(c, '不孝', hd[0] + 26, y, mixC(C.red, C.ember, bu), 1 - bu, 30);
-    burst(c, t, 114.0, hd[0] + 26, y, { n: 54, seed: 17, col: C.ember, v0: 30, v1: 260, a0: -Math.PI, spread: Math.PI, g: -120, life: 1.2 });
+  if (t > 113.5 && t < 116.9) {   // 很多责任本来是父母的：“这是你的责任”压到孩子头上 → 不用过早扛着：烧掉
+    const u = pr(t, 113.5, 114.0), y = lerp(top - 460, top - 44, u * u) + 10 * eio(pr(t, 114.0, 115.8)), bu = pr(t, 116.1, 116.5);
+    pill(c, '这是你的责任', hd[0] + 26, y, mixC(C.red, C.ember, bu), 1 - bu, 30);
+    burst(c, t, 116.1, hd[0] + 26, y, { n: 54, seed: 17, col: C.ember, v0: 30, v1: 260, a0: -Math.PI, spread: Math.PI, g: -120, life: 1.2 });
   }
   // 孩子胸口：生气是正常的（余烬金的脉动）→ 稳定的金色小光点
   if (t > 113.3) {

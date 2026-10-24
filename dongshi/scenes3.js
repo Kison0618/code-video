@@ -7,13 +7,13 @@ const CAM3H = [[S3 + 59.7, 990, 540, 1], [S3 + 62.2, 990, 540, 1], [S3 + 62.715,
   [S3 + 75.795, 960, 550, 1], [S3 + 94.96, 1040, 565, 1.1], [S3 + 94.965, 1300, 585, 1.55], [S3 + 104.24, 1300, 600, 1.72],
   [S3 + 104.25, 960, 545, 1], [S3 + 108.6, 965, 543, 1.01], [S3 + 110.0, 930, 525, 1.3], [S3 + 111.9, 930, 525, 1.3], [S3 + 113.4, 970, 540, 1.03], [S3 + 127.6, 1000, 530, 1.08], [S3 + 140.45, 975, 515, 1],
   [S3 + 144.4, 960, 535, 1.04], [S3 + 145.0, 980, 500, 1.2], [S3 + 146.4, 1015, 440, 1.75], [S3 + 148.3, 1015, 435, 1.8], [S3 + 149.6, 960, 520, 1.08], [S3 + 159.97, 930, 545, 1.12],
-  [S3 + 300, 960, 540, 1], [S3 + 308.4, 960, 540, 1], [S3 + 310.0, 1040, 600, 1.22], [S3 + 318.0, 1060, 610, 1.3], [S3 + 320.5, 1000, 560, 1.12], [S3 + 331.0, 990, 545, 1.05], [S3 + 339.3, 960, 530, .96]];
+  [S3 + 300, 1080, 545, 1.05], [S3 + 316.5, 1110, 560, 1.12], [S3 + 320.4, 980, 540, 1], [S3 + 325.4, 980, 540, 1], [S3 + 327.0, 1040, 600, 1.22], [S3 + 335.0, 1060, 610, 1.3], [S3 + 337.5, 1000, 560, 1.12], [S3 + 348, 960, 530, .98]];
 const CAM3V = [[S3 + 59.7, 960, 772, .94], [S3 + 62.2, 960, 772, .94], [S3 + 62.715, 700, 430, 1.6], [S3 + 64.9, 705, 425, 1.65], [S3 + 65.44, 1180, 430, 1.6], [S3 + 67.6, 1185, 425, 1.65],
   [S3 + 68.165, 700, 1020, 1.6], [S3 + 70.3, 705, 1015, 1.65], [S3 + 70.89, 1180, 1020, 1.6], [S3 + 73.1, 1185, 1015, 1.65], [S3 + 73.615, 960, 772, .94], [S3 + 75.79, 960, 772, .96],
   [S3 + 75.795, 960, 600, 1.0], [S3 + 94.96, 1000, 605, 1.07], [S3 + 94.965, 1300, 560, 1.6], [S3 + 104.24, 1300, 575, 1.75],
   [S3 + 104.25, 960, 560, 1.18], [S3 + 108.6, 962, 559, 1.19], [S3 + 110.0, 940, 480, 1.5], [S3 + 111.9, 940, 480, 1.5], [S3 + 113.4, 965, 555, 1.2], [S3 + 127.6, 985, 555, 1.26], [S3 + 140.45, 965, 520, 1.15],
   [S3 + 144.4, 960, 545, 1.22], [S3 + 145.0, 985, 500, 1.4], [S3 + 146.4, 1015, 400, 2.2], [S3 + 148.3, 1015, 395, 2.25], [S3 + 149.6, 960, 530, 1.25], [S3 + 159.97, 900, 560, 1.3],
-  [S3 + 300, 1085, 560, 1.12], [S3 + 308.4, 1085, 560, 1.12], [S3 + 310.0, 1060, 610, 1.4], [S3 + 318.0, 1070, 620, 1.48], [S3 + 320.5, 1040, 580, 1.3], [S3 + 331.0, 1030, 560, 1.2], [S3 + 339.3, 1000, 545, 1.08]];
+  [S3 + 300, 1080, 560, 1.0], [S3 + 316.5, 1110, 570, 1.08], [S3 + 320.4, 1085, 560, 1.12], [S3 + 325.4, 1085, 560, 1.12], [S3 + 327.0, 1060, 610, 1.4], [S3 + 335.0, 1070, 620, 1.48], [S3 + 337.5, 1040, 580, 1.3], [S3 + 348, 1000, 545, 1.08]];
 
 function dim3(t) {
   if (t < 59.7) return 0;
@@ -23,7 +23,7 @@ function dim3(t) {
   if (t < 140.5) return eo(pr(t, 104.55, 105.6));                             // 第二遍：同一间屋子
   if (t < 144.4) return 0;
   if (t < 159.975) return 1 - eio(pr(t, 159.45, 159.975));                    // 面具裂开 → 大字前 0.45 秒黑
-  if (t >= FIN0) return eo(pr(t, FIN0, FIN0 + .35)) * (1 - eio(pr(t, FIN0 + 38.4, FIN0 + 39.3)));   // 新结尾
+  if (t >= FIN0) return eo(pr(t, FIN0, FIN0 + .35)) * (1 - eio(pr(t, FIN0 + 45.9, FIN0 + 46.9)));   // 新结尾
   return 0;
 }
 function scenes3(t) {
@@ -165,12 +165,10 @@ function sceneLone(t) {
       c.save(); c.beginPath(); c.rect(x0 - 40, top - 20, x1 - x0 + 80, sy - top + 20); c.clip();
       for (let yy = top; yy < sy; yy += 12) seg(c, x0, yy, x1, yy, C.ice, .05 * fa, 1);            // 扫过的地方：一层很淡的网格
       for (let xx = x0; xx <= x1; xx += 42) seg(c, xx, top, xx, sy, C.ice, .035 * fa, 1);
-      const hb = Math.pow(Math.max(0, Math.sin((PX.t - 95.6) * Math.PI * 1.55)), 3), A = (.45 + .55 * hb) * fa;   // 心跳一样，一下一下
-      const cx = p[0] + 2, cy = p[1] + 4, crk = withLen([[cx - 26, cy - 30], [cx - 8, cy - 14], [cx - 18, cy + 2], [cx + 4, cy + 14], [cx - 4, cy + 30], [cx + 16, cy + 44]]);
-      glow(c, cx, cy + 6, 120, C.red, .3 * A); glow(c, cx, cy + 6, 40, mixC(C.red, C.white, .3), .5 * A);
-      c.shadowColor = rgba(C.red, 1); c.shadowBlur = 14; strokePartial(c, crk, 1, rgba(mixC(C.red, C.white, .25), .95 * A), 3);
-      strokePartial(c, withLen([[cx - 8, cy - 14], [cx + 14, cy - 22], [cx + 26, cy - 16]]), 1, rgba(C.red, .7 * A), 2);
-      strokePartial(c, withLen([[cx + 4, cy + 14], [cx - 22, cy + 20]]), 1, rgba(C.red, .7 * A), 2);
+      const A = fa * eo(pr(t, 96.2, 97.2)), cx = p[0] + 2, cy = p[1] + 8, R = 30 + 3 * Math.sin(PX.t * 1.3);   // 胸口里面：空的
+      c.fillStyle = rgba(C.body, .92 * A); c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2); c.fill();
+      c.shadowColor = rgba(C.ice, 1); c.shadowBlur = 16; ring(c, cx, cy, R, mixC(C.ice, C.white, .3), .9 * A, 2.2); c.shadowBlur = 0;
+      for (let i = 0; i < 9; i++) { const an = PX.t * (.3 + .2 * rnd(i, 91)) + i * .7, rr = R * (.25 + .6 * rnd(i, 92)); dot(c, cx + Math.cos(an) * rr, cy + Math.sin(an) * rr, 1.6, C.ice, .55 * A * (.5 + .5 * Math.sin(PX.t * 2 + i))); }   // 里面只有几粒冷的灰
       c.restore();
     }
     if (su > 0 && su < 1) {   // 扫描线本身：一道冰蓝白的横光
@@ -251,12 +249,14 @@ function sceneHome(t) {
   if (pB > 0) {
     const GB = drawFig({ kind: 'adult', P: { ...PO.cross, hd: 4 }, x: AX - 10, y: fy, h: 440, dir: -1, rim: COLD, a: pB, refl: fy });
     const cb = eo(pr(t, 135.3, 135.9)); if (cb > 0) cloud(c, AX - 10, 225, [.36, .3], cb, t);
-    const ga = .5 * win(t, 137.6, 139.9, .4, .9);
-    if (ga > 0) { drawFig({ kind: 'adult', P: { ...PO.stand, hd: 8 }, x: AX, y: fy, h: 460, dir: 1, rim: C.ice, sparse: true, nobody: true, a: ga }); }
+    const ga = .6 * win(t, 137.5, 140.3, .5, .6);
+    if (ga > 0) { drawFig({ kind: 'adult', P: { ...PO.sad, hd: 38 }, x: AX, y: fy, h: 460, dir: 1, rim: C.ice, sparse: true, nobody: true, a: ga }); }   // 偷偷希望：他们会为你担心、难过（虚影）
     const pc = GB.at('chest'); ringPulse(c, t, 137.6, pc[0], pc[1], 12, 200, C.ice, 1.0, .6);
   }
   // 孩子（134.3 以后长成大人）
   const K = homeKid(t), GK = drawFig(K), kc = GK.at('chest'), kh = GK.at('head');
+  if (t > 134.5 && t < 137.6) { const u = pr(t, 134.5, 134.7), k = 1 + .18 * Math.sin(Math.PI * u) * (u < 1 ? 1 : 0), a = eo(u) * (1 - eio(pr(t, 137.2, 137.6)));
+    c.save(); c.translate(kh[0] + 40, kh[1] - 110); c.scale(k, k); pill(c, '我要证明给你们看', 0, 0, mixC(C.gold, C.red, .45), a, 30); c.restore(); }
   // 先看脸色：孩子的视线（一串冰蓝的小点）
   const la = .55 * win(t, 106.15, 108.4, .3, .4);
   if (la > 0) { PX.useM(c); for (let i = 0; i < 16; i++) { const u = i / 16, m = .5 + .5 * Math.sin(i * 1.3 - PX.t * 7); PX.pt(lerp(kh[0] - 20, AX + 30, u), lerp(kh[1] - 10, 250, u), C.ice, la * m, .3); } PX.flush(c); }
@@ -266,10 +266,11 @@ function sceneHome(t) {
     const lit = eo(pr(t, 108.8, 109.2)) * (1 - eio(pr(t, 109.95, 110.5)));
     paper(c, lerp(hx, hx - 30, f), lerp(hy, fy - 6, f), lerp(0, -1.45, f), lit, eo(pr(t, 108.7, 108.95)) * (1 - pr(t, 113.3, 114.0)));
   }
-  if (GA && t > 109.74 && t < 111.5) {
-    const hd = GA.at('head'), u = pr(t, 109.74, 109.92), k = 1 + .2 * Math.sin(Math.PI * u) * (u < 1 ? 1 : 0), ba = eo(u) * (1 - eio(pr(t, 111.0, 111.4)));
-    c.save(); c.translate(AX + 110, hd[1] - 40); c.scale(k, k); pill(c, '别烦我', 0, 0, C.red, ba, 30); c.restore();
-    ringPulse(c, t, 109.74, hd[0], hd[1], 14, 140, C.red, .8, .6);
+  for (const [s0, s1, txt, dy] of [[111.0, 112.5, '别的科目呢？', -40], [112.6, 115.0, '你看看人家！', -100]]) {
+    if (!GA || t < s0 || t > s1) continue;
+    const hd = GA.at('head'), u = pr(t, s0, s0 + .18), k = 1 + .2 * Math.sin(Math.PI * u) * (u < 1 ? 1 : 0), ba = eo(u) * (1 - eio(pr(t, s1 - .4, s1)));
+    c.save(); c.translate(AX + 120, hd[1] + dy); c.scale(k, k); pill(c, txt, 0, 0, C.red, ba, 30); c.restore();
+    ringPulse(c, t, s0, hd[0], hd[1], 14, 140, C.red, .8, .6);
   }
   // 胸口的光：暗下去 → 112.2 递给大人（大人收下了，孩子胸口空了）
   if (t < 134.3) {
@@ -318,6 +319,10 @@ function sceneMask(t) {
   const F = { kind: 'adult', P, x: MK3.x, y: fy, h: 420, dir: -1, rim, refl: fy, gain: 1 + .5 * win(t, 148.4, 150, .2, 1.2) }, G = drawFig(F), p = G.at('chest'), hd = G.at('head');
   const cr = [144.62 + .545, 144.62 + 1.09, 144.62 + 1.635].map(s => eio(pr(t, s, s + .22)));
   cr.forEach((u, i) => { const s = 145.165 + i * .545; if (t > s) ringPulse(c, t, s, hd[0], hd[1], 12, 110, C.red, .7, .55); });
+  [['失眠', -1.6, -.9], ['焦虑', 1.7, -.6], ['想哭', -1.8, .5], ['好累', 1.6, .8], ['不想说话', -.2, -1.7]].forEach(([s, ox, oy], i) => {
+    const t0 = 146.4 + i * .22, a = eo(pr(t, t0, t0 + .3)) * (1 - eio(pr(t, 148.35, 148.6))); if (a <= 0) return;
+    const sq = eio(pr(t, t0 + .3, 148.4)), R = lerp(150, 70, sq), x = hd[0] + ox * R * (V ? .62 : 1) + Math.sin(PX.t * 9 + i) * 2 * sq, y = hd[1] + oy * R * .8;
+    c.save(); c.translate(x, y); pill(c, s, 0, 0, mixC(C.ice, C.red, .4 * sq), a, 24); c.restore(); });
   smileMask(c, G, F, { col: mixC(C.white, C.gray, .55), crack: cr, light: eo(pr(t, 147.9, 148.42)), shatter: pr(t, 148.435, 149.9) });
   burst(c, t, 148.435, hd[0], hd[1], { n: 60, seed: 621, col: C.gold, v0: 80, v1: 420, g: 160, life: 1.3 });
   chestDot(c, G, C.gold, eo(pr(t, 148.5, 149.0)), 6.5);
@@ -331,61 +336,74 @@ function sceneMask(t) {
   if (pa > 0) drawFig({ kind: 'adult', P: { ...PO.stand, hd: 16 }, x: MK3.px, y: fy, h: 440, dir: 1, rim: C.silver, a: pa, refl: fy, draw: pr(t, 157.3, 158.4) });
 }
 
-// ===================== 新结尾（歌里 205.1 转调 → 244.4；u = 0..39.3）：循环到你这里停下 =====================
-// 回到开头那条走廊。这一次站在门口的是长大的你，门里是暖光。你的孩子高兴地跑过来，摔倒了（和开头同一个位置、同一个动作）
-// → 6.4 “叫你别跑”到了嘴边：一个红色气泡在你头上闪，8.4 碎成金色的光尘 → 9.2 你走过去蹲下 → 11 他膝盖上那点红变成金色
-// → 15.0 “对不起”：金色气泡 → 18.48 大字（最响的一拍）→ 22.6 他跳起来欢呼 → 25.3 你胸口的光尘聚成小时候的你，站在旁边 → 28.3 小时候的你也举起手
-const FN = { you: 1305, kid0: 560, fall: 980 };
+// ===================== 新结尾（歌里 205.1 转调 → 252；u = 0..46.9） =====================
+// 0–18.5 感恩和理解：走廊里，父亲站在开着的门口（暖光），长大的你站在对面。6.4 “困在自己的时代里”：一个灰框把父亲框住，他心里那个余烬色的小孩亮起来
+// → 12.9 “试着理解”：框碎成金色光尘，父亲的轮廓变暖 → 16.5 他转身走进门里的光 → 18.48 大字（转调后最响的一拍）：当你看清原生家庭的局限，改变就有了可能
+// → 18.6 你走到门口 → 20.4 起用画面演“改变”：你的孩子跑过来摔倒，“叫你别跑”到了嘴边又碎掉，你蹲下来抱住他 → 39.6 他欢呼 → 42.3 小时候的你也出现 → 45.9 淡出
+const FN = { you: 1305, me0: 820, kid0: 560, fall: 980, D: 17 };
 function finYou(u) {
-  const L = HALL, walk = eio(pr(u, 9.0, 10.2)), x = lerp(FN.you, FN.fall + 150, walk), ww = eio(pr(u, 9.0, 9.2)) * (1 - eio(pr(u, 10.0, 10.2)));
+  const L = HALL;
+  if (u < 20.4) {
+    const w = eio(pr(u, 18.6, 20.3)), x = lerp(FN.me0, FN.you, w), ww = eio(pr(u, 18.6, 18.8)) * (1 - eio(pr(u, 20.1, 20.3)));
+    let P = poseSeq(u, [[0, { ...PO.stand, hd: 4 }], [12.9, { ...PO.stand, hd: 16 }, .6], [14.4, { ...PO.stand, hd: 2 }, .8]]);
+    if (ww > 0) P = lerpPose(P, walkPose((x - FN.me0) / 70 * Math.PI, 0), ww);
+    return { kind: 'adult', P, x, y: L.fy, h: L.ah, dir: 1, rim: mixC(C.gold, C.white, .2), refl: L.fy, gain: 1.1, a: eo(pr(u, 0, .6)) };
+  }
+  const v = u - FN.D, walk = eio(pr(v, 9.0, 10.2)), x = lerp(FN.you, FN.fall + 150, walk), ww = eio(pr(v, 9.0, 9.2)) * (1 - eio(pr(v, 10.0, 10.2)));
   const OPEN = { ...PO.kneel, hd: -2, aN: 62, eN: 34, aF: 52, eF: 40 }, HUG = { ...PO.kneel, hd: 10, aN: 74, eN: 62, aF: 66, eF: 64 }, WATCH = { ...PO.kneel, hd: -8, aN: 40, eN: 30, aF: 24, eF: 30 };
-  let P = poseSeq(u, [[0, { ...PO.stand, hd: 4 }], [6.4, { ...PO.point, aN: 20, eN: 30, hd: 10 }, .35], [8.3, { ...PO.stand, hd: 14 }, .5], [10.2, OPEN, .5], [12.3, HUG, .5], [21.8, WATCH, .7], [28.5, { ...WATCH, aN: 120, eN: 20 }, .8]]);
+  let P = poseSeq(v, [[0, { ...PO.stand, hd: 4 }], [6.4, { ...PO.point, aN: 20, eN: 30, hd: 10 }, .35], [8.3, { ...PO.stand, hd: 14 }, .5], [10.2, OPEN, .5], [12.3, HUG, .5], [21.8, WATCH, .7], [28.5, { ...WATCH, aN: 120, eN: 20 }, .8]]);
   if (ww > 0) P = lerpPose(P, walkPose((FN.you - x) / 70 * Math.PI, 0), ww);
   return { kind: 'adult', P, x, y: L.fy, h: L.ah, dir: -1, rim: mixC(C.gold, C.white, .2), refl: L.fy, gain: 1.1 };
 }
 function finKid(u) {
-  const L = HALL, run = pr(u, 3.4, 4.85), x = lerp(FN.kid0, FN.fall, Math.pow(run, 1.2)), rw = eio(pr(u, 3.3, 3.6)) * (1 - eio(pr(u, 4.7, 4.85))), ph = (x - FN.kid0) / 95 * Math.PI;
-  let P = poseSeq(u, [[0, PO.stand], [2.6, PO.happy, .4], [4.62, PO_TRIP, .13], [4.75, PO_FALL, .14], [5.4, { ...PO_FALL, hd: 30 }, .5], [12.3, { ...PO.stand, sp: 14, hd: 16, aN: 72, eN: 46, aF: 62, eF: 50 }, .6], [22.6, PO.cheer, .5]]);
+  const L = HALL, v = u - FN.D, run = pr(v, 3.4, 4.85), x = lerp(FN.kid0, FN.fall, Math.pow(run, 1.2)), rw = eio(pr(v, 3.3, 3.6)) * (1 - eio(pr(v, 4.7, 4.85))), ph = (x - FN.kid0) / 95 * Math.PI;
+  let P = poseSeq(v, [[0, PO.stand], [2.6, PO.happy, .4], [4.62, PO_TRIP, .13], [4.75, PO_FALL, .14], [5.4, { ...PO_FALL, hd: 30 }, .5], [12.3, { ...PO.stand, sp: 14, hd: 16, aN: 72, eN: 46, aF: 62, eF: 50 }, .6], [22.6, PO.cheer, .5]]);
   if (rw > 0) P = lerpPose(P, walkPose(ph, 1), rw);
-  const jump = 18 * Math.max(0, Math.sin((u - 22.6) * Math.PI * 1.8)) * win(u, 22.6, 27.5, .1, .8);
-  return { kind: 'child', P, x: x + 40 * eio(pr(u, 12.3, 12.9)), y: L.fy - 7 * rw * Math.abs(Math.sin(ph)) - jump, h: BOY_H, dir: 1, rim: mixC(mixC(C.silver, C.gold, .35), C.gold, eio(pr(u, 22.6, 23.4))), refl: L.fy, gain: 1 + .5 * eio(pr(u, 22.6, 23.4)) };
+  const jump = 18 * Math.max(0, Math.sin((v - 22.6) * Math.PI * 1.8)) * win(v, 22.6, 27.5, .1, .8);
+  return { kind: 'child', P, x: x + 40 * eio(pr(v, 12.3, 12.9)), y: L.fy - 7 * rw * Math.abs(Math.sin(ph)) - jump, h: BOY_H, dir: 1, rim: mixC(mixC(C.silver, C.gold, .35), C.gold, eio(pr(v, 22.6, 23.4))), refl: L.fy, gain: 1 + .5 * eio(pr(v, 22.6, 23.4)), a: eo(pr(u, 19.6, 20.4)) };
 }
 function finDoorPt() { const D = HALL.d; return w2s((D.x0 + D.x1) / 2, D.top + 200); }
-function finKidPt(t) { const p = figGeom(finKid(t - FIN0)).at('chest'); return w2s(p[0], p[1]); }
 function sceneFinale(u) {
-  const c = sx, L = HALL, fy = L.fy, D = { ...L.d, fy };
+  const c = sx, L = HALL, fy = L.fy, D = { ...L.d, fy }, v = u - FN.D, dm = (D.x0 + D.x1) / 2;
   lampPool(c, 900, 420, 950, 1); lampCone(c, 900, -60, fy + 40, 70, 640, lerp(.8, 1.1, eo(pr(u, 0, 2))));
   floorLine(c, fy, 200, 1800, 1, 1); motes(u + FIN0, 900, 440, 620, 330, 150, C.lamp, 1);
-  // 门：这一次开着，里面是暖光
+  // 门开着，里面是暖光
   door(c, D, { u: 1, open: eio(pr(u, 0, 1.4)), light: mixC(C.gold, C.lamp, .4), I: eio(pr(u, 0, 1.4)) * 1.15, under: .3 });
-  const Y = finYou(u), GY = drawFig(Y), K = finKid(u), GK = drawFig(K);
-  burst(c, u, 4.75, K.x + 40, fy - 4, { n: 22, seed: 5, col: C.lamp, v0: 30, v1: 170, a0: -Math.PI, spread: Math.PI, g: 260, life: .8 });
-  // 膝盖那点红：11 秒变成金色
-  const gk = eio(pr(u, 10.8, 11.4)), km = u < 4.75 ? 0 : lerp(1, .5, eio(pr(u, 5.5, 7))) * (1 - eio(pr(u, 12.3, 13.5)));
-  kneeMark(c, GK, mixC(C.red, C.gold, gk), km, 4.75, u);
-  const kp = GK.at('knN'); ringPulse(c, u, 10.85, kp[0], kp[1], 8, 120, C.gold, .9, .7); burst(c, u, 10.85, kp[0], kp[1], { n: 26, seed: 23, col: C.gold, v0: 30, v1: 190, a0: -Math.PI, spread: Math.PI, g: -40, life: 1.1 });
-  // “叫你别跑！”到了嘴边：在你头上闪了几下，8.4 碎成金色光尘
-  const hd = GY.at('head');
-  if (u > 6.5 && u < 8.45) { const fl = .55 + .45 * Math.abs(Math.sin(u * 13)) * Math.abs(Math.sin(u * 5.3)), a = eo(pr(u, 6.5, 6.8)) * fl;
-    c.save(); c.translate(hd[0] - 30, hd[1] - 90); pill(c, '叫你别跑！', 0, 0, C.red, a, 40); c.restore(); }
-  burst(c, u, 8.4, hd[0] - 30, hd[1] - 90, { n: 70, seed: 707, col: C.gold, v0: 40, v1: 260, a0: -Math.PI, spread: Math.PI, g: -50, life: 1.4 });
-  // “对不起”：金色气泡
-  if (u > 15.2 && u < 18.3) { const a = eo(pr(u, 15.2, 15.5)) * (1 - eio(pr(u, 17.9, 18.3))); c.save(); c.translate(hd[0] - 10, hd[1] - 92); pill(c, '对不起', 0, 0, C.gold, a, 38); c.restore();
-    ringPulse(c, u, 15.25, hd[0], hd[1], 12, 130, C.gold, .8, .5); }
-  // 孩子胸口的光：被抱住以后亮起来；18.48 大字时一圈金光；22.6 欢呼时炸开一小团
-  const kc = GK.at('chest');
-  chestDot(c, GK, C.gold, eo(pr(u, 12.6, 13.4)) + .4 * win(u, 18.4, 20.5, .1, 1.5), 5.5 + 2 * win(u, 18.4, 20, .1, 1));
-  ringPulse(c, u, 18.48, kc[0], kc[1], 8, 240, C.gold, 1.1, .7);
-  burst(c, u, 22.65, kc[0], kc[1], { n: 70, seed: 731, col: C.gold, v0: 80, v1: 460, g: 120, life: 1.4 });
-  // 你胸口的光尘聚成小时候的你，站在你身后
-  const ic = GY.at('chest'), ia = eo(pr(u, 25.3, 27.2));
-  if (ia > 0) { const IX = Y.x + 150;
-    const F = { kind: 'child', P: poseSeq(u, [[0, { ...PO.stand, hd: 6 }], [28.5, PO.cheer, .7]]), x: IX, y: fy, h: BOY_H, dir: -1, rim: mixC(C.gold, C.white, .35), a: ia, refl: fy,
-      draw: pr(u, 25.3, 27.4), src: (id, s0) => PX.inv(...w2s(ic[0], ic[1])) };
-    const GI = drawFig(F); chestDot(c, GI, C.gold, eo(pr(u, 27.0, 27.6)), 5.5); }
-  // 金色微尘从三个人身边慢慢升起
-  if (u > 22.6) { PX.useM(c); const ga = eo(pr(u, 22.6, 24)) * (1 - eio(pr(u, 37.8, 39.2)));
-    for (let i = 0; i < 140; i++) { const life = 3 + 2.5 * rnd(i, 741), v = ((u - 22.6) / life + rnd(i, 742)) % 1, x = Y.x - 150 + (rnd(i, 743) - .5) * 700 + Math.sin(u * .7 + i) * 18, y = fy - 20 - v * 560;
-      PX.pt(x, y, mixC(C.gold, C.white, .3 * rnd(i, 744)), ga * 1.3 * Math.sin(Math.PI * v) * (.6 + .4 * Math.sin(u * 5 + i)), .3); }
+  // 父亲：站在门口 → 被“时代”的框框住 → 框碎掉，轮廓变暖 → 转身走进光里
+  const fa = eo(pr(u, 0, .8)) * (1 - eio(pr(u, 16.6, 18.2)));
+  if (fa > 0) {
+    const turn = eio(pr(u, 16.4, 16.8)), warm = eio(pr(u, 13.0, 14.6)), F0 = { kind: 'adult', P: poseSeq(u, [[0, { ...PO.stand, hd: 10 }], [6.4, { ...PO.sad, hd: 24 }, 1.2], [13.2, { ...PO.stand, hd: 6 }, 1.2]]), x: dm + 20 * eio(pr(u, 16.6, 18.2)), y: fy, h: L.ah, rim: mixC(mixC(C.silver, C.gray, .3), mixC(C.lamp, C.gold, .3), warm), refl: fy };
+    let GF = null; if (turn < 1) GF = drawFig({ ...F0, dir: -1, a: fa * (1 - turn) }); if (turn > 0) GF = drawFig({ ...F0, dir: 1, a: fa * turn });
+    innerChild(GF, win(u, 6.6, 15.5, .8, 1.2) * fa, u + FIN0);   // 他心里那个没长大的孩子
+    const cl = eio(pr(u, 6.4, 7.6)), br = pr(u, 12.9, 13.4);   // 时代的栏杆：一根根从上面落下来，把他关在门口
+    if (cl > 0 && br < 1) { const A = (1 - br) * fa, top = fy - L.ah - 60;
+      for (let i = 0; i < 7; i++) { const x = dm - 105 + i * 35, d = eio(pr(u, 6.4 + i * .1, 7.3 + i * .1)), y1 = lerp(top, fy, d);
+        c.save(); c.shadowColor = rgba(C.gray, 1); c.shadowBlur = 6; seg(c, x, top, x, y1, mixC(C.gray, C.silver, .35), .9 * A, 3.5); c.restore(); }
+      seg(c, dm - 115, top, dm + 115, top, mixC(C.gray, C.silver, .35), .9 * A * cl, 3.5); }
+    burst(c, u, 12.9, dm, fy - L.ah * .55, { n: 90, seed: 751, col: C.gold, v0: 60, v1: 420, g: 40, life: 1.6 });
+  }
+  const Y = finYou(u), GY = drawFig(Y);
+  // 孩子（20.4 以后）
+  if (u > 19.6) {
+    const K = finKid(u), GK = drawFig(K);
+    burst(c, v, 4.75, K.x + 40, fy - 4, { n: 22, seed: 5, col: C.lamp, v0: 30, v1: 170, a0: -Math.PI, spread: Math.PI, g: 260, life: .8 });
+    const gk = eio(pr(v, 10.8, 11.4)), km = v < 4.75 ? 0 : lerp(1, .5, eio(pr(v, 5.5, 7))) * (1 - eio(pr(v, 12.3, 13.5)));
+    kneeMark(c, GK, mixC(C.red, C.gold, gk), km, 4.75, v);
+    const kp = GK.at('knN'); ringPulse(c, v, 10.85, kp[0], kp[1], 8, 120, C.gold, .9, .7); burst(c, v, 10.85, kp[0], kp[1], { n: 26, seed: 23, col: C.gold, v0: 30, v1: 190, a0: -Math.PI, spread: Math.PI, g: -40, life: 1.1 });
+    const hd = GY.at('head');   // “叫你别跑！”到了嘴边，闪了几下，碎成金色光尘
+    if (v > 6.5 && v < 8.45) { const fl = .55 + .45 * Math.abs(Math.sin(u * 13)) * Math.abs(Math.sin(u * 5.3)), a = eo(pr(v, 6.5, 6.8)) * fl;
+      c.save(); c.translate(hd[0] - 30, hd[1] - 90); pill(c, '叫你别跑！', 0, 0, C.red, a, 40); c.restore(); }
+    burst(c, v, 8.4, hd[0] - 30, hd[1] - 90, { n: 70, seed: 707, col: C.gold, v0: 40, v1: 260, a0: -Math.PI, spread: Math.PI, g: -50, life: 1.4 });
+    const kc = GK.at('chest');
+    chestDot(c, GK, C.gold, eo(pr(v, 12.6, 13.4)), 5.5);
+    burst(c, v, 22.65, kc[0], kc[1], { n: 70, seed: 731, col: C.gold, v0: 80, v1: 460, g: 120, life: 1.4 });
+    const ic = GY.at('chest'), ia = eo(pr(v, 25.3, 27.2));   // 你胸口的光尘聚成小时候的你，站在你身后
+    if (ia > 0) { const F = { kind: 'child', P: poseSeq(v, [[0, { ...PO.stand, hd: 6 }], [27.5, PO.cheer, .7]]), x: Y.x + 150, y: fy, h: BOY_H, dir: -1, rim: mixC(C.gold, C.white, .35), a: ia, refl: fy,
+        draw: pr(v, 25.3, 27.4), src: (id, s0) => PX.inv(...w2s(ic[0], ic[1])) };
+      const GI = drawFig(F); chestDot(c, GI, C.gold, eo(pr(v, 27.0, 27.6)), 5.5); }
+  }
+  if (v > 22.6) { PX.useM(c); const ga = eo(pr(v, 22.6, 24)) * (1 - eio(pr(u, 45.2, 46.6)));   // 金色微尘升起
+    for (let i = 0; i < 140; i++) { const life = 3 + 2.5 * rnd(i, 741), w = ((v - 22.6) / life + rnd(i, 742)) % 1, x = Y.x - 150 + (rnd(i, 743) - .5) * 700 + Math.sin(u * .7 + i) * 18, y = fy - 20 - w * 560;
+      PX.pt(x, y, mixC(C.gold, C.white, .3 * rnd(i, 744)), ga * 1.3 * Math.sin(Math.PI * w) * (.6 + .4 * Math.sin(u * 5 + i)), .3); }
     PX.flush(c); }
 }
