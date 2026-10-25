@@ -7,13 +7,13 @@ const CAM3H = [[S3 + 59.7, 990, 540, 1], [S3 + 62.2, 990, 540, 1], [S3 + 62.715,
   [S3 + 75.795, 960, 550, 1], [S3 + 94.96, 1040, 565, 1.1], [S3 + 94.965, 1300, 585, 1.55], [S3 + 104.24, 1300, 600, 1.72],
   [S3 + 104.25, 960, 545, 1], [S3 + 108.6, 965, 543, 1.01], [S3 + 110.0, 930, 525, 1.3], [S3 + 111.9, 930, 525, 1.3], [S3 + 113.4, 970, 540, 1.03], [S3 + 127.6, 1000, 530, 1.08], [S3 + 140.45, 975, 515, 1],
   [S3 + 144.4, 960, 535, 1.04], [S3 + 145.0, 980, 500, 1.2], [S3 + 146.4, 1015, 440, 1.75], [S3 + 148.3, 1015, 435, 1.8], [S3 + 149.6, 960, 520, 1.08], [S3 + 159.97, 930, 545, 1.12],
-  [S3 + 300, 1080, 545, 1.05], [S3 + 316.5, 1110, 560, 1.12], [S3 + 320.4, 980, 540, 1], [S3 + 325.4, 980, 540, 1], [S3 + 327.0, 1040, 600, 1.22], [S3 + 335.0, 1060, 610, 1.3], [S3 + 337.5, 1000, 560, 1.12], [S3 + 348, 960, 530, .98]];
+  [S3 + 300, 1080, 545, 1.05], [S3 + 316.5, 1110, 560, 1.12], [S3 + 320.4, 980, 540, 1], [S3 + 326.0, 980, 540, 1], [S3 + 328.6, 1040, 600, 1.22], [S3 + 334.6, 1060, 610, 1.3], [S3 + 336.8, 900, 540, 1.0], [S3 + 342, 880, 530, .98]];
 const CAM3V = [[S3 + 59.7, 960, 772, .94], [S3 + 62.2, 960, 772, .94], [S3 + 62.715, 700, 430, 1.6], [S3 + 64.9, 705, 425, 1.65], [S3 + 65.44, 1180, 430, 1.6], [S3 + 67.6, 1185, 425, 1.65],
   [S3 + 68.165, 700, 1020, 1.6], [S3 + 70.3, 705, 1015, 1.65], [S3 + 70.89, 1180, 1020, 1.6], [S3 + 73.1, 1185, 1015, 1.65], [S3 + 73.615, 960, 772, .94], [S3 + 75.79, 960, 772, .96],
   [S3 + 75.795, 960, 600, 1.0], [S3 + 94.96, 1000, 605, 1.07], [S3 + 94.965, 1300, 560, 1.6], [S3 + 104.24, 1300, 575, 1.75],
   [S3 + 104.25, 960, 560, 1.18], [S3 + 108.6, 962, 559, 1.19], [S3 + 110.0, 940, 480, 1.5], [S3 + 111.9, 940, 480, 1.5], [S3 + 113.4, 965, 555, 1.2], [S3 + 127.6, 985, 555, 1.26], [S3 + 140.45, 965, 520, 1.15],
   [S3 + 144.4, 960, 545, 1.22], [S3 + 145.0, 985, 500, 1.4], [S3 + 146.4, 1015, 400, 2.2], [S3 + 148.3, 1015, 395, 2.25], [S3 + 149.6, 960, 530, 1.25], [S3 + 159.97, 900, 560, 1.3],
-  [S3 + 300, 1080, 560, 1.0], [S3 + 316.5, 1110, 570, 1.08], [S3 + 320.4, 1085, 560, 1.12], [S3 + 325.4, 1085, 560, 1.12], [S3 + 327.0, 1060, 610, 1.4], [S3 + 335.0, 1070, 620, 1.48], [S3 + 337.5, 1040, 580, 1.3], [S3 + 348, 1000, 545, 1.08]];
+  [S3 + 300, 1080, 560, 1.0], [S3 + 316.5, 1110, 570, 1.08], [S3 + 320.4, 1085, 560, 1.12], [S3 + 326.0, 1085, 560, 1.12], [S3 + 328.6, 1060, 610, 1.4], [S3 + 334.6, 1070, 620, 1.48], [S3 + 336.8, 960, 560, 1.08], [S3 + 342, 940, 550, 1.04]];
 
 function dim3(t) {
   if (t < 59.7) return 0;
@@ -23,7 +23,7 @@ function dim3(t) {
   if (t < 140.5) return eo(pr(t, 104.55, 105.6));                             // 第二遍：同一间屋子
   if (t < 144.4) return 0;
   if (t < 159.975) return 1 - eio(pr(t, 159.45, 159.975));                    // 面具裂开 → 大字前 0.45 秒黑
-  if (t >= FIN0) return eo(pr(t, FIN0, FIN0 + .35)) * (1 - eio(pr(t, FIN0 + 45.9, FIN0 + 46.9)));   // 新结尾
+  if (t >= FIN0) return eo(pr(t, FIN0, FIN0 + .35)) * (1 - eio(pr(t, FIN0 + 40.7, FIN0 + 41.8)));   // 新结尾 → 41.8 片尾卡
   return 0;
 }
 function scenes3(t) {
@@ -347,11 +347,14 @@ function sceneMask(t) {
   if (pa > 0) drawFig({ kind: 'adult', P: { ...PO.stand, hd: 16 }, x: MK3.px, y: fy, h: 440, dir: 1, rim: C.silver, a: pa, refl: fy, draw: pr(t, 157.3, 158.4) });
 }
 
-// ===================== 新结尾（歌里 205.1 转调 → 252；u = 0..46.9） =====================
+// ===================== 新结尾（歌里 205.1 转调 → 246.9；u = 0..41.8，之后是片尾卡） =====================
 // 0–18.5 感恩和理解：走廊里，父亲站在开着的门口（暖光），长大的你站在对面。6.4 “困在自己的时代里”：一个灰框把父亲框住，他心里那个余烬色的小孩亮起来
 // → 12.9 “试着理解”：框碎成金色光尘，父亲的轮廓变暖 → 16.5 他转身走进门里的光 → 18.48 大字（转调后最响的一拍）：当你看清原生家庭的局限，改变就有了可能
-// → 18.6 你走到门口 → 20.4 起用画面演“改变”：你的孩子跑过来摔倒，“叫你别跑”到了嘴边又碎掉，你蹲下来抱住他 → 39.6 他欢呼 → 42.3 小时候的你也出现 → 45.9 淡出
+// → 18.6 你走到门口 → 20.4 起用画面演“改变”（字幕只讲道理，不再讲小事）：你的孩子跑过来摔倒，“叫你别跑”到了嘴边又碎掉，你蹲下来，把他抱进怀里
+// → 33.2 你胸口的光聚成小时候的你（“成为自己小时候最需要的那个大人”）→ 36.4 身后一排灰色的上一代 → 38.2 散成金色光尘往上飘，孩子欢呼（“在你这里停下”）→ 40.7 淡出
 const FN = { you: 1305, me0: 820, kid0: 560, fall: 980, D: 17 };
+// 跪着抱孩子：上臂往前下，前臂水平环到孩子背后，头低下来贴着他；孩子两只手搂住大人的脖子，脸埋进去（门厅那一抱也用这两个姿势）
+const PO_HUG = { ...PO.kneel, sp: 16, hd: 30, aN: 44, eN: 88, aF: 40, eF: 90 }, PO_HUGK = { ...PO.stand, sp: 10, hd: 22, aN: 122, eN: 26, aF: 112, eF: 34 }, HUG_DX = 52;
 function finYou(u) {
   const L = HALL;
   if (u < 20.4) {
@@ -361,17 +364,17 @@ function finYou(u) {
     return { kind: 'adult', P, x, y: L.fy, h: L.ah, dir: 1, rim: mixC(C.gold, C.white, .2), refl: L.fy, gain: 1.1, a: eo(pr(u, 0, .6)) };
   }
   const v = u - FN.D, walk = eio(pr(v, 9.0, 10.2)), x = lerp(FN.you, FN.fall + 150, walk), ww = eio(pr(v, 9.0, 9.2)) * (1 - eio(pr(v, 10.0, 10.2)));
-  const OPEN = { ...PO.kneel, hd: -2, aN: 62, eN: 34, aF: 52, eF: 40 }, HUG = { ...PO.kneel, hd: 10, aN: 74, eN: 62, aF: 66, eF: 64 }, WATCH = { ...PO.kneel, hd: -8, aN: 40, eN: 30, aF: 24, eF: 30 };
-  let P = poseSeq(v, [[0, { ...PO.stand, hd: 4 }], [6.4, { ...PO.point, aN: 20, eN: 30, hd: 10 }, .35], [8.3, { ...PO.stand, hd: 14 }, .5], [10.2, OPEN, .5], [12.3, HUG, .5], [21.8, WATCH, .7], [28.5, { ...WATCH, aN: 120, eN: 20 }, .8]]);
+  const OPEN = { ...PO.kneel, hd: -2, aN: 62, eN: 34, aF: 52, eF: 40 }, WATCH = { ...PO.kneel, hd: -8, aN: 40, eN: 30, aF: 24, eF: 30 };
+  let P = poseSeq(v, [[0, { ...PO.stand, hd: 4 }], [6.4, { ...PO.point, aN: 20, eN: 30, hd: 10 }, .35], [8.3, { ...PO.stand, hd: 14 }, .5], [10.2, OPEN, .5], [12.3, PO_HUG, .6], [19.6, WATCH, .7], [21.6, { ...WATCH, aN: 120, eN: 20 }, .8]]);
   if (ww > 0) P = lerpPose(P, walkPose((FN.you - x) / 70 * Math.PI, 0), ww);
   return { kind: 'adult', P, x, y: L.fy, h: L.ah, dir: -1, rim: mixC(C.gold, C.white, .2), refl: L.fy, gain: 1.1 };
 }
 function finKid(u) {
   const L = HALL, v = u - FN.D, run = pr(v, 3.4, 4.85), x = lerp(FN.kid0, FN.fall, Math.pow(run, 1.2)), rw = eio(pr(v, 3.3, 3.6)) * (1 - eio(pr(v, 4.7, 4.85))), ph = (x - FN.kid0) / 95 * Math.PI;
-  let P = poseSeq(v, [[0, PO.stand], [2.6, PO.happy, .4], [4.62, PO_TRIP, .13], [4.75, PO_FALL, .14], [5.4, { ...PO_FALL, hd: 30 }, .5], [12.3, { ...PO.stand, sp: 14, hd: 16, aN: 72, eN: 46, aF: 62, eF: 50 }, .6], [22.6, PO.cheer, .5]]);
+  let P = poseSeq(v, [[0, PO.stand], [2.6, PO.happy, .4], [4.62, PO_TRIP, .13], [4.75, PO_FALL, .14], [5.4, { ...PO_FALL, hd: 30 }, .5], [12.3, PO_HUGK, .6], [19.8, PO.cheer, .5]]);
   if (rw > 0) P = lerpPose(P, walkPose(ph, 1), rw);
-  const jump = 18 * Math.max(0, Math.sin((v - 22.6) * Math.PI * 1.8)) * win(v, 22.6, 27.5, .1, .8);
-  return { kind: 'child', P, x: x + 40 * eio(pr(v, 12.3, 12.9)), y: L.fy - 7 * rw * Math.abs(Math.sin(ph)) - jump, h: BOY_H, dir: 1, rim: mixC(mixC(C.silver, C.gold, .35), C.gold, eio(pr(v, 22.6, 23.4))), refl: L.fy, gain: 1 + .5 * eio(pr(v, 22.6, 23.4)), a: eo(pr(u, 19.6, 20.4)) };
+  const jump = 18 * Math.max(0, Math.sin((v - 19.8) * Math.PI * 1.8)) * win(v, 19.8, 24.0, .1, .8);
+  return { kind: 'child', P, x: x + HUG_DX * eio(pr(v, 12.3, 12.9)) * (1 - eio(pr(v, 19.4, 19.9))), y: L.fy - 7 * rw * Math.abs(Math.sin(ph)) - jump, h: BOY_H, dir: 1, rim: mixC(mixC(C.silver, C.gold, .35), C.gold, eio(pr(v, 19.8, 20.6))), refl: L.fy, gain: 1 + .5 * eio(pr(v, 19.8, 20.6)), a: eo(pr(u, 19.6, 20.4)) };
 }
 function finDoorPt() { const D = HALL.d; return w2s((D.x0 + D.x1) / 2, D.top + 200); }
 function sceneFinale(u) {
@@ -393,6 +396,12 @@ function sceneFinale(u) {
       seg(c, dm - 115, top, dm + 115, top, mixC(C.gray, C.silver, .35), .9 * A * cl, 3.5); }
     burst(c, u, 12.9, dm, fy - L.ah * .55, { n: 90, seed: 751, col: C.gold, v0: 60, v1: 420, g: 40, life: 1.6 });
   }
+  // 一代代传下来的：孩子身后浮出一排灰色的大人（父亲、父亲的父亲……），一个比一个淡；“在你这里停下”时散成金色光尘往上飘
+  if (v > 19.3 && v < 23.4) for (let i = 0; i < 3; i++) {
+    const gx = 830 - i * 135, ga = (.55 - i * .13) * eo(pr(v, 19.4 + i * .25, 20.4 + i * .25)), sc = eio(pr(v, 21.2 + i * .2, 22.6 + i * .2));
+    if (ga * (1 - sc) > .01) drawFig({ kind: 'adult', P: { ...PO.stand, hd: 12 + i * 4 }, x: gx, y: fy, h: L.ah * (.98 - i * .03), dir: 1, rim: mixC(mixC(C.gray, C.silver, .3), C.gold, sc), a: ga * (1 - sc * .7), refl: fy, draw: pr(v, 19.4 + i * .25, 20.6 + i * .25), scatter: sc });
+    burst(c, v, 21.25 + i * .2, gx, fy - L.ah * .55, { n: 50, seed: 760 + i, col: C.gold, v0: 40, v1: 260, g: -60, life: 1.6 });
+  }
   const Y = finYou(u), GY = drawFig(Y);
   // 孩子（20.4 以后）
   if (u > 19.6) {
@@ -407,14 +416,14 @@ function sceneFinale(u) {
     burst(c, v, 8.4, hd[0] - 30, hd[1] - 90, { n: 70, seed: 707, col: C.gold, v0: 40, v1: 260, a0: -Math.PI, spread: Math.PI, g: -50, life: 1.4 });
     const kc = GK.at('chest');
     chestDot(c, GK, C.gold, eo(pr(v, 12.6, 13.4)), 5.5);
-    burst(c, v, 22.65, kc[0], kc[1], { n: 70, seed: 731, col: C.gold, v0: 80, v1: 460, g: 120, life: 1.4 });
-    const ic = GY.at('chest'), ia = eo(pr(v, 25.3, 27.2));   // 你胸口的光尘聚成小时候的你，站在你身后
-    if (ia > 0) { const F = { kind: 'child', P: poseSeq(v, [[0, { ...PO.stand, hd: 6 }], [27.5, PO.cheer, .7]]), x: Y.x + 150, y: fy, h: BOY_H, dir: -1, rim: mixC(C.gold, C.white, .35), a: ia, refl: fy,
-        draw: pr(v, 25.3, 27.4), src: (id, s0) => PX.inv(...w2s(ic[0], ic[1])) };
-      const GI = drawFig(F); chestDot(c, GI, C.gold, eo(pr(v, 27.0, 27.6)), 5.5); }
+    burst(c, v, 19.85, kc[0], kc[1], { n: 70, seed: 731, col: C.gold, v0: 80, v1: 460, g: 120, life: 1.4 });
+    const ic = GY.at('chest'), ia = eo(pr(v, 16.2, 18.1));   // 你胸口的光尘聚成小时候的你，站在你身后
+    if (ia > 0) { const F = { kind: 'child', P: poseSeq(v, [[0, { ...PO.stand, hd: 6 }], [20.0, PO.cheer, .7]]), x: Y.x + 150, y: fy, h: BOY_H, dir: -1, rim: mixC(C.gold, C.white, .35), a: ia, refl: fy,
+        draw: pr(v, 16.2, 18.3), src: (id, s0) => PX.inv(...w2s(ic[0], ic[1])) };
+      const GI = drawFig(F); chestDot(c, GI, C.gold, eo(pr(v, 17.9, 18.5)), 5.5); }
   }
-  if (v > 22.6) { PX.useM(c); const ga = eo(pr(v, 22.6, 24)) * (1 - eio(pr(u, 45.2, 46.6)));   // 金色微尘升起
-    for (let i = 0; i < 140; i++) { const life = 3 + 2.5 * rnd(i, 741), w = ((v - 22.6) / life + rnd(i, 742)) % 1, x = Y.x - 150 + (rnd(i, 743) - .5) * 700 + Math.sin(u * .7 + i) * 18, y = fy - 20 - w * 560;
+  if (v > 19.8) { PX.useM(c); const ga = eo(pr(v, 19.8, 21.2)) * (1 - eio(pr(u, 40.2, 41.6)));   // 金色微尘升起
+    for (let i = 0; i < 140; i++) { const life = 3 + 2.5 * rnd(i, 741), w = ((v - 19.8) / life + rnd(i, 742)) % 1, x = Y.x - 150 + (rnd(i, 743) - .5) * 700 + Math.sin(u * .7 + i) * 18, y = fy - 20 - w * 560;
       PX.pt(x, y, mixC(C.gold, C.white, .3 * rnd(i, 744)), ga * 1.3 * Math.sin(Math.PI * w) * (.6 + .4 * Math.sin(u * 5 + i)), .3); }
     PX.flush(c); }
 }

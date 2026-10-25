@@ -272,7 +272,7 @@ function titleDust(t, T) {
 // 片尾（成片时间）：金色微尘从画面下方升起，聚回同一个“懂事”的字形
 function endDust(t) {
   if (t < 203.75 || t >= FIN0) return; const P = dustPts(); if (!P) return;
-  const hot = mixC(C.gold, C.white, .6), gc = mixC(C.gold, C.lamp, .4), fo = 1 - eio(pr(t, 207.95, 208.5));
+  const hot = mixC(C.gold, C.white, .6), gc = mixC(C.gold, C.lamp, .4), fo = 1 - eio(pr(t, CARD_E - .55, CARD_E));
   for (let i = 0; i < P.length; i++) {
     const q = P[i], ts = 203.75 + .55 * rnd(i, 81), te = ts + .85 + .3 * rnd(i, 82); if (t < ts) continue;
     const x0 = W * rnd(i, 83), y0 = H * (.6 + .45 * rnd(i, 84)), mx = (x0 + q[0]) / 2 + (rnd(i, 85) - .5) * 360, my = (y0 + q[1]) / 2 + (rnd(i, 86) - .5) * 240;
@@ -497,7 +497,7 @@ function sceneRoots(t) {
 
 // ===================== 6. 门厅（结尾）：长大的你，回来抱抱摔倒的自己（场景时间 140.2–157.4） =====================
 // 140.2 回到开头那一幕：小时候的你还跪在地上（膝盖上那点红）；父亲的门关着 → 140.4 长大的你（金色轮廓）从左边走来
-// → 142.0 蹲下、张开手臂 → 142.6 膝盖那点红变成金色 → 143.0 他站起来，扑进你怀里；光尘聚成“总是先道歉”，再散掉 → 145.3 举起双手
+// → 142.0 蹲下、张开手臂 → 142.6 膝盖那点红变成金色 → 143.0 他站起来，扑进你怀里；光尘聚成“总是先道歉”，再散掉 → 145.6 抱着他，胸口亮起来
 function sceneHall2(t) {
   const c = sx, L = HALL, fy = L.fy, D = { ...L.d, fy };
   lampPool(c, 900, 420, 950, 1);
@@ -506,18 +506,18 @@ function sceneHall2(t) {
   motes(t, 900, 440, 620, 330, 150, C.lamp, 1);
   door(c, D, { u: 1, open: 0, light: COLD, I: 0, under: .3 });   // 父亲的门：关着，这一次不等他
   const kx = L.b1 + 8, ax1 = kx - 220, ax0 = ax1 - 380, wu = eio(pr(t, 140.4, 142.0)), wx = lerp(ax0, ax1, wu), ww = eio(pr(t, 140.4, 140.65)) * (1 - eio(pr(t, 141.75, 142.0)));
-  const OPEN = { ...PO.kneel, hd: -2, aN: 62, eN: 34, aF: 52, eF: 40 }, HUG = { ...PO.kneel, hd: 10, aN: 74, eN: 62, aF: 66, eF: 64 }, WATCH = { ...PO.kneel, hd: -8, aN: 40, eN: 30, aF: 24, eF: 30 };
-  let AP = poseSeq(t, [[0, PO.stand], [141.8, PO.reach, .35], [142.1, OPEN, .5], [143.85, HUG, .4], [145.1, WATCH, .6]]);
+  const OPEN = { ...PO.kneel, hd: -2, aN: 62, eN: 34, aF: 52, eF: 40 };
+  let AP = poseSeq(t, [[0, PO.stand], [141.8, PO.reach, .35], [142.1, OPEN, .5], [143.85, PO_HUG, .5]]);   // 抱住以后一直抱着（“想哭的时候，就哭出来”）
   if (ww > 0) AP = lerpPose(AP, walkPose((wx - ax0) / 70 * Math.PI, 0), ww);
   const AF = drawFig({ kind: 'adult', P: AP, x: wx, y: fy, h: L.ah, dir: 1, rim: mixC(C.gold, C.white, .2), a: eo(pr(t, 140.35, 140.9)), refl: fy });
   if (t > 140.4 && t < 141.4) ringPulse(c, t, 140.45, AF.at('chest')[0], AF.at('chest')[1], 10, 150, C.gold, 1.0, .5);
   // 小时候的你：跪在地上 → 站起来、扑进怀里 → 举起双手
-  const hx = ax1 + 122, bx = lerp(kx, hx, eio(pr(t, 143.35, 143.95))) + 58 * eio(pr(t, 145.0, 145.4));   // 站起来 → 跑进怀里 → 退半步欢呼
-  let BP = poseSeq(t, [[0, { ...PO_FALL, hd: 30 }], [141.6, { ...PO_FALL, hd: -4 }, .5], [142.95, { ...PO.stand, hd: 4, aN: 20, eN: 30, aF: 10, eF: 30 }, .4], [143.85, { ...PO.stand, sp: 14, hd: 16, aN: 72, eN: 46, aF: 62, eF: 50 }, .3], [145.0, { ...PO.stand, hd: 0 }, .25], [145.3, PO.cheer, .6]]);
+  const hx = ax1 + 98, bx = lerp(kx, hx, eio(pr(t, 143.35, 143.95)));   // 站起来 → 跑进怀里
+  let BP = poseSeq(t, [[0, { ...PO_FALL, hd: 30 }], [141.6, { ...PO_FALL, hd: -4 }, .5], [142.95, { ...PO.stand, hd: 4, aN: 20, eN: 30, aF: 10, eF: 30 }, .4], [143.85, PO_HUGK, .4]]);
   const bw = eio(pr(t, 143.35, 143.5)) * (1 - eio(pr(t, 143.8, 143.95)));
   if (bw > 0) BP = lerpPose(BP, walkPose((kx - bx) / 60 * Math.PI, .6), bw);
   const brim = mixC(mixC(C.gray, C.gold, .3 * eo(pr(t, 142.6, 143.6))), C.gold, eio(pr(t, 145.3, 146.0)));
-  const GB = drawFig({ kind: 'child', P: BP, x: bx, y: fy - 10 * Math.sin(Math.PI * pr(t, 145.3, 145.75)), h: BOY_H, dir: -1, rim: brim, refl: fy, gain: 1 + .4 * eio(pr(t, 145.3, 146)) });
+  const GB = drawFig({ kind: 'child', P: BP, x: bx, y: fy, h: BOY_H, dir: -1, rim: brim, refl: fy, gain: 1 + .4 * eio(pr(t, 145.3, 146)) });
   const gk = eio(pr(t, 142.6, 143.2)), kp = GB.at('knN');   // 膝盖那点红，变成金色，再慢慢化开
   kneeMark(c, GB, mixC(C.red, C.gold, gk), lerp(.55, 1, gk) * (1 - eio(pr(t, 143.6, 144.6))), 142.65, t);
   burst(c, t, 142.65, kp[0], kp[1], { n: 26, seed: 23, col: C.gold, v0: 30, v1: 190, a0: -Math.PI, spread: Math.PI, g: -40, life: 1.1 });

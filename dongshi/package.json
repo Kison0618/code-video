@@ -2,7 +2,7 @@
   "name": "dongshi-demo",
   "private": true,
   "scripts": {
-    "frames": "node render.js frames 0:285.55:30:0:1"
+    "frames": "node render.js frames 0:257:30:0:1"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.0.0",
