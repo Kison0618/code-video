@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>被剥夺超级反应 · 墙上的影子</title>
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-sc/900.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/500.css">
+<link rel="stylesheet" href="node_modules/@fontsource/jetbrains-mono/500.css">
+<link rel="stylesheet" href="node_modules/@fontsource/ma-shan-zheng/400.css">
+<style>
+  html, body { margin: 0; background: #000; overflow: hidden; }
+  #c { display: block; transform-origin: 0 0; }
+  #tip { position: fixed; left: 12px; bottom: 10px; color: #777; font: 12px 'JetBrains Mono', monospace; display: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="tip">空格 播放/暂停 · ← → 前后 5 秒</div>
+<script src="core.js"></script>
+<script src="props.js"></script>
+<script src="post.js"></script>
+<script src="fx.js"></script>
+<script src="world.js"></script>
+<script src="main.js"></script>
+<script>
+// 预览：demo.html?play（竖屏 ?play&ar=9x16）。没有配乐，用时钟播放；不带 ?play 时什么都不做，只等 render.js 逐帧调用 window.render(t, frame)
+if (/[?&]play\b/.test(location.search)) (async () => {
+  const txt = window.ALL_TEXT.join('');
+  await Promise.all(window.FONTS.map(f => document.fonts.load(f, txt)));
+  const fit = () => { const k = Math.min(innerWidth / W, innerHeight / H); cv.style.transform = `scale(${k})`; cv.style.marginLeft = `${(innerWidth - W * k) / 2}px`; };
+  fit(); addEventListener('resize', fit); document.getElementById('tip').style.display = 'block';
+  let t = 0, last = performance.now(), playing = true;
+  addEventListener('keydown', e => {
+    if (e.code === 'Space') { playing = !playing; e.preventDefault(); }
+    if (e.code === 'ArrowRight') t = Math.min(window.TOTAL, t + 5);
+    if (e.code === 'ArrowLeft') t = Math.max(0, t - 5);
+  });
+  const loop = now => { if (playing) t = Math.min(window.TOTAL, t + (now - last) / 1000); last = now; window.render(t); requestAnimationFrame(loop); }; requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
