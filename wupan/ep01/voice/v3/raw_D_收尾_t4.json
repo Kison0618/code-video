@@ -1,0 +1,23 @@
+{
+  "section": "D_收尾",
+  "take": 4,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"task_id\": \"9b1124de9a814454a63da879bd05a8b3\", \"audio_url\": \"https://platform.r2.fish.audio/tasks/2026-10-23/9b1124de9a814454a63da879bd05a8b3.mp3\", \"voice\": {\"id\": \"918a8277663d476b95e2c4867da0f6a6\", \"title\": \"蒋介石\"}, \"model\": \"drama-3\", \"credits_charged\": 438}"
+      }
+    ],
+    "structuredContent": {
+      "task_id": "9b1124de9a814454a63da879bd05a8b3",
+      "audio_url": "https://platform.r2.fish.audio/tasks/2026-10-23/9b1124de9a814454a63da879bd05a8b3.mp3",
+      "voice": {
+        "id": "918a8277663d476b95e2c4867da0f6a6",
+        "title": "蒋介石"
+      },
+      "model": "drama-3",
+      "credits_charged": 438
+    },
+    "isError": false
+  }
+}

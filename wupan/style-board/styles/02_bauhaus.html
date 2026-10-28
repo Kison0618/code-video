@@ -1,0 +1,34 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{background:#ebe2cc}
+svg{position:absolute;inset:0}
+.sub{color:#141414;font:900 60px "Noto Sans SC";letter-spacing:2px}
+#grain{position:absolute;inset:0;z-index:4;opacity:.25;mix-blend-mode:multiply}
+</style></head><body>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080">
+ <!-- 一条陡峭的对角线把画面劈开：下方是“被压住的”深蓝 -->
+ <rect x="0" y="860" width="1920" height="220" fill="#1d3fa6"/><circle cx="860" cy="200" r="110" fill="#f2b705"/>
+ <!-- 杠杆：沿对角线 -->
+ <g transform="rotate(-17.6 960 555)">
+  <rect x="-60" y="545" width="2040" height="22" fill="#141414"/>
+  <!-- 重：巨大的黑圆 9999，压在左下 -->
+  <circle cx="330" cy="275" r="270" fill="#141414"/>
+  <text x="330" y="318" text-anchor="middle" font-family="Bahnschrift" font-weight="700" font-size="150" fill="#ebe2cc" letter-spacing="-6">9999</text>
+  <!-- 轻：小红圆 3999，被翘到右上 -->
+  <circle cx="1690" cy="492" r="52" fill="#d7261e"/>
+  <text x="1690" y="506" text-anchor="middle" font-family="Bahnschrift" font-weight="700" font-size="38" fill="#ebe2cc">3999</text>
+  <!-- 小人：站在高处，低头看那个大数字 -->
+  <g transform="translate(1540 545)">
+   <rect x="-9" y="-70" width="8" height="70" fill="#141414"/><rect x="3" y="-70" width="8" height="70" fill="#141414"/>
+   <polygon points="-26,-142 26,-142 12,-68 -12,-68" fill="#f2b705"/>
+   <circle cx="-2" cy="-162" r="18" fill="#141414"/>
+  </g>
+ </g>
+ <!-- 支点：红三角，偏右，所以“轻的”那头必然翘起 -->
+ <polygon points="1150,512 1050,860 1250,860" fill="#d7261e"/>
+</svg>
+<canvas id="grain" width="1920" height="1080"></canvas>
+<div class="sub" style="color:#ebe2cc">第一个数字，偷偷改写了你的判断</div>
+<script>
+const g=document.getElementById('grain').getContext('2d'),im=g.createImageData(1920,1080);
+for(let i=0;i<im.data.length;i+=4){const v=205+Math.random()*50;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255}g.putImageData(im,0,0);
+</script></body></html>

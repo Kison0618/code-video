@@ -1,0 +1,37 @@
+{
+  "section": "A_开场到蚂蚁",
+  "take": 4,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"task_id\": \"d47fb0e65e17449392f9e1dd5d5f193c\", \"audio_url\": \"https://platform.r2.fish.audio/tasks/2026-10-23/d47fb0e65e17449392f9e1dd5d5f193c.mp3\", \"voice\": {\"id\": \"918a8277663d476b95e2c4867da0f6a6\", \"title\": \"蒋介石\"}, \"voices\": [{\"id\": \"918a8277663d476b95e2c4867da0f6a6\", \"title\": \"蒋介石\"}, {\"id\": \"1512d05841734931bf905d0520c272b1\", \"title\": \"周杰伦\"}, {\"id\": \"85d573e7dfca4426816d5444100786ae\", \"title\": \"白岩松\"}], \"model\": \"drama-3\", \"credits_charged\": 0}"
+      }
+    ],
+    "structuredContent": {
+      "task_id": "d47fb0e65e17449392f9e1dd5d5f193c",
+      "audio_url": "https://platform.r2.fish.audio/tasks/2026-10-23/d47fb0e65e17449392f9e1dd5d5f193c.mp3",
+      "voice": {
+        "id": "918a8277663d476b95e2c4867da0f6a6",
+        "title": "蒋介石"
+      },
+      "voices": [
+        {
+          "id": "918a8277663d476b95e2c4867da0f6a6",
+          "title": "蒋介石"
+        },
+        {
+          "id": "1512d05841734931bf905d0520c272b1",
+          "title": "周杰伦"
+        },
+        {
+          "id": "85d573e7dfca4426816d5444100786ae",
+          "title": "白岩松"
+        }
+      ],
+      "model": "drama-3",
+      "credits_charged": 0
+    },
+    "isError": false
+  }
+}

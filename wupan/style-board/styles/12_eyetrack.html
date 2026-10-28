@@ -1,0 +1,50 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{background:#000}
+.ph{position:absolute;left:0;top:-160px;width:1920px;height:1280px;background:center/cover}
+.pg{position:absolute;z-index:1;color:#2b2420;font-family:"Noto Serif SC";mix-blend-mode:multiply}
+.pg h3{margin:0 0 6px;font:400 20px Georgia;letter-spacing:8px;color:#7a6a58;text-align:center}
+.pg h4{margin:0 0 26px;font:700 34px "Noto Serif SC";letter-spacing:10px;text-align:center}
+.it{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 22px;font-size:26px}
+.it span{flex:1;border-bottom:2px dotted #b9ab98;margin:0 10px;transform:translateY(-6px)}
+.it b{font:600 28px Georgia}
+.it small{display:block;font-size:17px;color:#8a7a68;margin-top:2px}
+.heat{position:absolute;inset:0;z-index:2;mix-blend-mode:multiply;opacity:.55}
+svg{position:absolute;inset:0;z-index:3}
+.lab{position:absolute;z-index:4;font:500 22px Consolas,"Noto Sans SC";color:#fff;background:rgba(0,0,0,.6);padding:6px 12px;border:1.5px solid rgba(255,255,255,.6)}
+.hud{position:absolute;inset:30px;z-index:4;font:400 20px Consolas;color:rgba(255,255,255,.85)}
+.hud span{position:absolute}
+.sub{color:#fff;font:600 58px "Noto Sans SC";letter-spacing:3px;text-shadow:0 3px 16px #000}
+</style></head><body><div class="ph" id="ph"></div>
+<div class="pg" style="left:430px;top:150px;width:520px;transform:rotate(-1.5deg) skewY(-1deg)">
+ <h3>MAINS</h3><h4>主 菜</h4>
+ <div class="it">澳洲 M9 和牛战斧<span></span><b>1,288</b></div>
+ <div class="it">法式香草烤春鸡<span></span><b>288</b></div>
+ <div class="it">香煎挪威三文鱼<span></span><b>268</b></div>
+ <div class="it">黑松露奶油意面<span></span><b>198</b></div>
+ <div class="it">慢炖牛脸颊<span></span><b>238</b></div>
+</div>
+<div class="pg" style="left:1060px;top:150px;width:520px;transform:rotate(1deg) skewY(1deg)">
+ <h3>WINE</h3><h4>酒 单</h4>
+ <div class="it">Château Lafite 2015<span></span><b>12,800</b></div>
+ <div class="it">店长精选红<span></span><b>688</b></div>
+ <div class="it">勃艮第黑皮诺<span></span><b>498</b></div>
+ <div class="it">杯装餐酒<span></span><b>88</b></div>
+</div>
+<canvas class="heat" id="heat" width="1920" height="1080"></canvas>
+<svg width="1920" height="1080" font-family="Consolas" font-size="24" font-weight="700" text-anchor="middle">
+ <polyline points="880,318 1480,318 870,378 540,378" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="10 8"/>
+ <circle cx="880" cy="318" r="46" fill="none" stroke="#fff" stroke-width="3"/><text x="880" y="327" fill="#fff">1</text>
+ <circle cx="1480" cy="318" r="40" fill="none" stroke="#fff" stroke-width="3"/><text x="1480" y="327" fill="#fff">2</text>
+ <circle cx="870" cy="378" r="28" fill="none" stroke="#ffcc00" stroke-width="3"/><text x="870" y="387" fill="#ffcc00">3</text>
+ <circle cx="540" cy="378" r="24" fill="none" stroke="#ffcc00" stroke-width="3"/><text x="540" y="387" fill="#ffcc00">4</text>
+</svg>
+<div class="lab" style="left:430px;top:60px">注视 #1 · ¥1,288 · 2.1s</div>
+<div class="lab" style="left:1300px;top:400px">注视 #2 · ¥12,800 · 1.4s</div>
+<div class="lab" style="left:200px;top:450px">#3 #4 · ¥288 “还挺合理”</div>
+<div class="hud"><span style="left:0;bottom:0">EYE-TRACK · 60Hz · TABLE 07</span><span style="right:0;bottom:0">00:00:07:40</span></div>
+<div class="sub">第一个数字，偷偷改写了你的判断</div>
+<script src="../assets/img_photo_menu.js"></script><script>
+document.getElementById('ph').style.backgroundImage=`url(${IMG.photo_menu})`;
+const g=document.getElementById('heat').getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,1920,1080);
+[[880,318,170,1],[1480,318,150,.85],[870,378,90,.4],[540,378,80,.3]].forEach(([x,y,r,a])=>{const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,`rgba(255,40,20,${a})`);gr.addColorStop(.45,`rgba(255,170,0,${a*.6})`);gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,7);g.fill()});
+</script></body></html>

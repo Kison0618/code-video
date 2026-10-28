@@ -1,0 +1,35 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{background:#000}
+.ph{position:absolute;left:0;top:-100px;width:1920px;height:1280px;background:url(../assets/photo_tag.png) center/cover;filter:contrast(1.05) saturate(.85) brightness(.92)}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse at 65% 50%,transparent 40%,rgba(0,0,0,.55) 100%)}
+.tagtxt{position:absolute;left:1414px;top:520px;width:210px;transform:rotate(-1.2deg) skewY(1deg);text-align:center;mix-blend-mode:multiply;font-family:"KaiTi","STKaiti"}
+.tagtxt s{display:block;font-size:40px;color:#2a2622;text-decoration:none;position:relative}
+.tagtxt s:after{content:"";position:absolute;left:8px;right:8px;top:52%;height:4px;background:#c7271f;transform:rotate(-8deg)}
+.tagtxt b{display:block;margin-top:40px;font-size:54px;color:#c7271f;font-weight:700}
+.tagtxt i{display:block;font-style:normal;font-size:24px;color:#5a524a;margin-top:6px}
+#chalk{position:absolute;inset:0;z-index:3}
+.sub{color:#fff;font:500 60px "Noto Sans SC";letter-spacing:3px;text-shadow:0 2px 14px rgba(0,0,0,.8)}
+.lbl{position:absolute;z-index:4;font:400 34px "Segoe Print","KaiTi";color:#fff;opacity:.92}
+</style></head><body><div class="ph"></div><div class="vig"></div>
+<div class="tagtxt"><i>原价</i><s>¥9,999</s><b>¥3,999</b></div>
+<svg id="chalk" width="1920" height="1080"></svg>
+<div class="lbl" style="left:700px;top:180px">锚 = 你先看到的数字</div>
+<div class="sub">第一个数字，偷偷改写了你的判断</div>
+<script src="../assets/rough.js"></script><script>
+const svg=document.getElementById('chalk'),rc=rough.svg(svg);
+const op={stroke:'#fff',strokeWidth:4,roughness:1.6,bowing:1.2};
+// 从价签垂下的链（粉笔圈），落到左下的锚
+const pts=[];for(let i=0;i<16;i++){const t=i/15;pts.push([1490-t*690,840-t*250+Math.sin(t*Math.PI)*130])}
+pts.forEach(([x,y],i)=>svg.appendChild(rc.ellipse(x,y,i%2?34:22,i%2?20:30,{...op,strokeWidth:3.5})));
+// 锚
+const ax=790,ay=800;
+svg.appendChild(rc.circle(ax,ay-210,46,op));
+svg.appendChild(rc.line(ax,ay-186,ax,ay+40,op));
+svg.appendChild(rc.line(ax-90,ay-140,ax+90,ay-140,op));
+svg.appendChild(rc.path(`M${ax-130} ${ay-40} Q ${ax} ${ay+130} ${ax+130} ${ay-40}`,op));
+svg.appendChild(rc.path(`M${ax-150} ${ay-70} L ${ax-130} ${ay-40} L ${ax-100} ${ay-62}`,op));
+svg.appendChild(rc.path(`M${ax+150} ${ay-70} L ${ax+130} ${ay-40} L ${ax+100} ${ay-62}`,op));
+// 指向价签的箭头
+svg.appendChild(rc.path('M 1010 240 Q 1300 260 1390 470',op));
+svg.appendChild(rc.path('M 1360 440 L 1392 474 L 1405 430',op));
+</script></body></html>

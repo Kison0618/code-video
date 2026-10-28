@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{background:#b9b0a4}
+.sub{color:#26231f;font:600 60px "Noto Sans SC";letter-spacing:4px}
+</style></head><body><div class="sub">第一个数字，偷偷改写了你的判断</div>
+<script src="../assets/r147/three.min.js"></script><script src="../assets/r147/FontLoader.js"></script><script src="../assets/r147/TextGeometry.js"></script>
+<script src="../assets/r147/RoomEnvironment.js"></script><script src="../assets/r147/font_helv_bold.js"></script><script>
+const T=THREE;T.ColorManagement.legacyMode=false;const scene=new T.Scene();
+const r=new T.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});r.setPixelRatio(1);r.setSize(1920,1080);
+r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;r.outputEncoding=T.sRGBEncoding;r.toneMapping=T.ACESFilmicToneMapping;r.toneMappingExposure=.78;
+document.body.prepend(r.domElement);
+const pm=new T.PMREMGenerator(r);scene.environment=pm.fromScene(new T.RoomEnvironment(),.04).texture;scene.environment.mapping=T.CubeUVReflectionMapping;
+scene.background=new T.Color('#b9b0a4');
+// 无缝背景：地面接弧形墙
+const cyc=new T.Mesh(new T.PlaneGeometry(60,40),new T.MeshStandardMaterial({color:'#bdb4a8',roughness:1}));cyc.rotation.x=-Math.PI/2;cyc.receiveShadow=true;scene.add(cyc);
+const wall=new T.Mesh(new T.PlaneGeometry(60,30),new T.MeshStandardMaterial({color:'#b5ac9f',roughness:1}));wall.position.set(0,15,-12);scene.add(wall);
+// 软垫：压扁的球，左边被重物压出一个坑
+const cg=new T.SphereGeometry(1,160,80);const p=cg.attributes.position;
+for(let i=0;i<p.count;i++){let x=p.getX(i)*3.1,y=p.getY(i)*.62,z=p.getZ(i)*2.4;
+ if(y>0){const d=Math.hypot(x+1.0,z*1.3);y-=.42*Math.exp(-d*d/1.6)*(y/.62);}
+ p.setXYZ(i,x,y,z)}
+cg.computeVertexNormals();
+const cushion=new T.Mesh(cg,new T.MeshStandardMaterial({color:'#e9e1d3',roughness:1,envMapIntensity:.35}));
+cushion.position.set(-.2,.5,0);cushion.castShadow=cushion.receiveShadow=true;scene.add(cushion);
+// 纽扣
+const btn=new T.Mesh(new T.SphereGeometry(.09,16,16),new T.MeshStandardMaterial({color:'#7a3a28',roughness:.6}));btn.visible=false;
+const font=new T.FontLoader().parse(FONT_HB);
+const txt=(s,size,depth)=>{const g=new T.TextGeometry(s,{font,size,height:depth,curveSegments:10,bevelEnabled:true,bevelThickness:.04,bevelSize:.03,bevelSegments:5});g.computeBoundingBox();g.center();return g};
+// 重：铬合金 9,999 斜着陷进软垫
+const heavy=new T.Mesh(txt('9,999',1.15,.42),new T.MeshStandardMaterial({color:'#5a5e68',metalness:1,roughness:.28,envMapIntensity:1.4}));
+heavy.position.set(-1.05,1.22,.15);heavy.rotation.set(-.08,.18,.06);heavy.castShadow=true;scene.add(heavy);
+// 轻：白色陶瓷感 3,999 浮在右上，几乎没有重量
+const light=new T.Mesh(txt('3,999',.5,.16),new T.MeshPhysicalMaterial({color:'#e0472f',roughness:.45,clearcoat:.4,envMapIntensity:.5}));
+light.position.set(3.4,2.75,.6);light.rotation.set(.1,-.35,-.12);light.castShadow=true;scene.add(light);
+// 灯：大柔光箱 + 轮廓光
+const key=new T.DirectionalLight('#fff4e6',2.2);key.position.set(-6,10,7);key.castShadow=true;key.shadow.mapSize.set(2048,2048);
+Object.assign(key.shadow.camera,{left:-8,right:8,top:8,bottom:-8});key.shadow.radius=8;key.shadow.bias=-.0004;scene.add(key);
+const rim=new T.DirectionalLight('#cfe0ff',1.2);rim.position.set(6,5,-6);scene.add(rim);
+scene.add(new T.HemisphereLight('#fff','#b8a99a',.35));
+const cam=new T.PerspectiveCamera(30,16/9,.1,100);cam.position.set(.4,3.6,10);cam.lookAt(.6,1.25,0);
+r.render(scene,cam);
+</script></body></html>

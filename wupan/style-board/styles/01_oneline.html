@@ -1,0 +1,34 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{background:#f5f0e6}
+svg{position:absolute;inset:0}
+.sub{color:#1a1a1a;font:400 60px "Noto Serif SC";letter-spacing:8px}
+#grain{position:absolute;inset:0;z-index:4;opacity:.18;mix-blend-mode:multiply}
+</style></head><body>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080">
+ <!-- 唯一的色块：价签后面的一枚暖色，视线终点 -->
+ <circle cx="1390" cy="430" r="250" fill="#f1c9b4"/>
+ <!-- 价签：大，第一个数字是主角 -->
+ <g transform="rotate(8 1390 300)">
+  <path d="M1390 150 L1520 222 L1520 640 L1260 640 L1260 222Z" fill="#fbf8f2" stroke="#1a1a1a" stroke-width="6" stroke-linejoin="round"/>
+  <circle cx="1390" cy="214" r="18" fill="none" stroke="#1a1a1a" stroke-width="6"/>
+  <text x="1390" y="400" text-anchor="middle" font-family="Bahnschrift" font-weight="700" font-size="84" fill="#c8372a">¥9,999</text>
+  <text x="1390" y="520" text-anchor="middle" font-family="Bahnschrift" font-weight="300" font-size="46" fill="#1a1a1a">¥3,999</text>
+  <line x1="1290" y1="455" x2="1490" y2="455" stroke="#1a1a1a" stroke-width="2"/>
+ </g>
+ <path id="L" fill="none" stroke="#1a1a1a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+<canvas id="grain" width="1920" height="1080"></canvas>
+<div class="sub">第一个数字，偷偷改写了你的判断</div>
+<script>
+// 一笔：从画面左下的肩线起笔 → 后脑 → 额头 → 从额头伸出，拧成锁链 → 扣进价签的孔
+let d='M 120 900 C 200 860 300 820 360 800 C 420 780 430 740 420 700 C 340 640 300 500 340 400 C 380 290 520 230 640 260 C 700 276 740 310 760 352 ';
+// 额头处（760,352）伸出的锁链：沿弧线到价签孔（约 1362,212）
+const P0=[766,350],P1=[1352,226],N=14;
+for(let i=1;i<=N*28;i++){const t=i/(N*28);const bx=P0[0]+(P1[0]-P0[0])*t,by=P0[1]+(P1[1]-P0[1])*t-Math.sin(t*Math.PI)*150;
+ const a=t*N*2*Math.PI,amp=4+16*Math.sin(Math.min(1,t*4)*Math.PI/2);d+=`L ${(bx+amp*Math.cos(a+Math.PI/2)).toFixed(1)} ${(by-amp*.85*Math.sin(a+Math.PI/2)).toFixed(1)} `;}
+// 回到侧脸继续画完：眉、鼻、唇、下巴、脖子、前胸
+d+='M 760 352 C 772 380 778 404 774 424 C 770 436 762 442 766 454 C 790 480 826 512 830 526 C 818 540 794 542 780 548 C 792 560 794 572 788 580 C 780 586 770 588 768 594 C 784 604 788 616 780 628 C 778 646 772 660 760 668 C 740 680 716 684 700 688 C 696 720 700 744 728 770 C 780 818 900 860 1040 900';
+document.getElementById('L').setAttribute('d',d);
+const g=document.getElementById('grain').getContext('2d'),im=g.createImageData(1920,1080);
+for(let i=0;i<im.data.length;i+=4){const v=215+Math.random()*40;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255}g.putImageData(im,0,0);
+</script></body></html>

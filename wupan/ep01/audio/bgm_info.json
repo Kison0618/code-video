@@ -1,0 +1,13 @@
+{
+ "OFF": 15.123,
+ "start_in_song": 15.123,
+ "drop_film": 1.957,
+ "loop_B": 119.8,
+ "loop_A": 43.68,
+ "jumps_film": [
+  104.68,
+  180.8
+ ],
+ "xf_talk_s": 0.3,
+ "song_end_used": 119.3
+}

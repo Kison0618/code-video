@@ -1,0 +1,38 @@
+{
+  "section": "B_绿松石",
+  "take": 1,
+  "model": "drama-3",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"task_id\": \"abf2ea25770b4fd09e75df761d20545c\", \"audio_url\": \"https://platform.r2.fish.audio/tasks/2026-10-23/abf2ea25770b4fd09e75df761d20545c.mp3\", \"voice\": {\"id\": \"2c0b44c053ed40788650a9d9d90d1f20\", \"title\": \"猫猫2\"}, \"voices\": [{\"id\": \"2c0b44c053ed40788650a9d9d90d1f20\", \"title\": \"猫猫2\"}, {\"id\": \"30ad478e008b4142babab2675dac1834\", \"title\": \"卡提西亚\"}, {\"id\": \"2be01e35836944349cb569863173e6c9\", \"title\": \"柯南\"}], \"model\": \"drama-3\", \"credits_charged\": 1449}"
+      }
+    ],
+    "structuredContent": {
+      "task_id": "abf2ea25770b4fd09e75df761d20545c",
+      "audio_url": "https://platform.r2.fish.audio/tasks/2026-10-23/abf2ea25770b4fd09e75df761d20545c.mp3",
+      "voice": {
+        "id": "2c0b44c053ed40788650a9d9d90d1f20",
+        "title": "猫猫2"
+      },
+      "voices": [
+        {
+          "id": "2c0b44c053ed40788650a9d9d90d1f20",
+          "title": "猫猫2"
+        },
+        {
+          "id": "30ad478e008b4142babab2675dac1834",
+          "title": "卡提西亚"
+        },
+        {
+          "id": "2be01e35836944349cb569863173e6c9",
+          "title": "柯南"
+        }
+      ],
+      "model": "drama-3",
+      "credits_charged": 1449
+    },
+    "isError": false
+  }
+}

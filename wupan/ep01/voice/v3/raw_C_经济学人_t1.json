@@ -1,0 +1,34 @@
+{
+  "section": "C_经济学人",
+  "take": 1,
+  "model": "drama-3",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"task_id\": \"9f153a228b5f42c2b38c1042703518ac\", \"audio_url\": \"https://platform.r2.fish.audio/tasks/2026-10-23/9f153a228b5f42c2b38c1042703518ac.mp3\", \"voice\": {\"id\": \"2c0b44c053ed40788650a9d9d90d1f20\", \"title\": \"猫猫2\"}, \"voices\": [{\"id\": \"2c0b44c053ed40788650a9d9d90d1f20\", \"title\": \"猫猫2\"}, {\"id\": \"6758b6fa79384cffae6f4adea4b5cc65\", \"title\": \"短剧解说\"}], \"model\": \"drama-3\", \"credits_charged\": 1297}"
+      }
+    ],
+    "structuredContent": {
+      "task_id": "9f153a228b5f42c2b38c1042703518ac",
+      "audio_url": "https://platform.r2.fish.audio/tasks/2026-10-23/9f153a228b5f42c2b38c1042703518ac.mp3",
+      "voice": {
+        "id": "2c0b44c053ed40788650a9d9d90d1f20",
+        "title": "猫猫2"
+      },
+      "voices": [
+        {
+          "id": "2c0b44c053ed40788650a9d9d90d1f20",
+          "title": "猫猫2"
+        },
+        {
+          "id": "6758b6fa79384cffae6f4adea4b5cc65",
+          "title": "短剧解说"
+        }
+      ],
+      "model": "drama-3",
+      "credits_charged": 1297
+    },
+    "isError": false
+  }
+}

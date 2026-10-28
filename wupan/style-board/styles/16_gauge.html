@@ -1,0 +1,40 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{background:radial-gradient(ellipse at 42% 40%,#3c5a4c 0%,#24372e 55%,#141f1a 100%)}
+svg{position:absolute;inset:0}
+.sub{color:#f2ead6;font:500 58px "Noto Serif SC";letter-spacing:6px;text-shadow:0 3px 14px rgba(0,0,0,.6)}
+</style></head><body>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" id="s">
+<defs>
+ <radialGradient id="face" cx="45%" cy="38%" r="70%"><stop offset="0" stop-color="#fbf5e6"/><stop offset=".8" stop-color="#e9dfc6"/><stop offset="1" stop-color="#cfc2a0"/></radialGradient>
+ <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0bf"/><stop offset=".25" stop-color="#c9a24a"/><stop offset=".5" stop-color="#7a5a22"/><stop offset=".75" stop-color="#e3c473"/><stop offset="1" stop-color="#5a4018"/></linearGradient>
+ <linearGradient id="brass2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0bf"/><stop offset=".5" stop-color="#8a6a2a"/><stop offset="1" stop-color="#e3c473"/></linearGradient>
+ <filter id="drop" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="24" dy="34" stdDeviation="26" flood-color="#000" flood-opacity=".55"/></filter>
+ <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".45" stop-color="#fff" stop-opacity=".04"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<g id="g" transform="translate(860 480)">
+ <circle r="420" fill="url(#brass)" filter="url(#drop)"/><circle r="392" fill="url(#brass2)"/><circle r="372" fill="url(#face)"/>
+ <g id="ticks"></g>
+ <text y="110" text-anchor="middle" font-family="Georgia" font-size="24" letter-spacing="8" fill="#5a4a30">JUDGMENT METER</text>
+ <text y="160" text-anchor="middle" font-family="Noto Serif SC" font-size="34" letter-spacing="10" fill="#2a241c">心理价位 · ¥</text>
+ <text y="205" text-anchor="middle" font-family="Georgia" font-size="20" letter-spacing="6" fill="#7a6a4a">EST. 1974</text>
+ <g id="needles"></g>
+ <circle r="34" fill="url(#brass)"/><circle r="12" fill="#3a2a10"/>
+ <path d="M-300 -240 A 372 372 0 0 1 240 -300 L 120 -60 Z" fill="url(#glass)"/>
+</g>
+</svg>
+<div class="sub">第一个数字，偷偷改写了你的判断</div>
+<script>
+const NS='http://www.w3.org/2000/svg',el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);(p||document.getElementById('ticks')).appendChild(e);return e};
+const A0=-225,A1=45,ang=v=>(A0+(A1-A0)*v/10000)*Math.PI/180;
+const arc=(v0,v1,r,w,col)=>{const a=ang(v0),b=ang(v1);el('path',{d:`M ${Math.cos(a)*r} ${Math.sin(a)*r} A ${r} ${r} 0 ${(b-a)>Math.PI?1:0} 1 ${Math.cos(b)*r} ${Math.sin(b)*r}`,fill:'none',stroke:col,'stroke-width':w})};
+arc(8500,10000,318,30,'#b8392a');arc(3000,4500,318,30,'#4f7a52');arc(0,2000,318,30,'#c9b98f');
+for(let v=0;v<=10000;v+=250){const a=ang(v),L=v%1000===0?38:18;el('line',{x1:Math.cos(a)*350,y1:Math.sin(a)*350,x2:Math.cos(a)*(350-L),y2:Math.sin(a)*(350-L),stroke:'#2a241c','stroke-width':v%1000===0?5:2})}
+for(let v=0;v<=10000;v+=2000){const a=ang(v);const t=el('text',{x:Math.cos(a)*262,y:Math.sin(a)*262+12,'text-anchor':'middle','font-family':'Georgia','font-size':34,fill:'#2a241c'});t.textContent=v?v/1000+'k':'0'}
+const lab=(v,txt,col)=>{const a=ang(v);const t=el('text',{x:Math.cos(a)*395+0,y:Math.sin(a)*395,'text-anchor':'middle','font-family':'Noto Sans SC','font-size':30,'font-weight':900,fill:col});t.textContent=txt};
+lab(9250,'原价',"#2a1a08");lab(3750,'划算！',"#2a1a08");lab(1000,'实际值',"#2a1a08");
+const nd=document.getElementById('needles');
+const needle=(v,col,op,w)=>{const a=ang(v)*180/Math.PI;el('path',{d:`M -40 ${-w} L 330 -2 L 330 2 L -40 ${w} Z`,fill:col,opacity:op,transform:`rotate(${a})`},nd)};
+needle(9999,'#c0392b',.35,9);needle(3999,'#1a1712',1,10);
+// 残影弧：指针从 9999 被拉回到 3999
+const a=ang(3999),b=ang(9999);el('path',{d:`M ${Math.cos(b)*200} ${Math.sin(b)*200} A 200 200 0 0 0 ${Math.cos(a)*200} ${Math.sin(a)*200}`,fill:'none',stroke:'#c0392b','stroke-width':4,'stroke-dasharray':'6 10',opacity:.7},nd);
+</script></body></html>

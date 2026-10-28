@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{background:#c9a57a}
+#paper{position:absolute;inset:0;z-index:0}
+.pc{position:absolute;z-index:2;background:center/cover;filter:drop-shadow(6px 10px 8px rgba(60,30,0,.45))}
+.pc>div{width:100%;height:100%;background:inherit}
+.tape{position:absolute;z-index:4;width:180px;height:50px;background:rgba(245,235,200,.72);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.scrap{position:absolute;z-index:3;padding:14px 22px;background:#f4efe3;font:900 56px "Noto Sans SC";color:#141414;filter:drop-shadow(4px 6px 5px rgba(60,30,0,.4))}
+.ltr{display:inline-block;padding:4px 10px;margin:0 3px;font:900 92px Impact,"Noto Sans SC";filter:drop-shadow(3px 5px 4px rgba(60,30,0,.4))}
+.mark{position:absolute;inset:0;z-index:5}
+.sub{color:#fff;font:900 58px "Noto Sans SC";letter-spacing:3px;text-shadow:0 0 0 #000;z-index:6}
+.sub span{background:#141414;padding:6px 20px}
+</style></head><body><canvas id="paper" width="1920" height="1080"></canvas>
+<div class="pc" id="p1" style="left:120px;top:110px;width:620px;height:430px;transform:rotate(-4deg)"></div>
+<div class="pc" id="p2" style="left:1240px;top:90px;width:520px;height:640px;transform:rotate(5deg)"></div>
+<div class="pc" id="p3" style="left:700px;top:430px;width:360px;height:520px;transform:rotate(-8deg);background-size:contain;background-repeat:no-repeat;filter:drop-shadow(6px 10px 8px rgba(60,30,0,.45)) sepia(.3)"></div>
+<div class="tape" style="left:330px;top:84px;transform:rotate(-8deg)"></div><div class="tape" style="left:1410px;top:70px;transform:rotate(10deg)"></div><div class="tape" style="left:1600px;top:690px;transform:rotate(-20deg)"></div>
+<div class="scrap" style="left:180px;top:600px;transform:rotate(3deg)">原价 <s style="text-decoration-color:#d7261e;text-decoration-thickness:8px">¥9,999</s></div>
+<div style="position:absolute;left:1080px;top:760px;z-index:3;transform:rotate(-4deg)">
+ <span class="ltr" style="background:#d7261e;color:#fff">¥</span><span class="ltr" style="background:#141414;color:#f2d14a;transform:rotate(6deg)">3</span><span class="ltr" style="background:#f4efe3;color:#141414;transform:rotate(-5deg)">9</span><span class="ltr" style="background:#2b59c3;color:#fff;transform:rotate(4deg)">9</span><span class="ltr" style="background:#f2d14a;color:#141414;transform:rotate(-7deg)">9</span></div>
+<svg class="mark" width="1920" height="1080"><g fill="none" stroke="#d7261e" stroke-width="7" stroke-linecap="round">
+ <path d="M 560 640 C 720 560 900 560 1000 600"/><path d="M 975 578 L 1004 602 L 972 620"/>
+ <path d="M 1100 850 C 1080 940 1500 960 1520 860 C 1540 760 1200 730 1110 790"/></g></svg>
+<div class="sub"><span>第一个数字，偷偷改写了你的判断</span></div>
+<script src="../assets/img_photo_window.js"></script><script src="../assets/img_photo_tag.js"></script><script src="../assets/img_engrave_anchor.js"></script><script>
+// 撕边：给每张图片一个锯齿 clip-path
+const torn=el=>{const pts=[];const n=40;for(let i=0;i<=n;i++)pts.push(`${i/n*100}% ${Math.random()*2.2}%`);for(let i=0;i<=n;i++)pts.push(`${100-Math.random()*1.6}% ${i/n*100}%`);for(let i=n;i>=0;i--)pts.push(`${i/n*100}% ${100-Math.random()*2.2}%`);for(let i=n;i>=0;i--)pts.push(`${Math.random()*1.6}% ${i/n*100}%`);el.style.clipPath=`polygon(${pts.join(',')})`};
+const set=(id,src,pos)=>{const e=document.getElementById(id);e.innerHTML='<div></div>';e.style.backgroundImage=`url(${src})`;if(pos)e.style.backgroundPosition=pos;torn(e.firstChild)};
+set('p1',IMG.photo_window,'40% 50%');set('p2',IMG.photo_tag,'78% 60%');set('p3',IMG.engrave_anchor);
+document.getElementById('p3').firstChild.style.mixBlendMode='multiply';
+// 牛皮纸纹理
+const g=document.getElementById('paper').getContext('2d'),im=g.createImageData(1920,1080);
+for(let i=0;i<im.data.length;i+=4){const n=Math.random()*26-13,f=Math.sin(i*.0007)*6;im.data[i]=201+n+f;im.data[i+1]=165+n+f;im.data[i+2]=122+n;im.data[i+3]=255}g.putImageData(im,0,0);
+</script></body></html>

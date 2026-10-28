@@ -1,0 +1,34 @@
+[
+ {
+  "section": "A_开场到蚂蚁",
+  "take": 2,
+  "chars": 289,
+  "cps_before": 4.06,
+  "tempo": 1.3,
+  "cps_after": 5.28
+ },
+ {
+  "section": "B_绿松石",
+  "take": 2,
+  "chars": 301,
+  "cps_before": 4.94,
+  "tempo": 1.073,
+  "cps_after": 5.3
+ },
+ {
+  "section": "C_经济学人",
+  "take": 2,
+  "chars": 279,
+  "cps_before": 5.96,
+  "tempo": 1.0,
+  "cps_after": 5.96
+ },
+ {
+  "section": "D_收尾",
+  "take": 2,
+  "chars": 112,
+  "cps_before": 4.38,
+  "tempo": 1.21,
+  "cps_after": 5.3
+ }
+]

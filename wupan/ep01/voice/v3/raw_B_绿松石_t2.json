@@ -1,0 +1,48 @@
+{
+  "section": "B_绿松石",
+  "take": 2,
+  "model": "drama-3",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"task_id\": \"9c002418b780403abeee06c1fc6c9eed\", \"audio_url\": \"https://platform.r2.fish.audio/tasks/2026-10-23/9c002418b780403abeee06c1fc6c9eed.mp3\", \"voice\": {\"id\": \"2c0b44c053ed40788650a9d9d90d1f20\", \"title\": \"猫猫2\"}, \"voices\": [{\"id\": \"2c0b44c053ed40788650a9d9d90d1f20\", \"title\": \"猫猫2\"}, {\"id\": \"30ad478e008b4142babab2675dac1834\", \"title\": \"卡提西亚\"}, {\"id\": \"2be01e35836944349cb569863173e6c9\", \"title\": \"柯南\"}], \"model\": \"drama-3\", \"credits_charged\": 0}"
+      },
+      {
+        "type": "text",
+        "text": "Fish tool definitions have been updated. Check the latest tools/list definition; reconnect if your client cannot refresh tools. Do not automatically retry a submission."
+      }
+    ],
+    "structuredContent": {
+      "task_id": "9c002418b780403abeee06c1fc6c9eed",
+      "audio_url": "https://platform.r2.fish.audio/tasks/2026-10-23/9c002418b780403abeee06c1fc6c9eed.mp3",
+      "voice": {
+        "id": "2c0b44c053ed40788650a9d9d90d1f20",
+        "title": "猫猫2"
+      },
+      "voices": [
+        {
+          "id": "2c0b44c053ed40788650a9d9d90d1f20",
+          "title": "猫猫2"
+        },
+        {
+          "id": "30ad478e008b4142babab2675dac1834",
+          "title": "卡提西亚"
+        },
+        {
+          "id": "2be01e35836944349cb569863173e6c9",
+          "title": "柯南"
+        }
+      ],
+      "model": "drama-3",
+      "credits_charged": 0,
+      "_meta": {
+        "tool_update": {
+          "next_action": "refresh_tools",
+          "message": "Fish tool definitions have been updated. Check the latest tools/list definition; reconnect if your client cannot refresh tools. Do not automatically retry a submission."
+        }
+      }
+    },
+    "isError": false
+  }
+}

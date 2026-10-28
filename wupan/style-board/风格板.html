@@ -1,0 +1,40 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>误判心理学 · 风格板</title><style>
+:root{--bg:#141414;--fg:#eee;--mut:#999;--line:#2a2a2a}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Noto Sans SC",sans-serif}
+header{padding:28px 32px 8px}h1{margin:0;font-size:26px;font-weight:600}header p{margin:6px 0 0;color:var(--mut);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:22px;padding:22px 32px 48px}
+figure{margin:0;cursor:zoom-in}figure img{width:100%;display:block;border:1px solid var(--line)}
+figcaption{padding:10px 2px;font-size:15px}figcaption b{margin-right:8px}figcaption span{color:var(--mut);font-size:13px;display:block;margin-top:3px}
+#big{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out}
+#big img{max-width:96vw;max-height:88vh}#big div{margin-top:10px;color:#ccc}
+.sec{margin:18px 32px 0;font-size:20px;font-weight:600;color:#ddd;border-top:1px solid #2a2a2a;padding-top:18px}header b{color:#fff}
+@media(max-width:520px){.grid{grid-template-columns:1fr;padding:16px}}
+</style></head><body>
+<header><h1>误判心理学 · 风格与效果</h1><p>上半部分是<b>风格</b>：整支视频的画面语言，选 1–2 种定调。下半部分是<b>效果</b>：讲某个点时插入的装置，放进任何风格里都能用。全部由代码渲染，部分用 AI 照片做底。点击可放大。</p></header>
+<h2 class="sec">风格 · 整片画面语言</h2><div class="grid" id="g1"></div>
+<h2 class="sec">效果 · 可插进任何风格的装置</h2><div class="grid" id="g2"></div>
+<div id="big"><img><div></div></div>
+<script>
+const STY=[
+['01_oneline','一笔画线描','米色纸、一根黑线、一抹暖色。安静、有设计感'],
+['02_bauhaus','包豪斯几何','红黄蓝黑、粗几何、强对角线。节奏强，适合讲“力”'],
+['03_papercut','剪纸层叠','分层纸片加投影。温和、有童书感'],
+['04_diorama','微缩街景 3D','夜晚小岛、移轴虚化。像在看一个小世界'],
+['13_metal3d','棚拍 3D 物件','无缝背景、金属与软垫。发布会级别的质感'],
+['07_photo_chalk','实拍 + 手绘','纪录片照片加白色手绘线。真实，解释性强'],
+['11_collage','手账拼贴','撕边照片、胶带、剪报字。热闹、有手作感'],
+['15_archive','复古档案影像','70 年代褪色胶片、点阵记分牌。适合讲历史实验'],
+];
+const FX=[
+['12_eyetrack','视线追踪','热力图加注视顺序：眼睛先看了哪里'],
+['14_magnifier','放大镜','透镜折射：被放大的就是注意力所在'],
+['16_gauge','仪表盘','指针与残影：判断被拉偏了多少'],
+['06_phone','手机界面','把偏误放回真实的 App 场景'],
+['09_receipt','小票 / 实物单据','用真实单据当证据'],
+['10_museum','展签 / 拍卖估价','用说明牌讲概念'],
+];
+const big=document.getElementById('big');
+[[STY,'g1'],[FX,'g2']].forEach(([L,id])=>L.forEach(([f,n,d],i)=>{const e=document.createElement('figure');e.innerHTML=`<img src="out/${f}.png" loading="lazy"><figcaption><b>${id==='g1'?'风格':'效果'} ${i+1}</b>${n}<span>${d}</span></figcaption>`;
+ e.onclick=()=>{big.querySelector('img').src=`out/${f}.png`;big.querySelector('div').textContent=`${n} — ${d}`;big.style.display='flex'};document.getElementById(id).appendChild(e)}));
+big.onclick=()=>big.style.display='none';
+</script></body></html>

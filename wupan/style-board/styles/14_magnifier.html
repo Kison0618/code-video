@@ -1,0 +1,35 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{background:#000}
+.sub{color:#fff;font:600 58px "Noto Sans SC";letter-spacing:3px;text-shadow:0 3px 16px #000}
+</style></head><body><canvas id="c" width="1920" height="1080"></canvas><div class="sub">第一个数字，偷偷改写了你的判断</div>
+<script src="../assets/img_photo_tag.js"></script><script>
+(async()=>{await document.fonts.load('700 50px Bahnschrift');await document.fonts.load('500 20px "Noto Sans SC"');
+const img=new Image();img.src=IMG.photo_tag;await img.decode();
+const W=1920,H=1080,c=document.getElementById('c').getContext('2d',{willReadFrequently:true});
+c.filter='brightness(.85) contrast(1.05)';c.drawImage(img,0,-100,1920,1280);c.filter='none';
+// 价签上印价格（跟着价签轻微透视）
+c.save();c.translate(1515,700);c.rotate(-.012);c.fillStyle='rgba(40,34,28,.92)';c.textAlign='center';
+c.font='500 22px "Noto Sans SC"';c.fillText('原价',0,-160);c.font='700 50px Bahnschrift';c.fillText('¥9,999',0,-106);
+c.fillRect(-80,-88,160,2);c.font='500 22px "Noto Sans SC"';c.fillText('现价',0,64);c.fillStyle='rgba(176,36,28,.95)';c.font='700 46px Bahnschrift';c.fillText('¥3,999',0,116);c.restore();
+// 透镜：中心放大 + 边缘桶形畸变 + 色散
+const src=c.getImageData(0,0,W,H),out=c.getImageData(0,0,W,H),S=src.data,O=out.data;
+const cx=1512,cy=588,R=128,M=1.8;
+for(let y=cy-R;y<cy+R;y++)for(let x=cx-R;x<cx+R;x++){const dx=x-cx,dy=y-cy,d=Math.hypot(dx,dy);if(d>=R)continue;
+ const t=d/R,k=(1/M)*(1+.35*t*t);
+ for(let ch=0;ch<3;ch++){const kk=k*(1+(ch-1)*.012*t);const sx=Math.round(cx+dx*kk),sy=Math.round(cy+dy*kk);O[(y*W+x)*4+ch]=S[(sy*W+sx)*4+ch]*(1.06-.12*t*t)}}
+c.putImageData(out,0,0);
+// 投影
+c.save();c.globalCompositeOperation='multiply';const sh=c.createRadialGradient(cx+60,cy+70,R*.9,cx+60,cy+70,R*1.35);sh.addColorStop(0,'rgba(0,0,0,.55)');sh.addColorStop(1,'rgba(0,0,0,0)');
+c.fillStyle=sh;c.beginPath();c.arc(cx+60,cy+70,R*1.35,0,7);c.arc(cx,cy,R,0,7,true);c.fill();c.restore();
+// 手柄
+c.save();c.translate(cx,cy);c.rotate(-.55);const hg=c.createLinearGradient(0,-24,0,24);hg.addColorStop(0,'#2a1d14');hg.addColorStop(.35,'#6b4a33');hg.addColorStop(.6,'#3a281b');hg.addColorStop(1,'#1a110b');
+c.fillStyle=hg;c.beginPath();c.roundRect(R+40,-24,300,48,24);c.fill();
+const fg=c.createLinearGradient(0,-18,0,18);fg.addColorStop(0,'#8a7a5a');fg.addColorStop(.4,'#f0dfae');fg.addColorStop(1,'#6a5a3a');c.fillStyle=fg;c.fillRect(R+4,-18,44,36);c.restore();
+// 黄铜镜框
+c.lineWidth=22;const rg=c.createLinearGradient(cx-R,cy-R,cx+R,cy+R);rg.addColorStop(0,'#fff1c4');rg.addColorStop(.3,'#c9a24a');rg.addColorStop(.55,'#7a5a22');rg.addColorStop(.8,'#e6c77a');rg.addColorStop(1,'#5a4018');
+c.strokeStyle=rg;c.beginPath();c.arc(cx,cy,R+10,0,7);c.stroke();c.lineWidth=2;c.strokeStyle='rgba(0,0,0,.5)';c.beginPath();c.arc(cx,cy,R-1,0,7);c.stroke();
+// 镜面高光
+c.save();c.beginPath();c.arc(cx,cy,R,0,7);c.clip();const gl=c.createLinearGradient(cx-R,cy-R,cx,cy);gl.addColorStop(0,'rgba(255,255,255,.28)');gl.addColorStop(.5,'rgba(255,255,255,.04)');gl.addColorStop(1,'rgba(255,255,255,0)');
+c.fillStyle=gl;c.beginPath();c.ellipse(cx-60,cy-80,R*.8,R*.45,-.6,0,7);c.fill();c.restore();
+})();
+</script></body></html>
