@@ -55,6 +55,7 @@
 - 编码参数必须保留 `-x264-params b-pyramid=none:keyint=60:min-keyint=30`。第一集因为默认的 b-pyramid，播放器丢 B 帧时出现了大面积方块花屏和字幕回退。
 - 预览用 `node src/preview.js out/_x.png <时刻...>` 抽帧拼图。云端只渲染 720p 或片段，不出整片成片。
 - 不要提交大文件：配音、mp4、wav 都不进仓库。单张图片控制在 10 MB 以内。
+- 第一集有 4 张素材超过 10 MB，没有上传：eng_ariely、eng_tourist、ph_case、ph_store。在云端渲染第一集，这几个镜头会缺图，属于正常现象。学风格时看 `ep01/style_frames/` 就够了。
 
 ## 5. 和用户沟通
 - 用户说“不好看”，通常意味着缺少和内容相关的视觉母题，不是让你调颜色。
