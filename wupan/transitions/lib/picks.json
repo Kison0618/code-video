@@ -1,0 +1,150 @@
+[
+  {
+    "id": "paixian",
+    "zh": "排线",
+    "用途": "固定开场，版画人物进入主题",
+    "dur": 2.2,
+    "seed": 0.37,
+    "focus": null,
+    "dir": null,
+    "sfx": {
+      "id": "wp_paixian",
+      "seed": 11,
+      "trimStart": 0.05,
+      "offset": 0,
+      "peakBelowVoiceDb": 6,
+      "accentP": 0.42
+    }
+  },
+  {
+    "id": "moran",
+    "zh": "墨染",
+    "用途": "人物转概念，墨滴从主体左侧晕入",
+    "dur": 2.6,
+    "seed": 0.37,
+    "focus": [
+      0.3,
+      0.45
+    ],
+    "dir": null,
+    "sfx": {
+      "id": "wp_moran",
+      "seed": 12,
+      "trimStart": 0.05,
+      "offset": 0,
+      "peakBelowVoiceDb": 6,
+      "accentP": 0
+    }
+  },
+  {
+    "id": "feibai",
+    "zh": "飞白",
+    "用途": "关键词转解释，枯笔横扫",
+    "dur": 2.2,
+    "seed": 0.37,
+    "focus": null,
+    "dir": null,
+    "sfx": {
+      "id": "wp_feibai",
+      "seed": 13,
+      "trimStart": 0.05,
+      "offset": 0,
+      "peakBelowVoiceDb": 6,
+      "accentP": 0.18
+    }
+  },
+  {
+    "id": "sizhi",
+    "zh": "撕纸",
+    "用途": "推翻旧结论，裂口避开中央人物",
+    "dur": 1.8,
+    "seed": 0.37,
+    "focus": [
+      0.66,
+      0.5
+    ],
+    "dir": null,
+    "sfx": {
+      "id": "wp_sizhi",
+      "seed": 14,
+      "trimStart": 0.05,
+      "offset": 0,
+      "peakBelowVoiceDb": 6,
+      "accentP": 0.25
+    }
+  },
+  {
+    "id": "fanye",
+    "zh": "翻页",
+    "用途": "下一章、清单推进",
+    "dur": 1.6,
+    "seed": 0.37,
+    "focus": null,
+    "dir": null,
+    "sfx": {
+      "id": "wp_fanye",
+      "seed": 15,
+      "trimStart": 0.05,
+      "offset": 0,
+      "peakBelowVoiceDb": 6,
+      "accentP": 0.95
+    }
+  },
+  {
+    "id": "fengsha",
+    "zh": "风沙",
+    "用途": "旧判断消散，沿指定风向离场",
+    "dur": 2.6,
+    "seed": 0.37,
+    "focus": null,
+    "dir": [
+      -1,
+      -0.21
+    ],
+    "sfx": {
+      "id": "wp_fengsha",
+      "seed": 16,
+      "trimStart": 0.05,
+      "offset": 0.1,
+      "peakBelowVoiceDb": 6,
+      "accentP": 0.5
+    }
+  },
+  {
+    "id": "shuaijing",
+    "zh": "甩镜",
+    "用途": "场所跳转、快速对比",
+    "dur": 1.6,
+    "seed": 0.37,
+    "focus": null,
+    "dir": [
+      1,
+      0
+    ],
+    "sfx": {
+      "id": "wp_shuaijing",
+      "seed": 17,
+      "trimStart": 0.05,
+      "offset": 0.242,
+      "peakBelowVoiceDb": 6,
+      "accentP": 0.5
+    }
+  },
+  {
+    "id": "yinzhang",
+    "zh": "印章",
+    "用途": "固定收尾，为结论落款",
+    "dur": 3,
+    "seed": 0.37,
+    "focus": null,
+    "dir": null,
+    "sfx": {
+      "id": "wp_yinzhang",
+      "seed": 18,
+      "trimStart": 0.05,
+      "offset": 0,
+      "peakBelowVoiceDb": 6,
+      "accentP": 0.35
+    }
+  }
+]

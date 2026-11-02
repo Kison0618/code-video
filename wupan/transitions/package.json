@@ -1,0 +1,14 @@
+{
+  "name": "shanhe-transitions",
+  "private": true,
+  "version": "1.0.0",
+  "description": "山河转场 20 式可复用转场库",
+  "dependencies": {
+    "playwright-core": "^1.64.1",
+    "skia-canvas": "^3.0.8"
+  },
+  "scripts": {
+    "gen-lib": "node tools/gen_lib.js",
+    "skia-demo": "node examples/skia_render.js"
+  }
+}
