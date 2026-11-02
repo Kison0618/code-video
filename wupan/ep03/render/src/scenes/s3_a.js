@@ -80,13 +80,14 @@ function s03(c, t) {
 }
 // —— 004 判词：只留一条“托”的队伍，队尾是“你” ——
 function s04(c, t) {
+  push(c, t, L('004').t0, L('004').t1, 0.03, 760, 560, () => Q.put(c, 'E09', 330, 800, 620, { ar: 1.1 }));
   for (let k = 0; k < 4; k++) {
-    const x = 470 + k * 210;
+    const x = 640 + k * 200;
     fig(c, 'E08', x, 760, 470, { flip: true });
     over(c, 'E08', x, 760, 470, '托', 1, { size: 46, color: '#fbf3df', bg: Q.RUST, seed: 740 + k, flip: true });
   }
   const b = prog(t, at('004', '真顾客'), at('004', '真顾客') + 0.5);
-  you(c, 'E01', 1420, 770, 480, { bounce: b });
+  you(c, 'E01', 1500, 770, 480, { bounce: b });
   verdict(c, t, '004', '一条假队伍', at('004', '一条假队伍'), 960, 870, 78);
 }
 

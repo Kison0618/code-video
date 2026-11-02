@@ -6,25 +6,56 @@ const { smooth, prog, lerp, clamp, easeOut } = K;
 const P = require('../paper');
 const V5 = require('./v5_util');
 
-// —— 023：桌上四张背面朝上的卡 ——
-const BACK = P.poly(P.jag([[-170, -230], [170, -230], [170, 230], [-170, 230]], 2, 16, 1001));
-function s23(c, t) {
-  push(c, t, L('023').t0, L('023').t1 + 0.3, 0.03, 960, 520, () => {
-    [-1.5, -0.5, 0.5, 1.5].forEach((k, i) => {
-      const p = pop(t, L('023').t0 - 0.1 + i * 0.12, 0.45);
-      c.save(); c.globalAlpha *= clamp(p * 2); c.translate(960 + k * 400, 500 + (1 - easeOut(p)) * 60); c.rotate((i % 2 ? 1 : -1) * 0.03);
-      P.piece(c, BACK, '#b7895a', { blur: 18, dy: 8 });
-      c.strokeStyle = 'rgba(251,246,234,0.6)'; c.lineWidth = 5; c.strokeRect(-140, -200, 280, 400);
-      c.fillStyle = 'rgba(251,246,234,0.85)'; c.font = '700 120px Num'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(String(i + 1), 0, 8);
-      c.restore();
-    });
-  });
-  Q.tag(c, 960, 880, '随处可见', pop(t, at('023', '随处可见')), { size: 70, hl: true, seed: 1002 });
+// —— 023：桌上摊开四张缩略图卡：药店长队 / 电视 / 手机评论 / 会议室。024–027 各自从自己那张卡里放大出来 ——
+const CARD_W = 420, CARD_H = 300, CARD_Y = 480, CARD_X = [-1.5, -0.5, 0.5, 1.5].map(k => 960 + k * 452);
+const CARDP = P.poly(P.jag([[-CARD_W / 2, -CARD_H / 2], [CARD_W / 2, -CARD_H / 2], [CARD_W / 2, CARD_H / 2], [-CARD_W / 2, CARD_H / 2]], 2, 16, 1001));
+function cover(c, name, w, h) {
+  const im = X.photo('gen/' + name), s = Math.max(w / im.width, h / im.height);
+  c.drawImage(im, -im.width * s / 2, -im.height * s / 2, im.width * s, im.height * s);
 }
-// 翻牌进场：每张卡开头 0.5 秒横向展开
+// 缩略图内容（卡片坐标系，原点在卡中心）
+const THUMBS = [
+  (c, w, h) => cover(c, 'E24', w, h),
+  (c, w, h) => { c.fillStyle = '#efe6d2'; c.fillRect(-w / 2, -h / 2, w, h); Q.put(c, 'H06', 0, h * 0.44, h * 0.86, { ar: 1.35, shadow: false }); Q.tag(c, -18, -12, '哈哈哈', 1, { size: 30, hl: true, seed: 1003 }); },
+  (c, w, h) => {
+    c.fillStyle = '#efe6d2'; c.fillRect(-w / 2, -h / 2, w, h);
+    c.save(); c.scale(0.62, 0.62);
+    V5.phone(c, 0, 6, 150, 240, (cc, sw, sh) => { cc.fillStyle = '#f6f2ea'; cc.fillRect(0, 0, sw, sh); cc.font = '700 22px Sans'; cc.textBaseline = 'middle';
+      for (let k = 0; k < 4; k++) { cc.fillStyle = '#ffffff'; cc.fillRect(8, 14 + k * 44, sw - 16, 36); cc.fillStyle = '#e0a526'; cc.fillText('★★★★★', 14, 32 + k * 44); } });
+    c.restore();
+  },
+  (c, w, h) => cover(c, 'E25', w, h),
+];
+function card(c, k, x, y, s, a, rot) {
+  c.save(); c.globalAlpha *= a; c.translate(x, y); c.rotate(rot); c.scale(s, s);
+  P.piece(c, CARDP, '#fbf7ee', { blur: 18, dy: 8 });
+  c.save(); c.beginPath(); c.rect(-CARD_W / 2 + 12, -CARD_H / 2 + 12, CARD_W - 24, CARD_H - 24); c.clip(); THUMBS[k](c, CARD_W - 24, CARD_H - 24); c.restore();
+  c.restore();
+}
+function table(c, t, a0, done = -1) {
+  for (let k = 0; k < 4; k++) {
+    const p = pop(t, a0 + k * 0.15, 0.45);
+    if (p <= 0.01) continue;
+    c.save(); c.globalAlpha *= k <= done ? 0.45 : 1; card(c, k, CARD_X[k], CARD_Y + (1 - p) * 60, 1, clamp(p * 2), (k % 2 ? 1 : -1) * 0.03); c.restore();
+  }
+}
+function s23(c, t) {
+  push(c, t, L('023').t0, L('023').t1 + 0.3, 0.03, 960, 520, () => table(c, t, L('023').t0 - 0.2));
+  Q.tag(c, 960, 820, '随处可见', pop(t, at('023', '随处可见')), { size: 70, hl: true, seed: 1002 });
+}
+// 第 k 个例子：先在桌上把第 k 张卡提起来，再从卡的位置放大到全屏，里面是这一句的完整画面
 function flipIn(c, t, a, fn) {
-  const p = smooth(prog(t, a - 0.15, a + 0.45));
-  c.save(); c.translate(960, 540); c.scale(Math.max(0.02, p), 1); c.translate(-960, -540); fn(); c.restore();
+  const k = ['024', '025', '026', '027'].findIndex(id => Math.abs(L(id).t0 - a) < 1e-6);
+  const p = smooth(prog(t, a - 0.15, a + 0.55));
+  if (p >= 1) return fn();
+  table(c, t, -1e9, k - 1);
+  const x = lerp(CARD_X[k], 960, p), y = lerp(CARD_Y, 540, p), w = lerp(CARD_W - 24, 1920, p), h = lerp(CARD_H - 24, 1080, p);
+  c.save(); c.translate(x, y);
+  P.piece(c, P.poly([[-w / 2 - 12, -h / 2 - 12], [w / 2 + 12, -h / 2 - 12], [w / 2 + 12, h / 2 + 12], [-w / 2 - 12, h / 2 + 12]]), '#fbf7ee', { blur: 24, dy: 10 });
+  c.beginPath(); c.rect(-w / 2, -h / 2, w, h); c.clip();
+  c.fillStyle = P.BG; c.fillRect(-w / 2, -h / 2, w, h);
+  c.scale(w / 1920, h / 1080); c.translate(-960, -540); fn();
+  c.restore();
 }
 // —— 024：深夜药店长队 ——
 function s24(c, t) {
@@ -82,7 +113,7 @@ function s26(c, t) {
   Q.tag(c, 1480, 760, '往好的方向带', pop(t, at('026', '往好的方向带')), { size: 50, seed: 1033 });
 }
 // —— 027：会议室，每个人头顶一个“……”；“没人反对”；“方案没问题”盖勾章 ——
-const HEADS = [[0.18, 0.36], [0.33, 0.30], [0.50, 0.28], [0.67, 0.30], [0.82, 0.36]];
+const HEADS = [[0.10, 0.34], [0.20, 0.33], [0.29, 0.30], [0.64, 0.34], [0.74, 0.37], [0.86, 0.42]];   // 按新 E25 量的坐着的人
 function s27(c, t) {
   const W = 1700, H = 880, X0 = 960 - W / 2, Y0 = 480 - H / 2;
   flipIn(c, t, L('027').t0, () => push(c, t, L('027').t0, L('027').t1, 0.03, 960, 500, () => {

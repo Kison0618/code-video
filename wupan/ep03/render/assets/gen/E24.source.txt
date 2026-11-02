@@ -1,4 +1,4 @@
 AI 生成（kedaya gpt-image-2.5，/v1/images/edits，2026-11-02），带参考图。
-参考图：ep02/render/assets/gen/I01
+参考图：ep03/render/assets/gen/E01、ep03/render/assets/gen/E26、ep02/render/assets/gen/I01
 尺寸：1536x1024
-提示词：Victorian copperplate engraving, fine crosshatching, warm sepia ink on cream paper, match the drawing style of the reference image. Full illustration. No text, no letters, no numbers, no readable signs, no frame, no border. Subject: a pharmacy storefront at night, warm light pouring out of the shop window, a long line of people waiting outside along the sidewalk, dark night sky.
+提示词：Victorian copperplate engraving, fine crosshatching, warm sepia ink on cream paper, match the drawing style of the reference image. Full illustration. No text, no letters, no numbers, no readable signs, no frame, no border. Subject: Everything is set in a contemporary Chinese city after 2010: all people are ordinary present-day Chinese (East Asian) people in modern everyday clothes like the people in the reference images, modern Chinese buildings and shop fronts, signboards with no readable writing. A modern Chinese pharmacy shopfront late at night: glowing shop window with medicine shelves inside, a green cross sign without writing, a long queue of Chinese people in winter coats and face masks waiting outside on the sidewalk, dark night sky.

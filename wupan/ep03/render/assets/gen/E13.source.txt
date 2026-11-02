@@ -1,4 +1,4 @@
 AI 生成（kedaya gpt-image-2.5，/v1/images/edits，2026-11-02），带参考图。
-参考图：ep02/render/assets/gen/H01、ep02/render/assets/gen/G04
+参考图：ep03/render/assets/gen/E01、ep03/render/assets/gen/E26、ep02/render/assets/gen/H01
 尺寸：1536x1024
-提示词：Victorian copperplate engraving, fine crosshatching, warm sepia ink on cream paper, match the drawing style of the reference image. Full illustration. No text, no letters, no numbers, no readable signs, no frame, no border. Subject: a crowd of ordinary people standing in a half circle, every single one of them turning their head to stare at one lone man standing alone in the middle, he looks uncomfortable.
+提示词：Victorian copperplate engraving, fine crosshatching, warm sepia ink on cream paper, match the drawing style of the reference image. Full illustration. No text, no letters, no numbers, no readable signs, no frame, no border. Subject: Everything is set in a contemporary Chinese city after 2010: all people are ordinary present-day Chinese (East Asian) people in modern everyday clothes like the people in the reference images, modern Chinese buildings and shop fronts, signboards with no readable writing. A crowd of ordinary Chinese people standing in a half circle on a modern pedestrian street, every single one of them turning to stare at one lone young man standing alone in the middle, he looks uncomfortable.

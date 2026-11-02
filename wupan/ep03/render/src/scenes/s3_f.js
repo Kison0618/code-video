@@ -7,20 +7,26 @@ const P = require('../paper');
 const V5 = require('./v5_util');
 const TL = require('../timeline');
 
-// —— 028 判词 ——
+// —— 028 判词：一块路牌在“反过来”时转向，“你”站在路牌下；纸签「用在好事上」——
 function s28(c, t) {
-  push(c, t, L('028').t0, L('028').t1, 0.03, 960, 600, () => you(c, 'E01', 960, 800, 560));
-  verdict(c, t, '028', '用在好事上', at('028', '用在好事上') - 0.3, 960, 890, 82);
+  const turn = smooth(prog(t, L('028').t0 + 0.1, L('028').t0 + 0.9));
+  push(c, t, L('028').t0, L('028').t1, 0.03, 960, 560, () => {
+    const sx = Math.cos(turn * Math.PI);   // 1 → -1：朝右的牌子转成朝左
+    c.save(); c.translate(1120, 0); c.scale(Math.abs(sx) < 0.04 ? 0.04 * Math.sign(sx || 1) : sx, 1); c.translate(-1120, 0);
+    Q.put(c, 'E34', 1120, 960, 820, { ar: 0.55, label: '路牌' }); c.restore();
+    you(c, turn > 0.5 ? 'E01' : 'E02', 700, 980, 520);
+  });
+  verdict(c, t, '028', '用在好事上', at('028', '用在好事上') - 0.3, 760, 170, 82);
 }
 // —— 029：家长群接龙 ——
 function s29(c, t) {
   Q.tag(c, 210, 140, '第一', pop(t, L('029').t0), { size: 64, bg: Q.INK, color: '#fbf3df', seed: 1101 });
-  // 左边：已经在做的人（一排人走向右边）
+  Q.tag(c, 1640, 400, '很快就交了', pop(t, at('029', '很快就交了')), { size: 50, seed: 1103 });
+  // 接龙名单本身就是“很多人已经在做了”：手机居中，左右两张纸签
   const many = at('029', '很多人已经在做了');
-  for (let k = 0; k < 4; k++) { const p = pop(t, L('029').t0 + k * 0.2, 0.5); c.save(); c.globalAlpha *= p; fig(c, crowdAt(k), 160 + k * 120, 960, 300); c.restore(); }
-  Q.tag(c, 400, 560, '很多人已经在做了', pop(t, many), { size: 46, hl: true, seed: 1102 });
+  Q.tag(c, 400, 470, '很多人已经在做了', pop(t, many), { size: 54, hl: true, seed: 1102, rot: -0.02 });
   const g = at('029', '家长群') - 0.3;
-  V5.phone(c, 1240, 520, 600, 800, (cc, w, h) => {
+  V5.phone(c, 1000, 520, 600, 800, (cc, w, h) => {
     cc.fillStyle = '#ededed'; cc.fillRect(0, 0, w, h);
     cc.fillStyle = '#f7f7f7'; cc.fillRect(0, 0, w, 84); cc.fillStyle = '#1e1e1e'; cc.font = '700 36px Sans'; cc.textAlign = 'center'; cc.textBaseline = 'middle'; cc.fillText('三年级二班 家长群', w / 2, 44);
     V5.msg(cc, 20, 100, w - 20, '已有 32 位家长提交', pop(t, at('029', '已有三十二位') - 0.2, 0.5), { size: 40, bg: '#fff3c4' });
@@ -40,7 +46,7 @@ function s29(c, t) {
       cc.restore();
     }
   }, { alpha: pop(t, L('029').t0 - 0.1, 0.5) });
-  if (t > at('029', '还没交')) X.roll(c, Math.min(41, 32 + (t - at('029', '还没交')) * 3.5), 1720, 860, 96, { digits: 2, suffix: ' 位', color: Q.RUST });
+  if (t > at('029', '还没交')) X.roll(c, Math.min(41, 32 + (t - at('029', '还没交')) * 3.5), 1640, 560, 120, { digits: 2, suffix: ' 位', color: Q.RUST });
 }
 // —— 030：老两口 + 保健品；“你”讲十遍道理（灰气泡一摞）；老同事一句“我也上过当” ——
 function bubble(c, x, y, s, p, o = {}) {
@@ -101,13 +107,26 @@ function s32(c, t) {
   Q.tag(c, 430, 420, '真的知道？', pop(t, at('032', '真的知道')), { size: 58, seed: 1134, rot: -0.03 });
   Q.tag(c, 1490, 420, '只是看见别人这么做？', pop(t, at('032', '只是看见别人')), { size: 52, seed: 1135, rot: 0.03 });
 }
-// —— 033 判词 + 「误判」印章 ——
-function s33(c, t) {
-  push(c, t, L('033').t0, TL.DUR, 0.03, 960, 500, () => you(c, 'E04', 960, 700, 500));
-  Q.tag(c, 960, 785, '跟对了，推你往前走', pop(t, at('033', '跟对了人群') - 0.3, 0.65), { size: 64, hl: true, seed: 1141, rot: -0.012 });
-  Q.tag(c, 960, 895, '跟错了，推你往坑里走', pop(t, at('033', '跟错了') - 0.3, 0.65), { size: 56, seed: 1142, rot: 0.01 });
-  const s = at('033', '往坑里走') + 0.9;
-  X.stamp(c, 1480, 380, '误判', prog(t, s, s + 0.7), { size: 150, color: Q.RUST, seed: 1143, rot: -0.1 });
+// —— 033 判词：“你”在人流里的近景；关键词纸签；最后「误判」印章落下，印框放大成片尾 ——
+function endCard(c) {
+  c.fillStyle = P.BG; c.fillRect(0, 0, 1920, 1080);
+  X.stamp(c, 960, 520, '误判', 1, { size: 220, color: Q.RUST, seed: 1143, rot: -0.06 });
 }
-
+function s33(c, t) {
+  push(c, t, L('033').t0, TL.DUR, 0.04, 960, 470, () => Q.sheet(c, 'E35', 960, 480, 1760, 900, { seed: 1140, label: '人群里的你（近景）' }));
+  Q.tag(c, 520, 170, '跟对人群', pop(t, at('033', '跟对了人群') - 0.2, 0.6), { size: 76, hl: true, seed: 1141, rot: -0.02 });
+  Q.tag(c, 1400, 170, '跟错人群', pop(t, at('033', '跟错了') - 0.2, 0.6), { size: 76, color: '#fbf3df', bg: Q.RUST, seed: 1142, rot: 0.02 });
+  // 印章转场：落印（0.35 秒）→ 印框从印章大小放大到全屏，框里是片尾
+  const s = at('033', '往坑里走') + 0.5, land = prog(t, s, s + 0.35), grow = smooth(prog(t, s + 0.55, s + 1.25));
+  const sx = 960, sy = 520;
+  if (grow > 0) {
+    const w = lerp(470, 2400, grow), h = lerp(330, 1700, grow);
+    c.save(); c.beginPath(); c.roundRect(sx - w / 2, sy - h / 2, w, h, lerp(30, 0, grow)); c.clip(); endCard(c); c.restore();
+  }
+  if (grow < 1) {
+    const shake = land > 0.3 && land < 1 ? Math.sin(land * 40) * 6 * (1 - land) : 0;
+    c.save(); c.translate(0, shake); c.globalAlpha *= 1 - grow;
+    X.stamp(c, sx, sy, '误判', land, { size: 220, color: Q.RUST, seed: 1143, rot: -0.06 }); c.restore();
+  }
+}
 module.exports = { shots: [['028', s28, 'feibai'], ['029', s29, 'slide'], ['030', s30, 'slide'], ['031', s31, 'slide'], ['032', s32, 'fade'], ['033', s33, 'fade']].map(([id, draw, tr]) => (tr === 'feibai' ? { a: L(id).t0 - 0.15, gl: tr, name: id, draw } : { a: L(id).t0 - 0.15, tr, name: id, draw })) };

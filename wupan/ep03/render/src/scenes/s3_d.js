@@ -6,19 +6,33 @@ const { smooth, prog, lerp, clamp, easeOut, easeIn, easeInOut } = K;
 const P = require('../paper');
 const V5 = require('./v5_util');
 
-// —— 互相看的一排人（015、022 共用）：每个人头顶到下一个人头顶连一条视线虚线，最后一条绕回第一个 ——
+// —— 互相看的一群人：每个人头顶到下一个人头顶连一条带箭头的视线，最后一条绕回第一个（015、022 共用）——
 const ROW = [['E05', 420, false], ['E01', 780, false], ['E06', 1140, true], ['E07', 1500, true]];
-function lookRow(c, t, a, y = 900, h = 520) {
-  const heads = ROW.map(([n, x, flip], k) => {
+function arrowHead(c, a, b, col, w) {
+  const ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
+  c.save(); c.translate(b[0], b[1]); c.rotate(ang); c.fillStyle = col;
+  c.beginPath(); c.moveTo(0, 0); c.lineTo(-w * 4.2, -w * 2.4); c.lineTo(-w * 4.2, w * 2.4); c.closePath(); c.fill(); c.restore();
+}
+function lookRow(c, t, a, y = 900, h = 520, row = ROW) {
+  const heads = row.map(([n, x, flip]) => {
     if (n === 'E01') you(c, n, x, y, h); else fig(c, n, x, y, h, { flip });
     const [hx, hy] = Q.ptOf(n, x, y, h, 0.5, 0, { ar: 0.42, flip });
     return [hx, hy - (n === 'E01' ? 110 : 20)];
   });
-  for (let k = 0; k < 4; k++) gaze(c, heads[k], heads[(k + 1) % 4], prog(t, a + k * 0.3, a + k * 0.3 + 0.6), { bend: k === 3 ? 170 : 70, w: 5 });
+  const col = 'rgba(158,59,38,0.92)';
+  for (let k = 0; k < row.length; k++) {
+    const p = prog(t, a + k * 0.3, a + k * 0.3 + 0.6), from = heads[k], to = heads[(k + 1) % row.length], bend = k === row.length - 1 ? 190 : 80;
+    gaze(c, from, to, p, { bend, w: 7, color: col, dash: [20, 10] });
+    if (p >= 0.98) { const mx = (from[0] + to[0]) / 2, my = Math.min(from[1], to[1]) - bend; arrowHead(c, [lerp(mx, to[0], 0.8), lerp(my, to[1], 0.8)], to, col, 7); }
+  }
 }
+// —— 015：超市门口，几个人互相看，视线箭头连成一圈 ——
 function s15(c, t) {
-  push(c, t, L('015').t0, L('015').t1 + 0.8, 0.03, 960, 600, () => lookRow(c, t, at('015', '每个人')));
-  Q.tag(c, 960, 140, '每个人都在看别人', pop(t, at('015', '看别人')), { size: 62, hl: true, seed: 901 });
+  push(c, t, L('015').t0, L('015').t1 + 0.8, 0.03, 960, 560, () => {
+    Q.sheet(c, 'E33', 960, 470, 1760, 860, { seed: 905, label: '超市入口' });
+    lookRow(c, t, at('015', '每个人'), 1000, 560);
+  });
+  Q.tag(c, 960, 110, '每个人都在看别人', pop(t, at('015', '看别人')), { size: 62, hl: true, seed: 901 });
 }
 
 // —— 016：时间卡 + 手机短信，谣言三句依次出现 ——
@@ -171,10 +185,13 @@ function s21(c, t) {
     c.restore();
   }
 }
-// —— 022 判词：回到互相看的一排人 ——
+// —— 022 判词：回到空货架前，人群互相看着对方 ——
 function s22(c, t) {
-  push(c, t, L('022').t0, L('022').t1, 0.03, 960, 600, () => lookRow(c, t, L('022').t0 - 1.2, 820, 480));
-  verdict(c, t, '022', '每个人都只是在看别人', at('022', '每个人'), 960, 900, 76);
+  push(c, t, L('022').t0, L('022').t1, 0.03, 960, 560, () => {
+    c.save(); c.globalAlpha *= 0.9; Q.put(c, 'E17', 960, 800, 700, { ar: 1.1 }); c.restore();
+    lookRow(c, t, L('022').t0 - 1.2, 1000, 520, [['E05', 380, false], ['E06', 700, true], ['E01', 1040, false], ['E07', 1380, true], ['E05', 1640, true]]);
+  });
+  verdict(c, t, '022', '都在看别人', at('022', '每个人'), 960, 150, 76);
 }
 
 module.exports = { shots: [['015', s15, 'fade'], ['016', s16, 'sizhi'], ['017', s17, 'slide'], ['018', s18, 'none'], ['019', s19, 'fade'], ['020', s20, 'slide'], ['021', s21, 'fade'], ['022', s22, 'fade']].map(([id, draw, tr]) => {
