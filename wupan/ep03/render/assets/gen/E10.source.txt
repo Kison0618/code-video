@@ -1,0 +1,4 @@
+AI 生成（kedaya gpt-image-2.5，/v1/images/edits，2026-11-02），带参考图。
+参考图：ep02/render/assets/gen/V6_watch
+尺寸：1536x1024
+提示词：Victorian copperplate engraving, fine crosshatching and stippling, warm sepia ink on a plain flat cream background, match the drawing style of the reference image exactly. Isolated subject with empty background around it. No text, no letters, no numbers, no signs with writing, no frame, no border. Subject: one round open bamboo steamer basket full of white steamed buns, three-quarter view, single object.

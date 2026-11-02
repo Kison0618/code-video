@@ -1,0 +1,4 @@
+AI 生成（kedaya gpt-image-2.5，/v1/images/edits，2026-11-02），带参考图。
+参考图：ep02/render/assets/gen/G05、ep02/render/assets/gen/I01
+尺寸：1536x1024
+提示词：Victorian copperplate engraving, fine crosshatching, warm sepia ink on cream paper, match the drawing style of the reference image. Full illustration. No text, no letters, no numbers, no readable signs, no frame, no border. Subject: a cutaway cross-section diagram of a street-level shop with an underground parking garage below it: a ramp going down from the street on the left, concrete pillars, a few parked cars, a stairway coming back up on the right into the shop, clean side view.
