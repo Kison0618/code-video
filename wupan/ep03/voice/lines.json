@@ -1,0 +1,266 @@
+[
+  {
+    "id": "001",
+    "role": "主旁白",
+    "text": "两家包子铺，一家门口排着长队，一家空空荡荡。大多数人，会选排队的那家。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "002",
+    "role": "主旁白",
+    "text": "重庆就有这么一家包子铺，门口天天排长队。后来执法人员一查，排队的全是雇来的托。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "003",
+    "role": "主旁白",
+    "text": "托买走的包子，从地下车库绕一圈，又送回店里接着卖。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "004",
+    "role": "B8",
+    "text": "一条假队伍，就能让真顾客心甘情愿地排在后面。",
+    "voice": "B8",
+    "voice_id": "918a8277663d476b95e2c4867da0f6a6",
+    "model": "drama-3"
+  },
+  {
+    "id": "005",
+    "role": "主旁白",
+    "text": "芒格把这叫作社会认同倾向：自己拿不准的时候，人会自动照着周围的人去想、去做。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "006",
+    "role": "主旁白",
+    "text": "它之所以存在，是因为大多数时候，这么做是对的。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "007",
+    "role": "主旁白",
+    "text": "去一座陌生的城市吃饭，挑人多的馆子，多半不会踩雷。别人已经替你试过了。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "008",
+    "role": "主旁白",
+    "text": "还有一层原因：跟大家不一样，会让人很不舒服。在群体里显得格格不入，本身就是一种压力。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "009",
+    "role": "主旁白",
+    "text": "所以芒格说，这种倾向在两种时候最强：一是拿不准，二是有压力。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "010",
+    "role": "主旁白",
+    "text": "来，做个小测试。左边这条线，和右边哪一条一样长？",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "011",
+    "role": "主旁白",
+    "text": "一眼就能看出来。可如果你前面的五个人，都一本正经地选了 A 呢？",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "012",
+    "role": "主旁白",
+    "text": "心理学家阿希做过这个测试：很多人明明看得清清楚楚，最后还是跟着说了 A。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "013",
+    "role": "主旁白",
+    "text": "有意思的是，只要有一个人先说出正确答案，跟着答错的人，就少了一大截。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "014",
+    "role": "B8",
+    "text": "一致的意见压力最大，一个不同的声音，就能把它打破。",
+    "voice": "B8",
+    "voice_id": "918a8277663d476b95e2c4867da0f6a6",
+    "model": "drama-3"
+  },
+  {
+    "id": "015",
+    "role": "主旁白",
+    "text": "那如果每个人，都在看别人呢？",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "016",
+    "role": "主旁白",
+    "text": "二零一一年三月，日本核泄漏。国内开始流传一个说法：吃碘盐能防辐射，海水被污染了，以后盐不够吃。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "017",
+    "role": "主旁白",
+    "text": "有人去超市多拿了几包。下一个人看见货架空了一块，心里一紧，也多拿了几包。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "018",
+    "role": "主旁白",
+    "text": "再下一个人看到的，是整排空货架。空货架本身，就成了最有力的证据。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "019",
+    "role": "主旁白",
+    "text": "几天之内，全国抢盐。有人一口气扛回去几十包，有的地方一包盐卖到了七八块。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "020",
+    "role": "主旁白",
+    "text": "然后辟谣来了：碘盐防不了辐射，盐也根本不缺。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "021",
+    "role": "主旁白",
+    "text": "于是另一支队伍出现了：排队退盐的。南京有人拿着八块钱一包买来的五十包盐，要求退货，而货架上的盐，又回到了一块多。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "022",
+    "role": "B8",
+    "text": "从头到尾，没有一个人掌握真相，每个人都只是在看别人。",
+    "voice": "B8",
+    "voice_id": "918a8277663d476b95e2c4867da0f6a6",
+    "model": "drama-3"
+  },
+  {
+    "id": "023",
+    "role": "主旁白",
+    "text": "生活里，这样的事随处可见。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "024",
+    "role": "主旁白",
+    "text": "二零二零年，一条“双黄连可抑制病毒”的消息，让深夜的药店排起了长队。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "025",
+    "role": "主旁白",
+    "text": "综艺里后期加上的笑声，明知道是假的，笑点还是显得更好笑。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "026",
+    "role": "主旁白",
+    "text": "网购时我们先看销量和评论，而评论区最早的几个赞，会把后面的评价一起往好的方向带。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "027",
+    "role": "主旁白",
+    "text": "芒格还提醒过一种更隐蔽的情况：别人什么都不做，也会误导你。开会时没人反对，你就以为方案没问题。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "028",
+    "role": "B8",
+    "text": "反过来，这股力量也可以用在好事上。",
+    "voice": "B8",
+    "voice_id": "918a8277663d476b95e2c4867da0f6a6",
+    "model": "drama-3"
+  },
+  {
+    "id": "029",
+    "role": "主旁白",
+    "text": "第一，想让别人做一件好事，就让他看见很多人已经在做了。老师在家长群里发一句“已有三十二位家长提交”，还没交的家长，很快就交了。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "030",
+    "role": "主旁白",
+    "text": "第二，人最容易跟着和自己相似的人走。想劝父母别乱买保健品，你讲十遍道理，不如他们的老同事说一句“我也上过当”。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "031",
+    "role": "主旁白",
+    "text": "第三，用在自己身上。想养成一个好习惯，就把自己放进做这件事的人群里：想健身，就去健身房；想读书，就找一群爱读书的朋友。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "032",
+    "role": "主旁白",
+    "text": "最后，是芒格认为最值得学会的本事：在别人错的时候，忽略别人的榜样。所有人都往一个方向挤的时候，先停两秒，想清楚他们是真的知道，还是只是看见别人这么做。",
+    "voice": "C",
+    "voice_id": "c2ecbca4c1dd415eb8dc80d2ae5e4957",
+    "model": "drama-3"
+  },
+  {
+    "id": "033",
+    "role": "B8",
+    "text": "跟对了人群，它推着你往前走；跟错了，它推着你往坑里走。",
+    "voice": "B8",
+    "voice_id": "918a8277663d476b95e2c4867da0f6a6",
+    "model": "drama-3"
+  }
+]
