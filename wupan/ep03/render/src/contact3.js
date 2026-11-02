@@ -24,7 +24,11 @@ const cv = new K.Canvas(K.W, K.H), ctx = cv.getContext('2d');
     sc.fillStyle = 'rgba(0,0,0,0.7)'; sc.fillRect(x + 2, y + 2, sc.measureText(lab).width + 16, 34);
     sc.fillStyle = '#ffd400'; sc.textBaseline = 'top'; sc.fillText(lab, x + 10, y + 7);
   }
-  if (out.endsWith('.png')) sheet.toFileSync(out); else sheet.toFileSync(out, { quality: 0.86 });
+  if (out.endsWith('.png')) {
+    sheet.toFileSync(out);
+    // 仓库单张图 ≤ 10 MB：PNG 量化成 256 色（只用来查空白，不影响判断）
+    require('child_process').spawnSync('python3', ['-c', `from PIL import Image;im=Image.open(${JSON.stringify(out)});im.convert('RGB').quantize(256).save(${JSON.stringify(out)},optimize=True)`], { stdio: 'inherit' });
+  } else sheet.toFileSync(out, { quality: 0.86 });
   console.log('wrote', out, TL.EST ? '(估算时间轴)' : '(真配音时间轴)');
   console.log('missing assets:', [...require('./kit02').MISSING].join(', ') || 'none');
   await closeGL();

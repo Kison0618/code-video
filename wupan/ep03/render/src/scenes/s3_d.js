@@ -35,7 +35,7 @@ function s16(c, t) {
 }
 
 // —— 货架：E17 剪影框里 4 层 × 6 格，每格一摞盐（E18）。格子位置按剪影框比例给，素材到位后按实图调 ——
-const SH = { cols: 6, rows: [[0.06, 0.24], [0.30, 0.48], [0.54, 0.72], [0.78, 0.96]], u0: 0.07, u1: 0.93 };
+const SH = { cols: 6, rows: [[0.10, 0.29], [0.33, 0.50], [0.55, 0.72], [0.77, 0.92]], u0: 0.06, u1: 0.94 };   // 按 E17 实图量的 4 层隔板
 function cellRect(x, y, h, i) {
   const r = Math.floor(i / SH.cols), k = i % SH.cols;
   const [a0, b0] = Q.ptOf('E17', x, y, h, SH.u0 + (SH.u1 - SH.u0) * k / SH.cols, SH.rows[r][0], { ar: 1.1 });
@@ -133,7 +133,7 @@ function s20(c, t) {
   if (t > l1 - 0.2) { c.globalAlpha *= 1; c.fillText('碘盐防不了辐射', 0, -10); }
   if (t > l2 - 0.2) c.fillText('盐也根本不缺', 0, 140);
   c.restore();
-  X.stamp(c, 1360, 290, '辟谣', prog(t, at('020', '辟谣'), at('020', '辟谣') + 0.8), { size: 78, color: Q.RUST, seed: 932 });
+  X.stamp(c, 1420, 700, '不缺', prog(t, l2 + 0.3, l2 + 1.1), { size: 78, color: Q.RUST, seed: 932 });
   Q.marker(c, [[690, 470], [1310, 470]], prog(t, l1, l1 + 0.6), { w: 30 });
   Q.marker(c, [[750, 620], [1250, 620]], prog(t, l2, l2 + 0.6), { w: 30 });
 }
@@ -157,9 +157,9 @@ function s21(c, t) {
     for (let k = 0; k < 5; k++) fig(c, 'E22', 1300 - k * 210, 1000, 380, { label: '抱着盐排队' });
     c.restore();
     Q.tag(c, 150, 640, '退盐', q, { size: 50, hl: true, seed: 943 });
-    Q.tag(c, 820, 590, '南京', pop(t, at('021', '南京')), { size: 50, seed: 944 });
-    X.priceTag(c, 1110, 560, '8 元', { s: 0.9, t, color: Q.RUST, size: 56, alpha: pop(t, at('021', '八块钱')) });
-    if (t > at('021', '五十包') - 0.1) { c.save(); X.roll(c, Math.min(50, (t - at('021', '五十包')) * 70), 1420, 640, 90, { digits: 2, suffix: ' 包', color: Q.RUST }); c.restore(); }
+    Q.tag(c, 420, 560, '南京', pop(t, at('021', '南京')), { size: 50, seed: 944 });
+    X.priceTag(c, 700, 470, '8 元', { s: 0.9, t, color: Q.RUST, size: 56, alpha: pop(t, at('021', '八块钱')) });
+    if (t > at('021', '五十包') - 0.1) { c.save(); X.roll(c, Math.min(50, (t - at('021', '五十包')) * 70), 1080, 560, 90, { digits: 2, suffix: ' 包', color: Q.RUST }); c.restore(); }
     c.restore();
   }
   if (sw > 0) {

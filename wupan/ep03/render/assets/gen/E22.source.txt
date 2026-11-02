@@ -1,4 +1,4 @@
 AI 生成（kedaya gpt-image-2.5，/v1/images/edits，2026-11-02），带参考图。
 参考图：ep02/render/assets/gen/I03、ep02/render/assets/gen/G04
 尺寸：1024x1536
-提示词：Victorian copperplate engraving, fine crosshatching and stippling, warm sepia ink on a plain flat cream background, match the drawing style of the reference image exactly. Isolated subject with empty background around it. No text, no letters, no numbers, no signs with writing, no frame, no border. Subject: a person standing in side profile facing right, holding a big armful of small white salt bags against the chest, waiting in line, full body head to shoes.
+提示词：Victorian copperplate engraving, fine crosshatching and stippling, warm sepia ink on a plain flat cream background, match the drawing style of the reference image exactly. Isolated subject with empty background around it. No text, no letters, no numbers, no signs with writing, no frame, no border. Subject: a person standing in side profile facing right, holding a tall stack of small flat rectangular white plastic salt packets in both arms against the chest, the packets clearly look like table salt packets, waiting in line, full body head to shoes.

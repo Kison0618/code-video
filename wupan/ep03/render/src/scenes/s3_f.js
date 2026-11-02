@@ -23,22 +23,23 @@ function s29(c, t) {
   V5.phone(c, 1240, 520, 600, 800, (cc, w, h) => {
     cc.fillStyle = '#ededed'; cc.fillRect(0, 0, w, h);
     cc.fillStyle = '#f7f7f7'; cc.fillRect(0, 0, w, 84); cc.fillStyle = '#1e1e1e'; cc.font = '700 36px Sans'; cc.textAlign = 'center'; cc.textBaseline = 'middle'; cc.fillText('三年级二班 家长群', w / 2, 44);
-    V5.msg(cc, 20, 110, w - 20, '已有 32 位家长提交', pop(t, at('029', '已有三十二位') - 0.2, 0.5), { size: 40, bg: '#fff3c4' });
+    V5.msg(cc, 20, 100, w - 20, '已有 32 位家长提交', pop(t, at('029', '已有三十二位') - 0.2, 0.5), { size: 40, bg: '#fff3c4' });
     // 接龙：越来越长
     const a = at('029', '还没交'), n = Math.floor(clamp((t - a) / (at('029', '很快就交了') + 0.9 - a)) * 9);
-    const p0 = pop(t, at('029', '已有三十二位') + 0.4, 0.5);
+    const p0 = 1;
     if (p0 > 0.01) {
       cc.save(); cc.globalAlpha *= p0;
-      cc.fillStyle = '#ffffff'; cc.beginPath(); cc.roundRect(110, 220, w - 140, 560, 12); cc.fill();
-      cc.fillStyle = Q.INK; cc.font = '700 34px Sans'; cc.textAlign = 'left'; cc.fillText('#接龙  已提交', 136, 262);
+      const ly = 110 + 120 * smooth(prog(t, at('029', '已有三十二位') - 0.2, at('029', '已有三十二位') + 0.3)); cc.translate(0, ly - 110);
+      cc.fillStyle = '#ffffff'; cc.beginPath(); cc.roundRect(110, 110, w - 140, 560, 12); cc.fill();
+      cc.fillStyle = Q.INK; cc.font = '700 34px Sans'; cc.textAlign = 'left'; cc.fillText('#接龙  已提交', 136, 152);
       const shown = 3 + n;
       for (let k = Math.max(0, shown - 9); k < shown; k++) {
-        const y = 315 + (k - Math.max(0, shown - 9)) * 52;
+        const y = 205 + (k - Math.max(0, shown - 9)) * 52;
         cc.fillStyle = '#333'; cc.font = '500 32px Sans'; cc.fillText(`${30 + k}. 已交`, 136, y);
       }
       cc.restore();
     }
-  }, { alpha: pop(t, g, 0.5) });
+  }, { alpha: pop(t, L('029').t0 - 0.1, 0.5) });
   if (t > at('029', '还没交')) X.roll(c, Math.min(41, 32 + (t - at('029', '还没交')) * 3.5), 1720, 860, 96, { digits: 2, suffix: ' 位', color: Q.RUST });
 }
 // —— 030：老两口 + 保健品；“你”讲十遍道理（灰气泡一摞）；老同事一句“我也上过当” ——
@@ -71,8 +72,6 @@ function s30(c, t) {
 }
 // —— 031：健身房 → 读书会，“你”走进人群 ——
 function s31(c, t) {
-  Q.tag(c, 210, 140, '第三', pop(t, L('031').t0), { size: 64, bg: Q.INK, color: '#fbf3df', seed: 1121 });
-  Q.tag(c, 960, 130, '放进做这件事的人群里', pop(t, at('031', '人群里')), { size: 52, hl: true, seed: 1122 });
   const r = at('031', '想读书'), sw = smooth(prog(t, r - 0.3, r + 0.5));
   c.save(); c.translate(-sw * 1920, 0);
   push(c, t, L('031').t0, r, 0.03, 960, 560, () => Q.sheet(c, 'E29', 960, 560, 1600, 760, { seed: 1123, label: '健身房 · 跑步机一排人' }));
@@ -87,29 +86,26 @@ function s31(c, t) {
   const w2 = smooth(prog(t, r + 0.3, r + 1.8));
   const x = sw < 0.5 ? lerp(-120, 520, w1) : lerp(-120, 420, w2);
   you(c, (sw < 0.5 ? w1 : w2) < 1 ? 'E02' : 'E01', x, 1000, 420);
+  Q.tag(c, 210, 140, '第三', pop(t, L('031').t0), { size: 64, bg: Q.INK, color: '#fbf3df', seed: 1121 });
+  Q.tag(c, 960, 130, '放进做这件事的人群里', pop(t, at('031', '人群里')), { size: 52, hl: true, seed: 1122 });
 }
-// —— 032：人流往右挤，“你”停下；问号；两张纸签 ——
+// —— 032：人流图慢慢往左平移（人群往右挤），“先停两秒”时人流变灰，“你”站住、头顶问号 ——
 function s32(c, t) {
-  const a = L('032').t0, stop = at('032', '先停两秒');
+  const a = L('032').t0, stop = at('032', '先停两秒'), crowd = at('032', '往一个方向挤');
   const gray = smooth(prog(t, stop, stop + 0.6));
-  const pan = (t - a) * lerp(26, 60, smooth(prog(t, at('032', '往一个方向挤'), at('032', '往一个方向挤') + 1)));
-  c.save(); c.translate(-pan % 400, 0);
-  for (let rep = 0; rep < 2; rep++) Q.sheet(c, 'E31', 960 + rep * 1680, 520, 1700, 820, { seed: 1131, label: '人流往右挤', alpha: lerp(1, 0.55, gray) });
-  c.restore();
-  // 人流里还有几个人从“你”身边擦过（前景）
-  const f = ((t - a) * 160) % 2400;
-  for (let k = 0; k < 3; k++) { c.save(); c.globalAlpha *= lerp(1, 0.4, gray); fig(c, crowdAt(k), -300 + ((f + k * 800) % 2400), 1060, 560); c.restore(); }
-  you(c, 'E04', 960, 1010, 600);
-  over(c, 'E04', 960, 1010, 600, '？', pop(t, stop), { dy: 130, size: 80, hl: true, seed: 1132 });
+  const u = 0.66 - 0.25 * smooth(prog(t, a, L('032').t1)) - 0.05 * smooth(prog(t, crowd, crowd + 2));   // 画面往右移 = 人流往右挤
+  Q.sheet(c, 'E31', 960, 500, 1760, 880, { seed: 1131, zoom: 1.6, focus: [u, 0.5], dim: lerp(0, 0.35, gray), label: '人流往右挤' });
+  you(c, 'E04', 960, 1000, 600);
+  over(c, 'E04', 960, 1000, 600, '？', pop(t, stop), { dy: 130, size: 80, hl: true, seed: 1132 });
   Q.tag(c, 960, 110, '忽略别人的榜样', pop(t, at('032', '忽略别人的榜样')), { size: 60, hl: true, seed: 1133 });
   Q.tag(c, 430, 420, '真的知道？', pop(t, at('032', '真的知道')), { size: 58, seed: 1134, rot: -0.03 });
   Q.tag(c, 1490, 420, '只是看见别人这么做？', pop(t, at('032', '只是看见别人')), { size: 52, seed: 1135, rot: 0.03 });
 }
 // —— 033 判词 + 「误判」印章 ——
 function s33(c, t) {
-  push(c, t, L('033').t0, TL.DUR, 0.03, 960, 560, () => you(c, 'E04', 960, 780, 540));
-  Q.tag(c, 960, 860, '跟对了，推你往前走', pop(t, at('033', '跟对了人群') - 0.3, 0.65), { size: 64, hl: true, seed: 1141, rot: -0.012 });
-  Q.tag(c, 960, 950, '跟错了，推你往坑里走', pop(t, at('033', '跟错了') - 0.3, 0.65), { size: 56, seed: 1142, rot: 0.01 });
+  push(c, t, L('033').t0, TL.DUR, 0.03, 960, 500, () => you(c, 'E04', 960, 700, 500));
+  Q.tag(c, 960, 785, '跟对了，推你往前走', pop(t, at('033', '跟对了人群') - 0.3, 0.65), { size: 64, hl: true, seed: 1141, rot: -0.012 });
+  Q.tag(c, 960, 895, '跟错了，推你往坑里走', pop(t, at('033', '跟错了') - 0.3, 0.65), { size: 56, seed: 1142, rot: 0.01 });
   const s = at('033', '往坑里走') + 0.9;
   X.stamp(c, 1480, 380, '误判', prog(t, s, s + 0.7), { size: 150, color: Q.RUST, seed: 1143, rot: -0.1 });
 }

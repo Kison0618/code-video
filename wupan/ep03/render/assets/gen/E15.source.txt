@@ -1,0 +1,4 @@
+AI 生成（kedaya gpt-image-2.5，/v1/images/edits，2026-11-02），带参考图。
+参考图：ep02/render/assets/gen/J02
+尺寸：1024x1536
+提示词：Victorian copperplate engraving, fine crosshatching and stippling, warm sepia ink on a plain flat cream background, match the drawing style of the reference image exactly. Isolated subject with empty background around it. No text, no letters, no numbers, no signs with writing, no frame, no border. Subject: a young woman in a blouse and skirt sitting on a plain wooden chair seen from the front, hands on knees, full figure including chair and shoes.

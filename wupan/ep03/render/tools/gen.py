@@ -42,14 +42,14 @@ JOBS = {
   'E17': ('1536x1024', ['G05'], STYLE, 'an empty supermarket shelf unit seen straight from the front, four evenly spaced shelves, completely empty, metal frame, single object'),
   'E18': ('1024x1536', ['H04'], STYLE, 'one small plain white plastic bag of table salt standing upright, pillow-shaped package, no printing at all, single object'),
   'E19': ('1024x1536', ['I08'], STYLE, 'a human hand and forearm reaching down from above, gripping two small plain white bags of salt, sleeve visible at the top, single object'),
-  'E20': ('1024x1536', ['G06'], STYLE, 'an old candy-bar mobile phone from around 2010 with a numeric keypad and a small blank screen, front view, single object'),
+  'E20': ('1024x1536', ['G06'], STYLE, 'an old candy-bar mobile phone from around 2010 with a small blank screen and completely blank keypad buttons (no numbers or symbols printed on any key), front view, single object'),
   'E21': ('1024x1536', ['I03'], STYLE, 'a man walking to the right in side profile carrying a huge tall stack of small white salt bags on his shoulder, straining, full body head to shoes'),
-  'E22': ('1024x1536', ['I03', 'G04'], STYLE, 'a person standing in side profile facing right, holding a big armful of small white salt bags against the chest, waiting in line, full body head to shoes'),
+  'E22': ('1024x1536', ['I03', 'G04'], STYLE, 'a person standing in side profile facing right, holding a tall stack of small flat rectangular white plastic salt packets in both arms against the chest, the packets clearly look like table salt packets, waiting in line, full body head to shoes'),
   'E23': ('1536x1024', ['G05'], STYLE, 'a supermarket customer service counter seen from the front, with a blank sign board hanging above it, no writing, isolated object'),
   'E24': ('1536x1024', ['I01'], SCENE, 'a pharmacy storefront at night, warm light pouring out of the shop window, a long line of people waiting outside along the sidewalk, dark night sky'),
   'E25': ('1536x1024', ['I06'], SCENE, 'a meeting room with a long table, office workers seated all around it, all silent with closed mouths and blank faces, one person standing at the end presenting a chart on an easel'),
   'E26': ('1536x1024', ['H01'], STYLE, 'an elderly East Asian couple sitting together on a sofa seen from the front, attentive faces, full figures including the sofa, isolated'),
-  'E27': ('1024x1536', ['G16'], STYLE, 'an elderly East Asian man sitting in an armchair turned to the left, raising one hand while talking earnestly, full figure including chair'),
+  'E27': ('1024x1536', ['E26:ref'], STYLE, 'an elderly East Asian man of the same age and the same plain everyday clothing style as the couple in the reference image (a retired neighbour), sitting in an armchair turned to the left, raising one hand while talking earnestly, full figure including chair'),
   'E29': ('1536x1024', ['I06'], SCENE, 'a gym with a row of people running on treadmills side by side, seen from the side'),
   'E30': ('1536x1024', ['K02'], SCENE, 'a reading club: a group of friends sitting around a table, each reading a book, cozy room'),
   'E31': ('1536x1024', ['G04', 'G15'], SCENE, 'a dense crowd of ordinary people all walking quickly to the right along a city street, side view, everyone moving the same direction'),
@@ -57,6 +57,7 @@ JOBS = {
 
 def ref_path(r):
     if r.startswith('@'): return os.path.join(GEN, r[1:] + '.png')
+    if r.endswith(':ref'): return os.path.join(GEN, r[:-4] + '.png')
     return os.path.join(EP02, r + '.png')
 
 def multipart(fields, files):
@@ -83,7 +84,7 @@ def gen(n, tries=3):
             open(os.path.join(GEN, n + '.png'), 'wb').write(img)
             with open(os.path.join(GEN, n + '.source.txt'), 'w', encoding='utf-8') as f:
                 f.write(f'AI 生成（kedaya {MODEL}，/v1/images/edits，{time.strftime("%Y-%m-%d")}），带参考图。\n')
-                f.write('参考图：' + '、'.join(('ep03/render/assets/gen/' + r[1:]) if r.startswith('@') else ('ep02/render/assets/gen/' + r) for r in refs) + '\n')
+                f.write('参考图：' + '、'.join(('ep03/render/assets/gen/' + r.strip('@').replace(':ref', '')) if (r.startswith('@') or r.endswith(':ref')) else ('ep02/render/assets/gen/' + r) for r in refs) + '\n')
                 f.write(f'尺寸：{size}\n提示词：{prompt}\n')
             print('ok', n, len(img)); return True
         except Exception as e:

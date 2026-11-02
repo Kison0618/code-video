@@ -72,22 +72,17 @@ function s12(c, t) {
   });
   Q.tag(c, 1560, 140, '阿希 · 从众实验', pop(t, at('012', '阿希')), { size: 50, seed: 812 });
 }
-// —— 013：第三个人亮出 B；右上角“答错的人”纸条一下矮了一大截 ——
+// —— 013：第三个人亮出 B；“少了一大截”时“你”也从 A 翻回 B（有人先说真话，跟着答错的就少了）——
 function s13(c, t) {
   const one = at('013', '有一个人'), drop = at('013', '少了一大截');
-  aschCard(c, 560, 210, 0.45, {});
+  aschCard(c, 960, 210, 0.45, { mark: k => (k === 2 ? 1 : 0) });
   row(c, t, (k, n, x, flip) => {
     if (k === 2) { const f = clamp(prog(t, one - 0.1, one + 0.4)); answer(c, n, x, flip, f < 0.5 ? 'A' : 'B', 1, { bg: f < 0.5 ? '#fbf7ee' : Q.YEL, flip: f }); }
+    else if (k === 5) { const f = clamp(prog(t, drop - 0.2, drop + 0.3)); answer(c, n, x, flip, f < 0.5 ? 'A' : 'B', 1, { bg: f < 0.5 ? '#fbf7ee' : Q.YEL, flip: f }); }
     else answer(c, n, x, flip, 'A', 1);
   });
-  // 条：牛皮纸竖条，高度从 300 掉到 110（只表示“少了一大截”，不代表具体比例）
-  const h = lerp(300, 110, smooth(prog(t, drop, drop + 0.9)));
-  c.save(); c.translate(1500, 380);
-  if (t > drop) { c.setLineDash([12, 10]); c.strokeStyle = 'rgba(35,27,21,0.5)'; c.lineWidth = 4; c.strokeRect(-70, -300, 140, 300); c.setLineDash([]); }
-  P.piece(c, P.poly(P.jag([[-70, -h], [70, -h], [70, 0], [-70, 0]], 2, 12, 813)), Q.KRAFT, { blur: 14, dy: 6 });
-  c.restore();
-  Q.tag(c, 1500, 425, '跟着答错的人', pop(t, at('013', '跟着答错')), { size: 44, seed: 814 });
-  Q.tag(c, 1730, 300, '少了一大截', pop(t, drop), { size: 48, hl: true, seed: 815, rot: 0.04 });
+  Q.tag(c, 1560, 140, '一个人先说出正确答案', pop(t, at('013', '正确答案')), { size: 46, seed: 814 });
+  Q.tag(c, 1560, 250, '跟着答错的少了一大截', pop(t, drop), { size: 46, hl: true, seed: 815, rot: 0.02 });
 }
 // —— 014 判词：只留那个举 B 的人 ——
 function s14(c, t) {

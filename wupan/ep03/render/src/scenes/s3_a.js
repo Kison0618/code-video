@@ -47,9 +47,9 @@ function s02(c, t) {
   Q.tag(c, 1640, 300, '执法人员一查', pop(t, a), { size: 50, seed: 714 });
 }
 // —— 003：车库剖面，包子沿虚线箭头下坡、绕一圈、回到店里 ——
-// 路线按 E11 的剪影框比例给（u,v）；素材到位后按实图微调这几个点
-const ROUTE = [[0.12, 0.16], [0.22, 0.30], [0.34, 0.58], [0.55, 0.72], [0.78, 0.66], [0.86, 0.44], [0.70, 0.30], [0.40, 0.22], [0.16, 0.14]];
-const GW = 1640, GH = 860, GX = 960, GY = 470;
+// 路线按 E11 实图比例（u,v）量的：店门 → 沿街往左 → 左边坡道下到车库 → 穿过车库 → 右边楼梯上来 → 回到店门
+const ROUTE = [[0.47, 0.47], [0.22, 0.49], [0.05, 0.62], [0.08, 0.72], [0.33, 0.79], [0.62, 0.79], [0.86, 0.74], [0.80, 0.53], [0.70, 0.49], [0.52, 0.47]];
+const GW = 1440, GH = 960, GX = 960, GY = 490;          // 与 E11 原图同为 3:2，不裁切
 function routePts() {
   const pts = [];
   for (let i = 0; i < ROUTE.length - 1; i++) for (let k = 0; k < 12; k++) {
@@ -70,12 +70,13 @@ function s03(c, t) {
       c.save(); c.setLineDash([22, 16]); c.strokeStyle = Q.RUST; c.lineWidth = 9; c.lineCap = 'round';
       c.beginPath(); c.moveTo(q[0][0], q[0][1]); for (const [x, y] of q.slice(1)) c.lineTo(x, y); c.stroke(); c.restore();
       const [x, y] = q[q.length - 1];
-      Q.put(c, 'E10', x, y + 60, 130, { ar: 1.3 });
+      Q.put(c, 'E10', x, y + 50, 110, { ar: 1.3 });
     }
+    Q.tag(c, 930, 300, '包子铺', pop(t, a), { size: 44, seed: 735 });
   });
-  Q.tag(c, 1500, 820, '地下车库', pop(t, at('003', '地下车库')), { size: 56, seed: 732 });
+  Q.tag(c, 960, 905, '地下车库', pop(t, at('003', '地下车库')), { size: 56, seed: 732 });
   Q.tag(c, 520, 120, '又送回店里', pop(t, at('003', '送回店里')), { size: 58, hl: true, seed: 733 });
-  X.stamp(c, 1560, 160, '接着卖', prog(t, at('003', '接着卖'), at('003', '接着卖') + 0.8), { size: 64, color: Q.RUST, seed: 734 });
+  X.stamp(c, 1520, 230, '接着卖', prog(t, at('003', '接着卖'), at('003', '接着卖') + 0.8), { size: 64, color: Q.RUST, seed: 734 });
 }
 // —— 004 判词：只留一条“托”的队伍，队尾是“你” ——
 function s04(c, t) {

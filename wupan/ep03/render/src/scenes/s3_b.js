@@ -54,7 +54,7 @@ function s08(c, t) {
     Q.sheet(c, 'E13', 960, 480, W, H, { seed: 781, label: '人群围看一个人' });
     const a = at('008', '跟大家不一样'), red = smooth(prog(t, at('008', '压力'), at('008', '压力') + 0.5));
     EYES.forEach(([u, v], k) => gaze(c, [X0 + u * W, Y0 + v * H], [X0 + MID[0] * W, Y0 + MID[1] * H - 80], prog(t, a + k * 0.12, a + k * 0.12 + 0.7),
-      { color: red > 0.5 ? 'rgba(158,59,38,0.9)' : 'rgba(35,27,21,0.75)', w: lerp(4, 8, red), bend: 30 }));
+      { color: red > 0.5 ? 'rgba(158,59,38,0.95)' : 'rgba(35,27,21,0.9)', w: lerp(7, 11, red), bend: 30, dash: [18, 10] }));
   });
   Q.tag(c, 960, 130, '格格不入', pop(t, at('008', '格格不入')), { size: 66, seed: 782 });
   Q.tag(c, 960, 860, '压力', pop(t, at('008', '压力')), { size: 72, hl: true, seed: 783 });

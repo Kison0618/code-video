@@ -40,7 +40,8 @@ async function renderFrameAsync(ctx, t, frame) {
   const a = cA.getContext('2d'), c = cB.getContext('2d');
   a.reset(); c.reset();
   SCENES.drawShot(a, g.from, t); SCENES.drawShot(c, g.to, t);
-  const px = await require(SH + '/picks').framePick(b, cA, cB, g.id, g.elapsed);
+  const PK = require(SH + '/picks');
+  const px = await PK.framePick(b, cA, cB, g.id, g.elapsed * PK.getPick(g.id).dur / g.dur);   // 按本集时长走完整个转场
   ctx.save();
   ctx.putImageData(b.toImageData(px, require('skia-canvas').ImageData), 0, 0);
   const live = SCENES.filter(s => t >= s.t0 - 1 && t < s.t1 + 1);

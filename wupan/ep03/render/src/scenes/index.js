@@ -6,7 +6,12 @@ const parts = ['s3_a', 's3_b', 's3_c', 's3_d', 's3_e', 's3_f'].map(n => require(
 
 const SHOTS = parts.flatMap(p => p.shots).sort((a, b) => a.a - b.a);
 for (const s of SHOTS) if (s.gl && !s.tr) s.tr = 'fade';
-const GL_DUR = { paixian: 2.2, fanye: 1.6, sizhi: 1.8, moran: 2.4, feibai: 2.0, shuaijing: 1.6 };
+// GL 转场：上一句一说完就开始，1.4 秒走完（frame.js 按库里的原时长换算进度），开口 0.3 秒时新画面已经过半
+const GL_DUR = { paixian: 1.4, fanye: 1.4, sizhi: 1.4, moran: 1.4, feibai: 1.4, shuaijing: 1.4 };
+for (const s of SHOTS) if (s.gl) {
+  const i = TL.LINES.findIndex(l => l.id === s.name), prev = TL.LINES[i - 1];
+  if (prev) s.a = Math.min(s.a, prev.t1 + 0.02);
+}
 
 function shotAt(t) { let i = -1; for (let k = 0; k < SHOTS.length; k++) if (t >= SHOTS[k].a) i = k; return i; }
 function drawShot(ctx, i, t) { const P = require('../paper'); ctx.fillStyle = P.BG; ctx.fillRect(0, 0, 1920, 1080); if (i >= 0) SHOTS[i].draw(ctx, t); }
