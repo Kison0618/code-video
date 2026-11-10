@@ -1,0 +1,12 @@
+{
+  "name": "tongyigeren",
+  "private": true,
+  "description": "《同一个人》画面工程：浏览器 canvas 逐帧绘制，window.render(t) 只由时间决定",
+  "scripts": {
+    "preview": "echo 用浏览器打开 index.html?play",
+    "render": "node tools/render-all.cjs"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
+}

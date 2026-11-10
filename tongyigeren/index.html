@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>同一个人</title>
+<style>
+  @font-face { font-family: 'Noto Serif SC'; font-weight: 700; src: url('assets/fonts/NotoSerifSC-700.woff2') format('woff2'); }
+  @font-face { font-family: 'Noto Serif SC'; font-weight: 900; src: url('assets/fonts/NotoSerifSC-900.woff2') format('woff2'); }
+  @font-face { font-family: 'Noto Sans SC'; font-weight: 500; src: url('assets/fonts/NotoSansSC-500.woff2') format('woff2'); }
+  @font-face { font-family: 'JetBrains Mono'; font-weight: 500; src: url('assets/fonts/JetBrainsMono-500.woff2') format('woff2'); }
+  @font-face { font-family: 'JetBrains Mono'; font-weight: 700; src: url('assets/fonts/JetBrainsMono-700.woff2') format('woff2'); }
+  html, body { margin: 0; background: #000; overflow: hidden; height: 100%; }
+  #c { display: block; transform-origin: 0 0; }
+  #ui { position: fixed; left: 0; right: 0; bottom: 0; padding: 8px 14px 10px; background: rgba(8,9,14,.82); color: #bdb8ae; font: 13px 'JetBrains Mono', monospace; display: none; }
+  #ui input { width: 100%; margin: 0 0 6px; accent-color: #ffc45a; }
+  #ui b { color: #ffc45a; font-weight: 500; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<div id="ui"><input id="bar" type="range" min="0" max="1" step="0.001" value="0"><span id="info"></span></div>
+<script src="src/timing.js"></script>
+<script src="src/core.js"></script>
+<script src="src/tiles.js"></script>
+<script src="src/room.js"></script>
+<script src="src/people.js"></script>
+<script src="src/shots.js"></script>
+<script src="src/post.js"></script>
+<script src="src/hud.js"></script>
+<script src="src/scenes/s1_room.js"></script>
+<script src="src/scenes/s2_years.js"></script>
+<script src="src/scenes/s3_ship.js"></script>
+<script src="src/scenes/s4_night.js"></script>
+<script src="src/scenes/s5_body.js"></script>
+<script src="src/scenes/s6_memory.js"></script>
+<script src="src/scenes/s7_self.js"></script>
+<script src="src/scenes/s8_relay.js"></script>
+<script src="src/main.js"></script>
+<script src="src/player.js"></script>
+</body>
+</html>
