@@ -37,12 +37,14 @@ const css = (c, a) => a === undefined || a >= 1 ? `rgb(${c[0] | 0},${c[1] | 0},$
 
 // 全片共用的几种颜色
 const PAL = {
-  bg: C('#07080d'),
-  ink: C('#f3ead8'),          // 字
+  bg: C('#17120f'),
+  ink: C('#f7efde'),          // 字（米白）
+  inkD: C('#2b2019'),         // 纸签上的深色字
+  paper: C('#f4ead6'),        // 纸签
   dim: C('#8d8a85'),
-  gold: C('#ffc45a'),         // 关键色：没被换掉的东西、被传下去的东西
+  gold: C('#ffc24d'),         // 关键色：没被换掉的东西、被传下去的东西
   goldDeep: C('#e89a2a'),
-  hot: C('#ff6a4d'),          // 提醒：被换掉 / 被骗
+  hot: C('#f0583c'),          // 提醒：被换掉 / 被骗
   cool: C('#7fb6ff'),
 };
 const FONT = {

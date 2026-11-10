@@ -15,7 +15,7 @@ function drawRuns(ctx, runs, cx, y, px, o) {
   const widths = runs.map(r => ctx.measureText(r.s).width), tw = widths.reduce((a, b) => a + b, 0);
   let x = o.left ? cx : cx - tw / 2;
   ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = px * .28; ctx.shadowOffsetY = 2;
+  ctx.shadowColor = 'rgba(16,10,6,.85)'; ctx.shadowBlur = px * .3; ctx.shadowOffsetY = 3;
   for (let i = 0; i < runs.length; i++) {
     const r = runs[i];
     ctx.globalAlpha = (o.alpha === undefined ? 1 : o.alpha) * (r.a === undefined ? 1 : r.a);
@@ -42,89 +42,67 @@ function drawSubtitle(ctx, t) {
   drawRuns(ctx, runs, W / 2, SUB.y + dy, SUB.px, { alpha: a, hl });
 }
 function subBand(ctx, a) {
-  const gr = ctx.createLinearGradient(0, 860, 0, H); gr.addColorStop(0, 'rgba(4,5,9,0)'); gr.addColorStop(.6, `rgba(4,5,9,${.62 * a})`); gr.addColorStop(1, `rgba(4,5,9,${.8 * a})`);
-  ctx.fillStyle = gr; ctx.fillRect(0, 860, W, H - 860);
+  const gr = ctx.createLinearGradient(0, 900, 0, H); gr.addColorStop(0, 'rgba(18,11,7,0)'); gr.addColorStop(.55, `rgba(18,11,7,${.4 * a})`); gr.addColorStop(1, `rgba(18,11,7,${.62 * a})`);
+  ctx.fillStyle = gr; ctx.fillRect(0, 900, W, H - 900);
 }
 
 const HUD = {
-  // 小标签：一行字，可带一条细线引到 (ax,ay)
-  tag(ctx, x, y, text, o) {
+  // 纸签：米色的小纸条，深色字。o = {a, px, align, tone: 'paper' | 'gold' | 'hot' | 'dark', rot, serif}
+  label(ctx, x, y, text, o) {
     o = o || {}; const a = o.a === undefined ? 1 : o.a; if (a <= 0.01) return 0;
-    const px = o.px || 30, col = o.col || PAL.ink;
-    ctx.save(); ctx.globalAlpha = a; ctx.font = o.mono ? FONT.mono(px, o.w) : o.serif ? FONT.serif(px, o.w) : FONT.sans(px); ctx.textBaseline = 'middle'; ctx.textAlign = o.align || 'left';
-    const tw = ctx.measureText(text).width, pad = o.pad === undefined ? 14 : o.pad, h = px + 16, bx = o.align === 'center' ? x - tw / 2 - pad : o.align === 'right' ? x - tw - pad : x - pad;
-    if (o.box !== false) { ctx.fillStyle = o.fill || 'rgba(6,7,12,.78)'; ctx.fillRect(bx, y - h / 2, tw + pad * 2, h); ctx.fillStyle = css(o.line || col, .9); ctx.fillRect(bx, y - h / 2, 3, h); }
-    else { ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 10; }
-    ctx.fillStyle = css(col); ctx.fillText(text, x, y + 1);
-    ctx.restore(); return tw;
+    const px = o.px || 34, tone = o.tone || 'paper';
+    const bg = tone === 'gold' ? PAL.gold : tone === 'hot' ? PAL.hot : tone === 'dark' ? C('#241b16') : PAL.paper, fg = tone === 'dark' || tone === 'hot' ? PAL.ink : PAL.inkD;
+    ctx.save(); ctx.globalAlpha = sat(a); ctx.font = o.serif ? FONT.serif(px, 900) : o.mono ? FONT.mono(px, 700) : FONT.sans(px); ctx.textBaseline = 'middle';
+    const tw = ctx.measureText(text).width, pad = px * .5, w = tw + pad * 2, h = px * 1.62, bx = o.align === 'center' ? -w / 2 : o.align === 'right' ? -w : 0;
+    ctx.translate(x, y + (1 - E.out(sat(a))) * 10); ctx.rotate(o.rot || 0);
+    shOn(ctx, .8); ctx.fillStyle = css(bg); ctx.beginPath(); ctx.roundRect(bx, -h / 2, w, h, 6); ctx.fill(); shOff(ctx);
+    ctx.fillStyle = css(fg); ctx.textAlign = 'left'; ctx.fillText(text, bx + pad, 2);
+    ctx.restore(); return w;
+  },
+  // 不带底的字（压在画面上，带一点阴影）
+  text(ctx, x, y, text, o) {
+    o = o || {}; const a = o.a === undefined ? 1 : o.a; if (a <= 0.01) return;
+    ctx.save(); ctx.globalAlpha = sat(a); ctx.font = o.mono ? FONT.mono(o.px || 30, o.w || 700) : o.serif ? FONT.serif(o.px || 30, o.w || 700) : FONT.sans(o.px || 30); ctx.textBaseline = 'middle'; ctx.textAlign = o.align || 'left';
+    ctx.shadowColor = 'rgba(20,12,8,.7)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 2; ctx.fillStyle = css(o.col || PAL.ink); ctx.fillText(text, x, y); ctx.restore();
+  },
+  // 圆形编号牌
+  badge(ctx, x, y, n, a, o) {
+    if (a <= 0.01) return; o = o || {}; const r = (o.r || 26) * (.6 + .4 * E.back(sat(a)));
+    ctx.save(); ctx.globalAlpha = sat(a * 1.5); shOn(ctx, .8); ctx.fillStyle = css(o.col || PAL.gold); ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); shOff(ctx);
+    ctx.fillStyle = css(PAL.inkD); ctx.font = FONT.mono(r * 1.15, 700); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(n), x, y + 2); ctx.restore();
   },
   // 四个角的取景框，k = 展开程度
   bracket(ctx, x, y, w, h, k, o) {
-    o = o || {}; if (k <= 0) return; const col = o.col || PAL.gold, L = Math.min(o.len || 26, w / 2, h / 2) * E.out(k), lw = o.lw || 4;
-    ctx.save(); ctx.globalAlpha = (o.a === undefined ? 1 : o.a) * sat(k * 2); ctx.fillStyle = css(col);
-    const ex = (1 - E.out(k)) * 14; x -= ex; y -= ex; w += ex * 2; h += ex * 2;
-    for (const [px, py, sx, sy] of [[x, y, 1, 1], [x + w, y, -1, 1], [x, y + h, 1, -1], [x + w, y + h, -1, -1]]) { ctx.fillRect(sx > 0 ? px : px - L, sy > 0 ? py : py - lw, L, lw); ctx.fillRect(sx > 0 ? px : px - lw, sy > 0 ? py : py - L, lw, L); }
-    if (o.frame) { ctx.globalAlpha *= o.frame; ctx.strokeStyle = css(col); ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h); }
-    ctx.restore();
-  },
-  // 带编号的小方牌：① 墙
-  numTag(ctx, x, y, n, text, a, o) {
-    if (a <= 0.01) return; o = o || {};
-    ctx.save(); ctx.globalAlpha = a; const s = 44;
-    ctx.fillStyle = css(PAL.gold); ctx.fillRect(x, y, s, s);
-    ctx.fillStyle = '#16120c'; ctx.font = FONT.mono(30, 700); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(n), x + s / 2, y + s / 2 + 2);
-    if (text) { ctx.font = FONT.sans(32); const tw = ctx.measureText(text).width; ctx.fillStyle = 'rgba(6,7,12,.84)'; ctx.fillRect(x + s, y, tw + 26, s); ctx.fillStyle = css(PAL.ink); ctx.textAlign = 'left'; ctx.fillText(text, x + s + 13, y + s / 2 + 2); }
-    ctx.restore();
-  },
-  // 角标：左上角一行小字（章节）
-  corner(ctx, t) {
-    const idx = TL.idx(t); if (idx < 0) return;
-    const ch = TL.lines[idx].ch, list = [...new Set(TL.lines.map(l => l.ch))], n = list.indexOf(ch) + 1;
-    let first = idx; while (first > 0 && TL.lines[first - 1].ch === ch) first--;
-    const t0 = TL.s(TL.lines[first].id), a = seg(t, t0, t0 + .5) * .92;
-    ctx.save(); ctx.globalAlpha = a; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 8;
-    const x = 64 - (1 - E.out(seg(t, t0, t0 + .5))) * 14, y = 66;
-    ctx.fillStyle = css(PAL.gold); ctx.font = FONT.mono(30, 700); ctx.textAlign = 'left'; ctx.fillText(String(n).padStart(2, '0'), x, y + 1);
-    ctx.fillStyle = css(PAL.ink, .6); ctx.fillRect(x + 52, y - 1, 30, 3);
-    ctx.fillStyle = css(PAL.ink); ctx.font = FONT.sans(32); ctx.fillText(ch, x + 96, y + 1);
-    ctx.restore();
-  },
-  // 大数字 + 小字说明（右上角）
-  counter(ctx, x, y, label, value, o) {
-    o = o || {}; const a = o.a === undefined ? 1 : o.a; if (a <= 0.01) return;
-    ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic'; ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 12;
-    ctx.fillStyle = css(PAL.ink, .86); ctx.font = FONT.sans(28); ctx.fillText(label, x, y);
-    ctx.fillStyle = css(o.col || PAL.gold); ctx.font = FONT.mono(o.px || 92, 700); ctx.fillText(String(value), x + 4, y + (o.px || 92) + 4);
+    o = o || {}; if (k <= 0) return; const col = o.col || PAL.gold, L = Math.min(o.len || 30, w / 2, h / 2) * E.out(k), lw = o.lw || 6;
+    ctx.save(); ctx.globalAlpha = (o.a === undefined ? 1 : o.a) * sat(k * 2); ctx.strokeStyle = css(col); ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.shadowColor = 'rgba(20,12,8,.45)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
+    const ex = (1 - E.out(k)) * 16; x -= ex; y -= ex; w += ex * 2; h += ex * 2;
+    for (const [px, py, sx, sy] of [[x, y, 1, 1], [x + w, y, -1, 1], [x, y + h, 1, -1], [x + w, y + h, -1, -1]]) { ctx.beginPath(); ctx.moveTo(px + sx * L, py); ctx.lineTo(px, py); ctx.lineTo(px, py + sy * L); ctx.stroke(); }
     ctx.restore();
   },
   line(ctx, x0, y0, x1, y1, k, o) {
-    o = o || {}; if (k <= 0) return; ctx.save(); ctx.globalAlpha = o.a === undefined ? .9 : o.a; ctx.strokeStyle = css(o.col || PAL.ink); ctx.lineWidth = o.lw || 3;
+    o = o || {}; if (k <= 0) return; ctx.save(); ctx.globalAlpha = o.a === undefined ? .9 : o.a; ctx.strokeStyle = css(o.col || PAL.ink); ctx.lineWidth = o.lw || 3; ctx.lineCap = 'round';
     if (o.dash) ctx.setLineDash(o.dash);
     ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(lerp(x0, x1, E.out(k)), lerp(y0, y1, E.out(k))); ctx.stroke(); ctx.restore();
   },
-  // 居中的大字（清晰的，不是木板拼的）
+  // 居中的大字
   big(ctx, text, x, y, px, o) {
     o = o || {}; const a = o.a === undefined ? 1 : o.a; if (a <= 0.01) return;
     drawRuns(ctx, typeof text === 'string' ? parseRuns(text) : text, x, y, px, { alpha: a, weight: o.w || 900, hl: o.hl, left: o.left });
   },
-  cite(ctx, text, a) { if (a <= 0.01) return; ctx.save(); ctx.globalAlpha = a * .8; ctx.font = FONT.mono(24, 500); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 8; ctx.fillStyle = css(PAL.ink); ctx.fillText(text, W / 2, 1046); ctx.restore(); },
+  cite(ctx, text, a) { if (a <= 0.01) return; ctx.save(); ctx.globalAlpha = a * .8; ctx.font = FONT.mono(24, 500); ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 8; ctx.fillStyle = css(PAL.ink); ctx.fillText(text, W - 60, 56); ctx.restore(); },
 };
-// 把世界坐标换成屏幕坐标（标签要贴着画面里的东西时用）
-function toScreen(cam, x, y) { const z = cam ? cam.z : 1, cx = cam ? cam.x : W / 2, cy = cam ? cam.y : H / 2; return [(x - cx) * z + W / 2, (y - cy) * z + H / 2]; }
-function camMix(a, b, k) { return { z: lerp(a.z, b.z, k), x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k) }; }
-const CAM0 = { z: 1, x: W / 2, y: H / 2 };
 
-// “那个晚上”的小卡片：记词的时候收起来，后面再打开。s = 缩放
-function drawMemCard(ctx, x, y, s, a, o) {
-  if (a <= 0.01) return; o = o || {};
+// “那个晚上”的记忆卡片：一张小纸卡，上面九道横线代表九个词。s = 缩放
+function drawMemCard(ctx, x, y, s, a) {
+  if (a <= 0.01) return;
   const w = 250 * s, h = 150 * s;
-  ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y);
-  ctx.fillStyle = 'rgba(8,10,18,.9)'; ctx.fillRect(0, 0, w, h);
-  ctx.strokeStyle = css(PAL.gold, .9); ctx.lineWidth = 3 * s; ctx.strokeRect(0, 0, w, h);
-  ctx.fillStyle = css(PAL.gold); ctx.fillRect(0, 0, w, 8 * s);
-  ctx.font = FONT.sans(28 * s); ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.fillStyle = css(PAL.ink); ctx.fillText('那个晚上', 18 * s, 38 * s);
-  ctx.font = FONT.mono(24 * s, 500); ctx.textAlign = 'right'; ctx.fillStyle = css(PAL.gold); ctx.fillText('9 个词', w - 16 * s, 38 * s);
-  const ws = [1, 2, 2, 2, 2, 2, 2, 2, 2];                          // 九个词：一个字的短，两个字的长
-  let k = 0; for (let r = 0; r < 2; r++) { let bx = 18 * s; for (let c = 0; c < (r ? 4 : 5); c++, k++) { const bw = (ws[k] === 1 ? 20 : 38) * s; ctx.fillStyle = css(PAL.ink, .82); ctx.fillRect(bx, (72 + r * 34) * s, bw, 16 * s); bx += bw + 9 * s; } }
+  ctx.save(); ctx.globalAlpha = sat(a); ctx.translate(x, y); ctx.rotate(-.03);
+  shOn(ctx, 1); ctx.fillStyle = css(PAL.paper); ctx.beginPath(); ctx.roundRect(0, 0, w, h, 8 * s); ctx.fill(); shOff(ctx);
+  ctx.fillStyle = css(PAL.gold); ctx.beginPath(); ctx.roundRect(0, 0, w, 14 * s, [8 * s, 8 * s, 0, 0]); ctx.fill();
+  ctx.font = FONT.sans(27 * s); ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.fillStyle = css(PAL.inkD); ctx.fillText('那个晚上', 18 * s, 44 * s);
+  ctx.font = FONT.mono(23 * s, 700); ctx.textAlign = 'right'; ctx.fillStyle = css(PAL.goldDeep); ctx.fillText('9 个词', w - 16 * s, 44 * s);
+  const ws = [1, 2, 2, 2, 2, 2, 2, 2, 2]; let k = 0;
+  for (let r = 0; r < 2; r++) { let bx = 18 * s; for (let c = 0; c < (r ? 4 : 5); c++, k++) { const bw = (ws[k] === 1 ? 20 : 38) * s; ctx.fillStyle = css(PAL.inkD, .7); ctx.beginPath(); ctx.roundRect(bx, (76 + r * 32) * s, bw, 14 * s, 4 * s); ctx.fill(); bx += bw + 9 * s; } }
   ctx.restore();
 }
