@@ -26,7 +26,7 @@ const S1 = (() => {
   const SEA = { x: 960, y: 640, s: 3.6 };
   const tDrop = () => t('a2') - .1;                               // “第一次，已经开始了”：布景落下
   const waveF = (i, time, k) => x => k * ((22 + i * 8) * Math.sin(x * (.005 + i * .0008) - time * (1.5 + i * .3) + i * 1.7) + (9 + i * 3) * Math.sin(x * (.012 + i * .002) + time * (2.4 + i * .3) + i));
-  function seaShip(time, calm, sx, still) { const f = waveF(2, time, (1 - (calm || 0) * .6) * (1 - (still || 0))), x = sx || SEA.x; return { y: SEA.y + f(x) * .7, tilt: Math.atan((f(x + 100) - f(x - 100)) / 200) * 1.2 }; }
+  function seaShip(time, calm, sx, still) { const f = waveF(2, time, (1 - (calm || 0) * .6) * (1 - (still || 0))), x = sx || SEA.x; return { y: SEA.y + f(x) * .7, tilt: Math.atan((f(x + 100) - f(x - 100)) / 200) * 1.2 * (1 - (calm || 0) * .5) }; }
   // calm：0 暴风雨（开头）→ 1 天快亮（结尾）。drop：0..1 布景落下去的进度。ship：false = 不画船
   function paintSea(ctx, time, o) {
     o = o || {}; const calm = o.calm || 0, drop = o.drop || 0, sx = o.sx || SEA.x;
@@ -38,7 +38,7 @@ const S1 = (() => {
     ctx.fillStyle = g; ctx.fillRect(-40, -40, W + 80, H + 80);
     if (calm > 0) { g = ctx.createRadialGradient(sx, 600, 20, sx, 600, 700); g.addColorStop(0, css([255, 222, 160], .7 * calm)); g.addColorStop(1, 'rgba(255,222,160,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
     else { fs(ctx, C('#f6efd6'), .9); circ(ctx, 1500, 210, 64); fs(ctx, mixc(C('#16224a'), C('#8aa2de'), fl * .6)); circ(ctx, 1474, 192, 58); }
-    for (let k = 0; k < 5; k++) { shOn(ctx, .8); fs(ctx, mixc(mixc(C('#1b2850'), C('#e9c1b0'), calm), C('#c0cdf0'), fl * .5), calm ? .5 : 1); const cx = ((hash(k * 3 + 1) * 2300 + time * (10 + k * 4)) % 2500) - 280, cy = 110 + hash(k * 3 + 2) * 230, w = 300 + hash(k) * 240; rr(ctx, cx, cy, w, 64, 32); rr(ctx, cx + w * .2, cy - 34, w * .5, 70, 35); shOff(ctx); }
+    for (let k = 0; k < 5; k++) { shOn(ctx, .8); fs(ctx, mixc(mixc(C('#1b2850'), C('#e9c1b0'), calm), C('#c0cdf0'), fl * .5), calm ? .3 : 1); const cx = ((hash(k * 3 + 1) * 2300 + time * (10 + k * 4)) % 2500) - 280, cy = 110 + hash(k * 3 + 2) * 230, w = 300 + hash(k) * 240; rr(ctx, cx, cy, w, 64, 32); rr(ctx, cx + w * .2, cy - 34, w * .5, 70, 35); shOff(ctx); }
     ctx.restore();
     // 浪：五层，往下落（后面的先落）
     const sh = seaShip(time, calm, sx, o.still), cols = ['#1d3f78', '#215091', '#2a63ab', '#1f4c8c', '#183a70'];

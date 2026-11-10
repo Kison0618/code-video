@@ -26,8 +26,6 @@ const S3 = (() => {
       hullShadow(c);
       // 旧桅杆：断成两截，上半截歪倒掉下去，下半截被拔走
       const u = seg(time, TB, TB + 1.0), v = seg(time, TM - .35, TM);
-      if (u < 1) piece(c, { px: 0, py: -86, r: E.in(u) * 1.5, dx: E.in(u) * 26, dy: u * u * 120, a: 1 - seg(u, .7, 1) }, k => { k.beginPath(); k.rect(-40, -170, 100, 84); k.clip(); sh(k, .6 + u * 2); shipMast(k, SHIP_OLD.mast); shipFlag(k); shOff(k); });
-      if (v < 1) { c.save(); c.translate(-E.in(u) * 3, E.in(v) * 70); c.rotate(-seg(u, 0, .4) * .06); c.globalAlpha *= 1 - seg(v, .6, 1); c.beginPath(); c.rect(-20, -86, 40, 60); c.clip(); sh(c, .6); shipMast(c, SHIP_OLD.mast); shOff(c); c.restore(); }
       // 新桅杆：从上面落下来
       const w = seg(time, TM, TM + .5);
       if (w > 0) piece(c, { dy: -(1 - E.out(w)) * 150, a: w * 4 }, k => { sh(k, .6 + (1 - w) * 1.5); shipMast(k, SHIP_NEW.mast); shipFlag(k); shOff(k); });
@@ -37,6 +35,8 @@ const S3 = (() => {
       // 新帆：从桅杆往外展开
       const nu = seg(time, TS + .15, TS + .75);
       if (nu > 0) for (const [which, px] of [['jib', -9], ['main', 9]]) piece(c, { px, py: -38, sx: Math.max(.02, E.back(nu)) }, k => { sh(k, .6); shipSail(k, which, SHIP_NEW.sail, { stripe: 1 }); shOff(k); });
+      if (u < 1) piece(c, { px: 0, py: -86, r: -E.io2(u) * 1.7, dx: -u * 30, dy: u * u * 90, a: 1 - seg(u, .75, 1) }, k => { k.beginPath(); k.rect(-40, -170, 100, 84); k.clip(); sh(k, .6 + u * 2); shipMast(k, SHIP_OLD.mast); shipFlag(k); shOff(k); });
+      if (v < 1) { c.save(); c.translate(-E.in(u) * 3, E.in(v) * 70); c.rotate(-seg(u, 0, .4) * .06); c.globalAlpha *= 1 - seg(v, .6, 1); c.beginPath(); c.rect(-20, -86, 40, 60); c.clip(); sh(c, .6); shipMast(c, SHIP_OLD.mast); shOff(c); c.restore(); }
       // 船身
       sh(c, .8); fs(c, SHIP_OLD.hull); hullPath(c); c.fill(); shOff(c);
       const po = seg(time, TP - .1, TP + .5), pn = seg(time, TP + .25, TP + .75);

@@ -50,9 +50,9 @@ const S2 = (() => {
     const mix = { a: a.who, b: b.who, k: E.io2(p) }, same = a.x === b.x && a.y === b.y && !!a.sit === !!b.sit && !!a.floor === !!b.floor;
     const base = Object.assign({}, p < .5 ? a : b, { mix, who: undefined });
     if (same) { out.push(Object.assign(base, { armL: lerpA(a.armL, b.armL, E.io(p)), armR: lerpA(a.armR, b.armR, E.io(p)) })); return; }
-    const q = seg(p, .25, .75);
-    if (q < 1) out.push(Object.assign({}, a, { mix, who: undefined, alpha: 1 - q }));
-    if (q > 0) out.push(Object.assign({}, b, { mix, who: undefined, alpha: q }));
+    const k0 = 1 - E.in(seg(p, .15, .5)), k1 = E.back(seg(p, .5, .9));                      // 这边缩回去，那边弹出来
+    if (k0 > 0.02) out.push(Object.assign({}, a, { mix, who: undefined, s: a.s * k0, alpha: sat(k0 * 3) }));
+    if (k1 > 0.02) out.push(Object.assign({}, b, { mix, who: undefined, s: b.s * k1, alpha: sat(k1 * 3) }));
   }
   function build(i, p, time) {
     const A = STAGE[i], B = STAGE[Math.min(STAGE.length - 1, i + 1)];
