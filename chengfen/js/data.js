@@ -1,12 +1,12 @@
 // 成分文案。改文案只改这个文件。
 // noun = 这项最高时的称号；mod = 这项最低时的修饰语。结果名 = mod + noun（24×23 种）。
 window.VIRTUES = {
-  w: { zh: '智慧', tag: '脑', color: '#2B5FD9' },
-  c: { zh: '勇气', tag: '胆', color: '#E8472B' },
-  h: { zh: '仁爱', tag: '心', color: '#E5488F' },
-  j: { zh: '正义', tag: '群', color: '#1E9A5A' },
-  t: { zh: '节制', tag: '闸', color: '#D99A00' },
-  x: { zh: '超越', tag: '魂', color: '#7B52D9' }
+  w: { zh: '智慧', tag: '脑', color: '#5C8DFF' },
+  c: { zh: '勇气', tag: '胆', color: '#FF6A3D' },
+  h: { zh: '仁爱', tag: '心', color: '#FF5FA8' },
+  j: { zh: '正义', tag: '群', color: '#2EE59D' },
+  t: { zh: '节制', tag: '闸', color: '#FFC53D' },
+  x: { zh: '超越', tag: '魂', color: '#A77BFF' }
 };
 
 // short = 快检题号：前 2 题（一正一反）给 48 题版，4 题全用给 96 题版
