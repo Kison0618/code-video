@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08070D">
+<title>查成分 · 光谱 v2</title>
+<link rel="stylesheet" href="fonts.css">
+<style>
+  @property --hue { syntax: '<color>'; inherits: true; initial-value: #7AA2FF; }
+  @property --hue2 { syntax: '<color>'; inherits: true; initial-value: #FF8FC7; }
+  :root { --bg: #08070D; --fg: #F6F2EA; --dim: #9A96A8; --hair: rgba(246,242,234,.12); }
+  * { box-sizing: border-box; margin: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--fg); font-family: -apple-system, 'PingFang SC', 'HarmonyOS Sans SC', 'MiSans', 'Noto Sans SC', sans-serif; overflow: hidden; }
+  .page { position: relative; max-width: 480px; height: 100dvh; min-height: 640px; margin: 0 auto; padding: calc(14px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; transition: --hue 1.6s, --hue2 1.6s; isolation: isolate; }
+
+  /* 背景：跟着当前这个人的颜色走 */
+  .sky { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  .sky::before { content: ''; position: absolute; left: 50%; top: 38%; width: 150vmin; height: 150vmin; transform: translate(-50%, -50%); border-radius: 50%;
+    background: radial-gradient(closest-side, color-mix(in oklab, var(--hue) 34%, transparent), color-mix(in oklab, var(--hue2) 12%, transparent) 45%, transparent 72%); }
+  .sky::after { content: ''; position: absolute; inset: 0; opacity: .16; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E"); }
+  .stars { position: absolute; inset: 0; background-image: radial-gradient(1px 1px at 12% 18%, #fff8 50%, transparent 51%), radial-gradient(1px 1px at 82% 12%, #fff6 50%, transparent 51%), radial-gradient(1.2px 1.2px at 68% 44%, #fff5 50%, transparent 51%), radial-gradient(1px 1px at 22% 58%, #fff5 50%, transparent 51%), radial-gradient(1px 1px at 91% 66%, #fff6 50%, transparent 51%), radial-gradient(1px 1px at 8% 80%, #fff4 50%, transparent 51%), radial-gradient(1.2px 1.2px at 44% 8%, #fff5 50%, transparent 51%); }
+
+  header { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; letter-spacing: .14em; color: var(--dim); }
+  header b { color: var(--fg); font-family: 'CF Serif', 'Songti SC', serif; font-weight: 900; font-size: 17px; letter-spacing: .08em; }
+  header span { border: 1px solid var(--hair); padding: 5px 10px; border-radius: 99px; background: rgba(255,255,255,.04); }
+  h1 { margin-top: 18px; text-align: center; font-family: 'CF Serif', 'Songti SC', serif; font-weight: 900; font-size: clamp(34px, 10vw, 42px); line-height: 1.15; letter-spacing: .01em; }
+  h1 + p { text-align: center; color: var(--dim); font-size: 14px; margin-top: 6px; }
+
+  /* 成分球 */
+  .stage { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; }
+  .rig { position: relative; width: min(60vw, 33dvh, 280px); aspect-ratio: 1; }
+  .orbit { position: absolute; inset: -21%; animation: spin 90s linear infinite; }
+  .orbit circle { transition: r 1.2s cubic-bezier(.3,1.3,.4,1), opacity 1s; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .orb { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: #0E0C16; cursor: pointer; isolation: isolate;
+    box-shadow: 0 0 70px -6px color-mix(in oklab, var(--hue) 70%, transparent), 0 24px 60px -18px #000; transition: transform .45s cubic-bezier(.3,1.6,.4,1); }
+  .orb.squish { transform: scale(.93, 1.05) rotate(-3deg); }
+  .mix { position: absolute; inset: -12%; filter: blur(20px) saturate(1.5) brightness(1.05); }
+  .blob { position: absolute; width: 58%; height: 58%; border-radius: 50%; left: var(--x); top: var(--y); background: var(--c); scale: var(--s, .6); opacity: var(--o, .9);
+    transition: scale 1.5s cubic-bezier(.3,.9,.2,1), opacity 1.2s; animation: float var(--d) ease-in-out infinite alternate; }
+  @keyframes float { from { translate: -14% -10%; } 50% { translate: 12% 6%; } to { translate: -4% 16%; } }
+  .orb::before { content: ''; position: absolute; inset: 0; z-index: 2; border-radius: 50%; background: radial-gradient(46% 38% at 30% 20%, rgba(255,255,255,.5), transparent 70%), radial-gradient(closest-side, transparent 58%, rgba(4,3,10,.62) 100%); }
+  .orb::after { content: ''; position: absolute; inset: 0; z-index: 3; border-radius: 50%; opacity: .55; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
+
+  /* 标注 */
+  .tag { position: absolute; display: flex; align-items: center; gap: 6px; padding: 6px 11px 6px 9px; border-radius: 99px; font-size: 12.5px; font-weight: 600; white-space: nowrap;
+    background: rgba(18,16,28,.62); border: 1px solid rgba(255,255,255,.16); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: opacity .4s, transform .5s cubic-bezier(.3,1.4,.4,1); z-index: 5; }
+  .tag i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); }
+  .tag b { font-family: 'CF Latin', Georgia, serif; font-weight: 400; font-size: 17px; line-height: 1; margin-left: 2px; }
+  .tag.low { color: var(--dim); } .tag.low i { box-shadow: none; opacity: .6; }
+  .tag.hide { opacity: 0; transform: scale(.8); }
+  .t1 { left: -26%; top: 6%; } .t2 { right: -30%; top: 34%; } .t3 { left: -20%; bottom: 4%; }
+  .tap { position: absolute; left: 50%; bottom: -17%; transform: translateX(-50%); font-size: 11px; color: var(--dim); letter-spacing: .12em; white-space: nowrap; opacity: .8; }
+
+  /* 这个人是谁 */
+  .who { text-align: center; min-height: 118px; transition: opacity .4s, transform .4s; }
+  .who.hide { opacity: 0; transform: translateY(8px); }
+  .who small { font-size: 11px; letter-spacing: .22em; color: var(--dim); }
+  .who i { display: block; font-style: normal; font-size: 14px; color: color-mix(in oklab, var(--hue) 55%, #fff); margin-top: 5px; }
+  .who b { display: block; font-family: 'CF Serif', 'Songti SC', serif; font-weight: 900; font-size: clamp(27px, 8vw, 34px); line-height: 1.2; }
+  .who p { font-size: 13.5px; color: #C9C5D4; line-height: 1.55; margin: 6px auto 0; max-width: 19em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* 底部面板 */
+  .dock { margin-top: 12px; padding: 6px 6px 6px; border-radius: 30px; background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.035)); border: 1px solid rgba(255,255,255,.13); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); padding: 10px 4px 12px; text-align: center; }
+  .stats div + div { border-left: 1px solid var(--hair); }
+  .stats b { font-family: 'CF Latin', Georgia, serif; font-weight: 400; font-size: 27px; line-height: 1; display: block; }
+  .stats span { font-size: 11px; color: var(--dim); }
+  .cta { display: flex; align-items: center; justify-content: space-between; height: 58px; padding: 0 7px 0 26px; border-radius: 26px; text-decoration: none; color: #0B0A12; font-size: 18px; font-weight: 700; position: relative; overflow: hidden;
+    background: linear-gradient(100deg, #fff, color-mix(in oklab, var(--hue) 38%, #fff) 60%, color-mix(in oklab, var(--hue2) 45%, #fff)); transition: transform .15s; }
+  .cta:active { transform: scale(.975); }
+  .cta::after { content: ''; position: absolute; top: 0; bottom: 0; width: 40%; left: -50%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.75), transparent); animation: sheen 3.6s ease-in-out infinite; }
+  @keyframes sheen { 0%, 55% { left: -50%; } 100% { left: 130%; } }
+  .cta span:last-child { width: 44px; height: 44px; border-radius: 20px; background: #0B0A12; color: #fff; display: grid; place-items: center; font-size: 18px; position: relative; z-index: 1; }
+  .src { margin-top: 10px; text-align: center; font-size: 10.5px; color: #6F6B7C; }
+  @media (max-height: 700px) { h1 + p, .tap { display: none; } .who { min-height: 96px; } .who p { -webkit-line-clamp: 1; } }
+  @media (prefers-reduced-motion: reduce) { .orbit, .blob, .cta::after { animation: none; } }
+</style>
+</head>
+<body>
+<div class="page" id="page">
+  <div class="sky"><div class="stars"></div></div>
+  <header><b>查成分</b><span>213 题 · 性格成分检测</span></header>
+  <h1>你是什么做的？</h1>
+  <p>24 种性格成分，每个人的配比都不一样。</p>
+
+  <div class="stage">
+    <div class="rig">
+      <svg class="orbit" viewBox="-142 -142 284 284" id="orbit" aria-hidden="true"><circle r="118" fill="none" stroke="rgba(255,255,255,.1)" stroke-dasharray="1 6"/></svg>
+      <div class="orb" id="orb" role="button" aria-label="换一个人看看"><div class="mix" id="mix"></div></div>
+      <div class="tag t1" id="t1"></div><div class="tag t2" id="t2"></div><div class="tag t3 low" id="t3"></div>
+      <span class="tap">点一下球，换个人</span>
+    </div>
+  </div>
+
+  <div class="who" id="who"><small>有人测出来是</small><i id="mod"></i><b id="noun"></b><p id="line"></p></div>
+
+  <div class="dock">
+    <div class="stats"><div><b>213</b><span>道量表题</span></div><div><b>24</b><span>种成分</span></div><div><b>552</b><span>种结果</span></div></div>
+    <a class="cta" href="../index.html"><span>查查我的成分</span><span>→</span></a>
+  </div>
+  <p class="src">题目源自 IPIP-VIA 公开量表 · 约 8 分钟 · 无需注册 · 仅供娱乐</p>
+</div>
+
+<script src="../js/data.js"></script>
+<script>
+(() => {
+  const S = STRENGTHS, IDX = Object.fromEntries(S.map((s, i) => [s.key, i]));
+  const HUE = { w: '#5C8DFF', c: '#FF6A3D', h: '#FF5FA8', j: '#2EE59D', t: '#FFC53D', x: '#A77BFF' }, VS = Object.keys(HUE);
+  // 首页展示的样本：挑有“隐藏款”的强弱组合，[强, 第二强, 弱]
+  const DEMO = [['curiosity', 'creativity', 'perseverance'], ['kindness', 'gratitude', 'forgiveness'], ['humor', 'social', 'love'], ['perseverance', 'selfreg', 'zest'],
+    ['judgment', 'prudence', 'bravery'], ['honesty', 'bravery', 'social'], ['love', 'beauty', 'prudence'], ['perspective', 'learning', 'selfreg'], ['zest', 'hope', 'selfreg'], ['teamwork', 'fairness', 'leadership']];
+  const $ = id => document.getElementById(id), page = $('page'), mix = $('mix'), orbit = $('orbit'), NS = 'http://www.w3.org/2000/svg';
+  // 球里的色团：六大类各一团 + 主成分两团
+  const POS = [[2, 4], [44, 0], [48, 40], [20, 48], [-6, 30], [26, 18], [10, 10], [36, 30]];
+  const blobs = POS.map(([x, y], i) => { const b = document.createElement('div'); b.className = 'blob'; b.style.cssText = `--x:${x}%;--y:${y}%;--d:${7 + i * 1.3}s;--c:${HUE[VS[i % 6]]};animation-delay:${-i * 1.7}s`; mix.append(b); return b; });
+  // 轨道上 24 个点
+  const dots = S.map((s, i) => { const c = document.createElementNS(NS, 'circle'), a = (i * 15 - 90) * Math.PI / 180; c.setAttribute('cx', Math.cos(a) * 118); c.setAttribute('cy', Math.sin(a) * 118); c.setAttribute('r', 2); c.setAttribute('fill', HUE[s.v]); orbit.append(c); return c; });
+  let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  let n = -1, timer;
+  function show() {
+    n = (n + 1) % DEMO.length;
+    const [a, b, c] = DEMO[n].map(k => S[IDX[k]]), t = TENSIONS[a.key + '|' + c.key];
+    const val = S.map(s => s === a ? .9 + rnd() * .08 : s === b ? .78 + rnd() * .08 : s === c ? .1 + rnd() * .1 : .3 + rnd() * .42);
+    const pct = s => Math.round(val[IDX[s.key]] * 100);
+    // 各大类的份量 → 色团大小
+    const w = VS.map(v => { const g = S.filter(s => s.v === v); return g.reduce((x, s) => x + val[IDX[s.key]], 0) / g.length; });
+    blobs.forEach((bl, i) => {
+      if (i < 6) { bl.style.setProperty('--s', (.3 + w[i] * 1.0).toFixed(2)); bl.style.setProperty('--o', (.5 + w[i] * .5).toFixed(2)); }
+      else { bl.style.setProperty('--c', HUE[(i === 6 ? a : b).v]); bl.style.setProperty('--s', i === 6 ? 1.15 : .8); }
+    });
+    dots.forEach((d, i) => { d.setAttribute('r', (1.2 + val[i] * 5).toFixed(1)); d.style.opacity = S[i] === a || S[i] === b ? 1 : .2 + val[i] * .6; });
+    page.style.setProperty('--hue', HUE[a.v]); page.style.setProperty('--hue2', HUE[b.v === a.v ? VS[(VS.indexOf(a.v) + 2) % 6] : b.v]);
+    const tags = [[$('t1'), a], [$('t2'), b], [$('t3'), c]], who = $('who');
+    tags.forEach(([el]) => el.classList.add('hide')); who.classList.add('hide');
+    setTimeout(() => {
+      tags.forEach(([el, s], i) => { el.style.setProperty('--c', HUE[s.v]); el.innerHTML = `<i></i>${s.zh}<b>${pct(s)}%</b>`; setTimeout(() => el.classList.remove('hide'), 120 * i); });
+      $('mod').textContent = c.mod; $('noun').textContent = a.noun; $('line').textContent = t ? t[1] : a.hiOne; who.classList.remove('hide');
+    }, 420);
+  }
+  function auto() { clearInterval(timer); timer = setInterval(show, 4200); }
+  $('orb').addEventListener('click', () => { const o = $('orb'); o.classList.add('squish'); setTimeout(() => o.classList.remove('squish'), 220); show(); auto(); });
+  show(); auto();
+})();
+</script>
+</body>
+</html>
