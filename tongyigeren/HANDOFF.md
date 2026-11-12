@@ -13,7 +13,7 @@
 | 画面 | 全部完成。全片 309.8 秒，逐秒抽帧无报错 |
 | 配音 | 已剪辑、处理，交付文件是 `voice.wav`（4 分 52 秒，48 kHz、24 bit、单声道，−16.4 LUFS，峰值 −1.4 dB） |
 | 时间轴 | 已按 `voice.wav` 对齐，`timing/timing.json`、`src/timing.js` 已提交 |
-| 配音文件 | **不在仓库里**（仓库是公开的）。用户手上有：云端发过去的 `同一个人_配音_处理后.wav`，以及原始录音 `Track-23_20261112-215333.m4a` |
+| 配音文件 | 处理后的配音在仓库里：`audio/voice.wav`（约 42 MB）。原始录音 `Track-23_20261112-215333.m4a` 不在仓库，在用户手上 |
 | 成片 | 没渲染 |
 
 配音做过的处理，两步都已经写成脚本，可以完整重做：
@@ -137,7 +137,7 @@ python tools/align.py audio/voice.wav --name voice.wav
 
 ## 3. 容易踩的坑
 
-- **配音不要提交进仓库**：仓库是公开的，`audio/`、`out/`、`.render/` 已经在 `.gitignore` 里。
+- **仓库里只放最终配音**：`audio/` 下只有 `voice.wav` 会被提交（`.gitignore` 里单独放行了），中间文件（`edit.wav` 等）、`out/`、`.render/` 都不提交。仓库是公开的，原始录音不要提交。重做配音后覆盖 `audio/voice.wav` 再提交即可。
 - **时间不要写死**：画面里所有时间都从 `timing/timing.json` 来，改文案或配音以后跑一遍 `align.py` 就行。
 - **`timing/lines.json` 的句子 id 不要改**，场景代码按 id 取时间。改字可以，改完重跑 `align.py`。
 - **字体**：已经裁好放在 `assets/fonts/`。画面里加了生僻字、显示成别的字体时，用 `tools/subset_fonts.py` 重新裁。

@@ -1,6 +1,7 @@
 node_modules
 .render/
 out/
-audio/
+audio/*
+!audio/voice.wav
 timing/asr_last.json
 __pycache__/
