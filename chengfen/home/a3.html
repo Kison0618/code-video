@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08070D">
+<title>查成分 · 光谱 v3</title>
+<link rel="stylesheet" href="fonts.css">
+<style>
+  @property --hue { syntax: '<color>'; inherits: true; initial-value: #5C8DFF; }
+  :root { --bg: #08070D; --fg: #F6F2EA; --dim: #9A96A8; --hair: rgba(246,242,234,.12); }
+  * { box-sizing: border-box; margin: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--fg); font-family: -apple-system, 'PingFang SC', 'HarmonyOS Sans SC', 'MiSans', 'Noto Sans SC', sans-serif; overflow: hidden; }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+  .page { position: relative; max-width: 480px; height: 100dvh; min-height: 620px; margin: 0 auto; padding: calc(14px + env(safe-area-inset-top)) 22px calc(16px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; transition: --hue 1.2s; isolation: isolate; }
+  .sky { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  .sky::before { content: ''; position: absolute; left: -30%; top: -8%; width: 130vmin; height: 110vmin; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in oklab, var(--hue) 30%, transparent), transparent 72%); }
+  .sky::after { content: ''; position: absolute; inset: 0; opacity: .16; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E"); }
+
+  header { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; letter-spacing: .12em; color: var(--dim); }
+  header b { color: var(--fg); font-family: 'CF Serif', 'Songti SC', serif; font-weight: 900; font-size: 17px; letter-spacing: .08em; }
+  header span { border: 1px solid var(--hair); padding: 5px 10px; border-radius: 99px; background: rgba(255,255,255,.04); }
+
+  /* 主角：一句被说中的话 */
+  .hit { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; padding-top: 6px; }
+  .kick { font-size: 13px; color: var(--dim); letter-spacing: .08em; display: flex; align-items: center; gap: 10px; }
+  .kick::before { content: ''; width: 20px; height: 1.5px; background: var(--hue); }
+  .mark { font-family: 'CF Latin', Georgia, serif; font-size: 96px; line-height: .7; height: 44px; color: var(--hue); margin-top: 22px; }
+  .quote { font-family: 'CF Serif', 'Songti SC', serif; font-weight: 900; font-size: clamp(29px, 8.7vw, 37px); line-height: 1.36; letter-spacing: .005em; min-height: 4.1em; text-wrap: balance; line-break: strict; transition: opacity .32s, transform .32s; }
+  .swap .quote, .swap .who { opacity: 0; transform: translateY(10px); }
+
+  /* 这句话写的是谁 */
+  .who { margin-top: 18px; display: grid; grid-template-columns: 54px 1fr; gap: 12px; align-items: center; transition: opacity .32s .05s, transform .32s .05s; }
+  .who img { width: 54px; height: 54px; border-radius: 16px; object-fit: cover; box-shadow: 0 0 0 1.5px var(--hue), 0 8px 20px -6px var(--hue); background: #1a1824; }
+  .who small { font-size: 12px; color: var(--dim); display: block; }
+  .who b { font-size: 18px; font-weight: 700; line-height: 1.3; display: block; }
+  .who b em { font-style: normal; color: color-mix(in oklab, var(--hue) 60%, #fff); }
+  .mixrow { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+  .mixrow span { font-size: 12px; padding: 4px 10px 4px 8px; border-radius: 99px; background: rgba(255,255,255,.06); border: 1px solid var(--hair); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .mixrow i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+  .mixrow b { font-family: 'CF Latin', Georgia, serif; font-weight: 400; font-size: 15px; line-height: 1; }
+  .mixrow .lo { color: var(--dim); }
+
+  /* 是我 / 不是我 */
+  .vote { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+  .vote button { height: 50px; border-radius: 18px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); font-size: 15px; font-weight: 600; transition: transform .12s, background .2s; }
+  .vote button:active { transform: scale(.96); }
+  .vote .yes { background: color-mix(in oklab, var(--hue) 26%, rgba(255,255,255,.06)); border-color: color-mix(in oklab, var(--hue) 60%, transparent); }
+  .tally { margin-top: 12px; font-size: 12.5px; color: var(--dim); text-align: center; min-height: 1.5em; }
+  .tally b { color: var(--fg); font-weight: 700; }
+
+  .dock { margin-top: 10px; padding: 6px; border-radius: 30px; background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.035)); border: 1px solid rgba(255,255,255,.13); }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); padding: 9px 4px 11px; text-align: center; }
+  .stats div + div { border-left: 1px solid var(--hair); }
+  .stats b { font-family: 'CF Latin', Georgia, serif; font-weight: 400; font-size: 25px; line-height: 1; display: block; }
+  .stats span { font-size: 11px; color: var(--dim); }
+  .cta { display: flex; align-items: center; justify-content: space-between; height: 58px; padding: 0 7px 0 24px; border-radius: 26px; text-decoration: none; color: #0B0A12; font-size: 17.5px; font-weight: 700; position: relative; overflow: hidden;
+    background: linear-gradient(100deg, #fff 30%, color-mix(in oklab, var(--hue) 42%, #fff)); transition: transform .15s; }
+  .cta:active { transform: scale(.975); }
+  .cta.pulse { animation: pulse .5s; }
+  @keyframes pulse { 40% { transform: scale(1.03); } }
+  .cta span:last-child { width: 44px; height: 44px; border-radius: 20px; background: #0B0A12; color: #fff; display: grid; place-items: center; font-size: 18px; }
+  .src { margin-top: 10px; text-align: center; font-size: 10.5px; color: #6F6B7C; }
+  @media (max-height: 700px) { .mark { display: none; } .quote { min-height: 3.6em; margin-top: 14px; } .mixrow { display: none; } }
+</style>
+</head>
+<body>
+<div class="page" id="page">
+  <div class="sky"></div>
+  <header><b>查成分</b><span>213 题 · 性格成分检测</span></header>
+
+  <div class="hit" id="hit">
+    <p class="kick">这句话，说的是不是你</p>
+    <div class="mark" aria-hidden="true">“</div>
+    <p class="quote" id="quote"></p>
+    <div class="who">
+      <img id="pic" alt="">
+      <div><small>测出这句话的人，成分是</small><b><em id="mod"></em><span id="noun"></span></b></div>
+      <div class="mixrow" id="mix"></div>
+    </div>
+    <div class="vote"><button class="yes" id="yes">是我</button><button id="no">不是我，换一句</button></div>
+    <p class="tally" id="tally">先试三句。完整版会有 8 句只写给你的。</p>
+  </div>
+
+  <div class="dock">
+    <div class="stats"><div><b>213</b><span>道量表题</span></div><div><b>24</b><span>种成分</span></div><div><b>552</b><span>种结果</span></div></div>
+    <a class="cta" id="cta" href="../index.html"><span id="ctat">查查我是什么做的</span><span>→</span></a>
+  </div>
+  <p class="src">题目源自 IPIP-VIA 公开量表 · 约 8 分钟 · 无需注册 · 仅供娱乐</p>
+</div>
+
+<script src="../js/data.js"></script>
+<script>
+(() => {
+  const S = Object.fromEntries(STRENGTHS.map(s => [s.key, s]));
+  const HUE = { w: '#5C8DFF', c: '#FF6A3D', h: '#FF5FA8', j: '#2EE59D', t: '#FFC53D', x: '#A77BFF' };
+  // [最多, 第二多, 最少, 那句话取自谁, 第几条]
+  const DEMO = [
+    ['curiosity', 'creativity', 'perseverance', 'curiosity', 'hi', 0, 93, 78, 11],
+    ['kindness', 'gratitude', 'forgiveness', 'forgiveness', 'lo', 1, 92, 86, 14],
+    ['selfreg', 'prudence', 'zest', 'zest', 'lo', 1, 90, 83, 16],
+    ['humor', 'social', 'love', 'humor', 'hi', 1, 94, 79, 17],
+    ['judgment', 'prudence', 'bravery', 'bravery', 'lo', 1, 91, 84, 13],
+    ['love', 'beauty', 'prudence', 'love', 'hi', 0, 95, 80, 19],
+    ['social', 'kindness', 'honesty', 'social', 'hi', 1, 89, 82, 21],
+    ['zest', 'hope', 'selfreg', 'selfreg', 'lo', 0, 92, 85, 12],
+    ['humility', 'teamwork', 'bravery', 'humility', 'hi', 0, 90, 81, 15],
+    ['perseverance', 'honesty', 'zest', 'perseverance', 'hi', 2, 96, 80, 18]
+  ];
+  const $ = id => document.getElementById(id), page = $('page'), hit = $('hit');
+  let n = -1, yes = 0, seen = 0;
+  function show() {
+    n = (n + 1) % DEMO.length;
+    const [a, b, c, src, kind, k, pa, pb, pc] = DEMO[n], A = S[a], B = S[b], C = S[c];
+    hit.classList.add('swap');
+    setTimeout(() => {
+      $('quote').textContent = S[src][kind][k];
+      $('mod').textContent = C.mod; $('noun').textContent = A.noun; $('pic').src = `../img/${a}.webp`;
+      $('mix').innerHTML = [[A, pa], [B, pb], [C, pc]].map(([s, p], i) => `<span class="${i === 2 ? 'lo' : ''}"><i style="--c:${HUE[s.v]}"></i>${s.zh}<b>${p}%</b></span>`).join('');
+      page.style.setProperty('--hue', HUE[A.v]); hit.classList.remove('swap');
+    }, n === 0 && !seen ? 0 : 320);
+  }
+  function vote(isYes) {
+    seen++; if (isYes) yes++;
+    const t = $('tally'), cta = $('cta');
+    if (seen < 3) t.innerHTML = isYes ? `说中 <b>${yes}</b> 句了。再来。` : (yes ? `目前说中 <b>${yes}</b> 句。再来。` : '这句不是你。再来。');
+    else {
+      t.innerHTML = yes ? `${seen} 句里说中了 <b>${yes}</b> 句，而这些还不是照着你写的。` : `${seen} 句都没中。那你更该测了，这些都不是照着你写的。`;
+      $('ctat').textContent = '测出只写给我的那 8 句'; cta.classList.remove('pulse'); void cta.offsetWidth; cta.classList.add('pulse');
+    }
+    show();
+  }
+  $('yes').addEventListener('click', () => vote(true)); $('no').addEventListener('click', () => vote(false));
+  show();
+})();
+</script>
+</body>
+</html>
