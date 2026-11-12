@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F7F3EE">
+<title>查成分 · 方案 D 第一题</title>
+<link rel="stylesheet" href="fonts.css">
+<style>
+  :root { --ink: #1B1A22; --dim: #7A7684; --bg: #F7F3EE; }
+  * { box-sizing: border-box; margin: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--ink); font-family: -apple-system, 'PingFang SC', 'HarmonyOS Sans SC', 'MiSans', 'Noto Sans SC', sans-serif; overflow: hidden; }
+  .aura { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+  .aura i { position: absolute; width: 78vmin; height: 78vmin; border-radius: 50%; filter: blur(70px); opacity: .7; animation: drift 16s ease-in-out infinite alternate; }
+  .aura i:nth-child(1) { background: #FFC9A8; left: -24vmin; top: 6%; }
+  .aura i:nth-child(2) { background: #C6C8FF; right: -30vmin; top: 30%; animation-delay: -5s; }
+  .aura i:nth-child(3) { background: #BFEBDD; left: 4vmin; bottom: -30vmin; animation-delay: -9s; }
+  @keyframes drift { to { transform: translate(8vmin, -6vmin) scale(1.12); } }
+  .page { position: relative; max-width: 480px; height: 100dvh; min-height: 600px; margin: 0 auto; padding: calc(14px + env(safe-area-inset-top)) 26px calc(22px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; }
+  header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--dim); letter-spacing: .1em; }
+  header b { font-family: 'CF Serif', 'Songti SC', serif; font-weight: 900; font-size: 17px; color: var(--ink); letter-spacing: .08em; }
+  .q { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; }
+  .hint { font-size: 14px; color: var(--dim); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .hint::before { content: ''; width: 22px; height: 1.5px; background: var(--ink); }
+  .say { font-family: 'CF Serif', 'Songti SC', serif; font-weight: 900; font-size: clamp(34px, 10.6vw, 46px); line-height: 1.28; letter-spacing: -.01em; min-height: 3.9em; transition: opacity .3s, transform .3s; text-wrap: balance; }
+  .say.hide { opacity: 0; transform: translateY(10px); }
+  .scale { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .scale button { border: 0; background: none; padding: 8px 0; flex: 1; display: grid; place-items: center; cursor: pointer; height: 76px; }
+  .scale i { display: block; width: var(--d); height: var(--d); border-radius: 50%; border: 2px solid var(--ink); background: rgba(255,255,255,.55); transition: transform .18s, background .18s; }
+  .scale button:active i, .scale button.on i { background: var(--ink); transform: scale(1.12); }
+  .ends { display: flex; justify-content: space-between; font-size: 13px; color: var(--dim); margin-top: 2px; padding: 0 6px; }
+  .foot { margin-top: 26px; min-height: 118px; }
+  .meta { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: var(--dim); }
+  .prog { flex: 1; height: 3px; background: rgba(27,26,34,.12); border-radius: 3px; margin: 0 12px; overflow: hidden; }
+  .prog u { display: block; height: 100%; width: 1%; background: var(--ink); transition: width .4s; }
+  .facts { margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(27,26,34,.14); font-size: 12.5px; color: var(--dim); line-height: 1.7; }
+  .facts b { color: var(--ink); font-weight: 700; }
+  .cta { display: none; align-items: center; justify-content: space-between; height: 60px; padding: 0 8px 0 26px; border-radius: 99px; background: var(--ink); color: #fff; font-size: 17px; font-weight: 700; text-decoration: none; animation: rise .5s cubic-bezier(.2,.9,.2,1); }
+  .cta span:last-child { width: 44px; height: 44px; border-radius: 50%; background: #fff; color: var(--ink); display: grid; place-items: center; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+  .done .cta { display: flex; }
+  .done .scale, .done .ends { visibility: hidden; height: 0; margin: 0; overflow: hidden; }
+  .done .hint { color: var(--ink); }
+  @media (prefers-reduced-motion: reduce) { .aura i { animation: none; } }
+</style>
+</head>
+<body>
+<div class="aura"><i></i><i></i><i></i></div>
+<div class="page" id="page">
+  <header><b>查成分</b><span>性格成分检测</span></header>
+
+  <div class="q">
+    <p class="hint" id="hint">不用准备，先回答这一句</p>
+    <p class="say" id="say">我做事常常有始无终。</p>
+    <div class="scale" id="scale" role="radiogroup" aria-label="这句话像不像你">
+      <button style="--d:46px" aria-label="完全不像我"><i></i></button>
+      <button style="--d:34px" aria-label="不太像我"><i></i></button>
+      <button style="--d:24px" aria-label="说不准"><i></i></button>
+      <button style="--d:34px" aria-label="有点像我"><i></i></button>
+      <button style="--d:46px" aria-label="太像我了"><i></i></button>
+    </div>
+    <div class="ends"><span>不像我</span><span>太像我了</span></div>
+  </div>
+
+  <div class="foot">
+    <a class="cta" href="../index.html"><span>继续，还剩 93 题</span><span>→</span></a>
+    <div class="meta" style="margin-top:14px"><span id="n">1 / 96</span><span class="prog"><u id="bar"></u></span><span>约 8 分钟</span></div>
+    <p class="facts">答完会得到一张<b>性格成分表</b>：你身上 <b>24 种成分</b>各占多少，以及 <b>552 种结果</b>里你是哪一种。题目源自 IPIP-VIA 公开量表，无需注册，仅供娱乐。</p>
+  </div>
+</div>
+
+<script>
+(() => {
+  const QS = ['我做事常常有始无终。', '我善于察觉别人的感受。', '我喜欢在人群中引人注目。']; // 题库第 85、183、140 题
+  const say = document.getElementById('say'), page = document.getElementById('page'), n = document.getElementById('n'), bar = document.getElementById('bar'), hint = document.getElementById('hint');
+  let i = 0, lock = false;
+  document.getElementById('scale').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || lock) return; lock = true; b.classList.add('on');
+    setTimeout(() => {
+      say.classList.add('hide');
+      setTimeout(() => {
+        b.classList.remove('on'); i++;
+        if (i < QS.length) { say.textContent = QS[i]; n.textContent = (i + 1) + ' / 96'; hint.textContent = i === 1 ? '很好，下一句' : '再来一句'; }
+        else { say.textContent = '就是这样。你已经答了 3 题。'; hint.textContent = '已经开始了'; page.classList.add('done'); }
+        bar.style.width = (i / 96 * 100 + 1) + '%'; say.classList.remove('hide'); lock = false;
+      }, 300);
+    }, 220);
+  });
+})();
+</script>
+</body>
+</html>
