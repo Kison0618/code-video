@@ -4,19 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>查成分 · 性格优势测试</title>
-<meta name="description" content="213 题性格优势测试，测出 24 项性格优势在你身上的排序。非官方，仅供娱乐，答案只在本地计算。">
+<meta name="description" content="96 题或 213 题性格优势测试，测出 24 项性格优势在你身上的排序。非官方，仅供娱乐，答案只在本地计算。">
 <meta name="theme-color" content="#08070D">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%2308070D'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='%23F6F2EA' font-family='sans-serif' font-weight='900'%3E查%3C/text%3E%3C/svg%3E">
 <link rel="preload" href="fonts/serif-900.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/report.css">
+<link rel="stylesheet" href="css/home-design-4.css">
 </head>
 <body>
+<header class="site-header"><div class="header-inner"><button class="brand" data-act="home" aria-label="查成分首页"><span class="brand-icon">✦</span><span><strong>查成分</strong><small>Character Strengths</small></span></button><span class="header-status" id="header-status">首页</span><button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换深色模式">☾</button></div></header>
 <main id="app" aria-live="polite"></main>
+<footer class="site-footer"><strong>✦ 查成分</strong><p>基于 IPIP 公开题库的性格优势探索 · 非官方测评</p><p>答案在本地计算，仅供自我探索与参考。</p></footer>
 <div id="toast" role="status"></div>
 <div id="sheet" hidden></div>
 <noscript><p style="padding:24px">这个页面需要开启 JavaScript 才能出报告。</p></noscript>
 <script src="js/items.js"></script>
+<script src="js/items-via-r.js"></script>
 <script src="js/data.js"></script>
+<script src="js/report.js"></script>
+<script src="js/home-design-4.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
