@@ -1,0 +1,9 @@
+{
+  "name": "infp-v3-scenes",
+  "private": true,
+  "dependencies": {
+    "skia-canvas": "3.0.8",
+    "@expo-google-fonts/noto-serif-sc": "^0.4.4",
+    "@expo-google-fonts/cormorant-garamond": "^0.4.1"
+  }
+}
