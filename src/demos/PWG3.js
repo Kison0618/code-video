@@ -14,7 +14,8 @@ module.exports = function make(G) {
     { a: Cc.T.in, fi: 0.9, draw: (c, t) => Cc.draw(c, t) },
     { a: D.T.in, fi: 0.9, draw: (c, t) => D.draw(c, t) },
   ];
-  return [{ a: G.a - 0.3, b: G.b + 0.3,
+  // 组界（C301 前 0.6 秒）落在 C214 还没念完的地方：本组多留到 C301 开口前，下一组相应晚一点淡入
+  return [{ a: G.a - 0.3, b: X.vs('C301') - 0.05,
     draw(ctx, t, al) { S.freeLayers(); let st; S.group(ctx, al, c => { st = S.seq(c, t, LIST); }); return st; },
     over(ctx, t, al) { if (t >= Cc.T.in + 0.5) Cc.over(ctx, t, al); else if (t >= B.T.in) B.over(ctx, t, al); } }];
 };

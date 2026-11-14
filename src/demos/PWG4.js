@@ -9,7 +9,7 @@ module.exports = function make(G) {
     { a: G.a - 0.3, draw: (c, t) => A.draw(c, t) },
     { a: B.T.in - 3, draw: (c, t) => B.draw(c, t) },
   ];
-  return [{ a: G.a - 0.3, b: G.b + 0.3,
+  return [{ a: require('./pwk').vs('C301') - 0.35, b: G.b + 0.3,
     draw(ctx, t, al) { S.freeLayers(); let st; S.group(ctx, al, c => { st = S.seq(c, t, LIST); }); return st; },
     over(ctx, t, al) { if (t < B.T.in - 3) A.over(ctx, t, al); else B.over(ctx, t, al); } }];
 };
