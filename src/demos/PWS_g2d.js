@@ -7,8 +7,8 @@ const S = require('./PWS_kit');
 const { K, GOLD, LIME, vs, ve, at } = X;
 const { W, H, clamp, lerp, prog, smooth, easeOut, easeInOut, glow, rgba, mix, hash, mulberry32 } = K;
 
-const T = { in: vs('B12') - 0.9, b12: vs('B12'), pct: at('B12', '百分'), end: ve('B12') + 1.2 };
-const CAM = () => [[T.in, { x: 0, y: 0, z: 5.4, ax: HW[0], ay: HW[1] }], [T.b12 + 0.2, { x: 0, y: 0, z: 4.8 }], [T.pct - 0.1, { x: 0, y: 0, z: 1.0 }], [T.end, { x: 0, y: 0, z: 0.94 }]];
+const T = { in: vs('B12') - 0.9, b12: vs('B12'), pct: at('B12', '百分'), push: ve('B12') + 0.1, end: ve('B12') + 1.2 };
+const CAM = () => [[T.in, { x: 0, y: 0, z: 5.4, ax: HW[0], ay: HW[1] }], [T.b12 + 0.2, { x: 0, y: 0, z: 4.8 }], [T.pct - 0.1, { x: 0, y: 0, z: 1.0 }], [T.push, { x: 0, y: 0, z: 0.96 }], [T.push + 0.95, { x: 0, y: 0, z: 9 }, K.easeIn]];
 let _cam; const camOf = t => S.camKF(t, _cam || (_cam = CAM()));
 const SC = 2;      // 中景按 2 倍预渲，拉近时不糊
 // 楼：{x, y(底), w, h, cols, rows}，窗格 = 列 × 行
@@ -89,7 +89,7 @@ function draw(ctx, t) {
   return { C };
 }
 function over(ctx, t, a) {
-  const u = prog(t, T.pct - 0.25, T.pct + 0.7), ta = smooth(u) * a * (1 - smooth(prog(t, T.end - 0.5, T.end))); if (ta <= 0.003) return;
+  const u = prog(t, T.pct - 0.25, T.pct + 0.7), ta = smooth(u) * a * (1 - smooth(prog(t, T.push - 0.1, T.push + 0.4))); if (ta <= 0.003) return;
   ctx.save(); ctx.shadowColor = rgba(LIME, 0.6 * ta); ctx.shadowBlur = 70;
   K.text(ctx, '1%', W / 2, 300 + (1 - easeOut(u)) * 30, { size: 250, family: 'Latin', weight: 600, color: mix(LIME, [255, 255, 255], 0.3), alpha: ta }); ctx.restore();
   X.L.rich(ctx, '万家灯火里，只有一扇窗是这个颜色', W / 2, 392, { size: 40, weight: 500, spacing: 0.08, color: [226, 226, 240], alpha: 0.9 * ta * smooth(prog(u, 0.4, 1)), keys: ['一扇窗'], keyColor: LIME });
