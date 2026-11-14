@@ -10,7 +10,8 @@ const { infp } = require('./pf');
 const S = require('./PWS_kit');
 const CL = require('./PWS_cliff');
 const { K, GOLD, LIME, PINK, BLUE, vs, ve, at } = X;
-const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, glow, rgba, mix, hash } = K;
+const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash } = K;
+const glow = S.glow;
 
 const STAR = [560, 196], GOLDW = [255, 226, 160];
 const T = {
@@ -18,7 +19,7 @@ const T = {
 };
 // ---- 相机 ----
 const CAM = [
-  [T.open, { x: -116, y: -40, z: 1.7 }], [T.open + 1.1, { x: -116, y: -40, z: 1.7 }], [T.ideal - 0.5, { x: 0, y: 0, z: 1 }], [T.b02 - 0.3, { x: 0, y: -6, z: 1.03 }],
+  [T.open, { x: -116, y: 460, z: 1.7 }], [T.open + 1.0, { x: -116, y: -40, z: 1.7 }, K.easeOut], [T.open + 1.3, { x: -116, y: -40, z: 1.7 }], [T.ideal - 0.5, { x: 0, y: 0, z: 1 }], [T.b02 - 0.3, { x: 0, y: -6, z: 1.03 }],
   [T.b02 + 0.5, { x: -70, y: 10, z: 1.36 }], [T.b03 - 0.1, { x: -64, y: 10, z: 1.4 }], [T.b03 + 1.3, { x: 10, y: -10, z: 1 }], [T.b04, { x: 14, y: -16, z: 1 }], [T.end - 0.2, { x: 20, y: -30, z: 1.04 }],
 ];
 // ---- 台阶 ----

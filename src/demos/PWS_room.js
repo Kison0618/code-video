@@ -4,7 +4,8 @@
 //   room(ctx, t, C, o)：o.lamp 台灯亮度 0-1、o.rain 雨夜 0-1、o.curtain 窗帘合上 0-1、o.cold 手机冷光漫出来 0-1
 const K = require('../core');
 const S = require('./PWS_kit');
-const { W, H, clamp, lerp, prog, smooth, glow, rgba, mix, mulberry32, hash } = K;
+const { W, H, clamp, lerp, prog, smooth, rgba, mix, mulberry32, hash } = K;
+const glow = S.glow;
 const FY = 1090, WIN = [560, 300, 420, 560], LAMP = [196, 742], HER = [520, 1268];
 const PAD = 240;
 const SKYLINE = S.lazy(() => S.bake(700, 700, c => {

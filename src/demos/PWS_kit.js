@@ -8,7 +8,18 @@
 const K = require('../core');
 const X = require('./pwk');
 const { Image } = require('skia-canvas');
-const { W, H, clamp, lerp, prog, smooth, easeOut, easeInOut, glow, rgba, mix, mulberry32, hash } = K;
+const { W, H, clamp, lerp, prog, smooth, easeOut, easeInOut, rgba, mix, mulberry32, hash } = K;
+// 光晕：core.glow 的贴图是 Canvas（skia-canvas 每贴一次都要把指令重放一遍，一个小光点 0.3ms），这里换成位图贴图，快 20 倍；
+//   颜色先量化（每通道 12 一档），渐变色不会每帧多出一张贴图
+const qc = v => Math.min(255, Math.round(v / 12) * 12), GS = new Map();
+function glow(ctx, x, y, r, c, a = 1) {
+  if (a <= 0.003 || r <= 0.5) return;
+  const key = (qc(c[0]) << 16) | (qc(c[1]) << 8) | qc(c[2]); let img = GS.get(key);
+  if (!img) { img = new Image(); img.src = K.glowSprite([qc(c[0]), qc(c[1]), qc(c[2])]).toBufferSync('png'); GS.set(key, img); }
+  const op = ctx.globalCompositeOperation, ga = ctx.globalAlpha;
+  ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = clamp(a) * ga; ctx.drawImage(img, x - r, y - r, 2 * r, 2 * r);
+  ctx.globalCompositeOperation = op; ctx.globalAlpha = ga;
+}
 
 function bake(w, h, fn) {
   const c = new K.Canvas(w, h); fn(c.getContext('2d'));
@@ -218,4 +229,4 @@ function seq(ctx, t, list) {
   }
   return st;
 }
-module.exports = { seq, bake, lazy, cam, w2s, kf, camKF, layer, freeLayers, group, comp, lit, vgrad, rgrad, add, poly, ring, moon, ridge, mountain, clouds, stars, neon, ribbon, petals, rain, title, muteFront };
+module.exports = { glow, seq, bake, lazy, cam, w2s, kf, camKF, layer, freeLayers, group, comp, lit, vgrad, rgrad, add, poly, ring, moon, ridge, mountain, clouds, stars, neon, ribbon, petals, rain, title, muteFront };

@@ -10,7 +10,8 @@ const { infp } = require('./pf');
 const S = require('./PWS_kit');
 const RM = require('./PWS_room');
 const { K, GOLD, LIME, PINK, BLUE, vs, ve, at } = X;
-const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, glow, rgba, mix, hash, mulberry32 } = K;
+const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash, mulberry32 } = K;
+const glow = S.glow;
 
 const T = { in: vs('C211') - 1.0, c211: vs('C211'), dim: at('C211', '灰暗'), rain: at('C211', '小雨'), c212: vs('C212'), empty: at('C212', '空无'), c213: vs('C213'), spill: at('C213', '溢出'), away: at('C213', '离世'), c214: vs('C214'), hour: at('C214', '个把'), end: ve('C214') + 0.6 };
 const CAM = [[T.in, { x: 0, y: 0, z: 1.0, ax: 540, ay: 1000 }], [T.c212 - 0.2, { x: 30, y: -10, z: 1.12 }], [T.c212 + 0.8, { x: -70, y: 30, z: 1.3 }], [T.spill, { x: -70, y: 30, z: 1.36 }], [T.away - 0.2, { x: -40, y: 20, z: 1.2 }], [T.away + 1.5, { x: 0, y: -70, z: 0.42 }], [T.end, { x: 0, y: -70, z: 0.38 }]];

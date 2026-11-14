@@ -9,7 +9,8 @@ const { infp } = require('./pf');
 const S = require('./PWS_kit');
 const RM = require('./PWS_room');
 const { K, GOLD, LIME, PINK, BLUE, vs, ve, at } = X;
-const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, glow, rgba, mix, hash, mulberry32 } = K;
+const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash, mulberry32 } = K;
+const glow = S.glow;
 
 const T = { in: vs('C101') - 0.9, c101: vs('C101'), prob: at('C101', '有问题'), fix: at('C101', '自己疏导'), c102: vs('C102'), think: at('C102', '常常'), over: at('C102', '思考过度'), end: ve('C102') + 0.25 };
 const CAM = [[T.in, { x: 30, y: -60, z: 1.5, ax: 540, ay: 1000 }], [T.c101 + 0.6, { x: 0, y: 0, z: 1.06 }], [T.prob, { x: -10, y: 20, z: 1.3 }], [T.c102 - 0.2, { x: -10, y: 20, z: 1.36 }], [T.think + 0.6, { x: 0, y: 0, z: 1.1 }], [T.end, { x: 0, y: 0, z: 1.0 }]];

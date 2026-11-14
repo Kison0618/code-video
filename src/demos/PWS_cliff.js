@@ -4,7 +4,8 @@
 //   cliffTop(x)          山崖顶面在 x 处的 y（人站在上面）
 const K = require('../core');
 const S = require('./PWS_kit');
-const { W, H, clamp, lerp, prog, smooth, glow, rgba, mix, mulberry32, hash } = K;
+const { W, H, clamp, lerp, prog, smooth, rgba, mix, mulberry32, hash } = K;
+const glow = S.glow;
 
 const PAD = 260, BW = W + PAD * 2, BH = H + PAD * 2;   // 位图比画面大一圈，相机可以平移/拉远
 const NIGHT = {

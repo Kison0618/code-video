@@ -10,7 +10,8 @@ const { infp } = require('./pf');
 const MB = require('./mb');
 const S = require('./PWS_kit');
 const { K, GOLD, LIME, PINK, BLUE, vs, ve, at } = X;
-const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, glow, rgba, mix, hash, mulberry32 } = K;
+const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash, mulberry32 } = K;
+const glow = S.glow;
 
 const FY = 1040, PAD = 240, HER = [806, 1090], HS = 0.66, PEND = [430, 250];
 const T = { in: vs('C103') - 0.3, c103: vs('C103'), c104: vs('C104'), hide: at('C104', '躲在'), c105: vs('C105'), grab: at('C105', '一抓'), end: ve('C105') + 1.3 };

@@ -5,7 +5,8 @@ const X = require('./pwk');
 const { infp } = require('./pf');
 const S = require('./PWS_kit');
 const { K, GOLD, LIME, vs, ve, at } = X;
-const { W, H, clamp, lerp, prog, smooth, easeOut, easeInOut, glow, rgba, mix, hash, mulberry32 } = K;
+const { W, H, clamp, lerp, prog, smooth, easeOut, easeInOut, rgba, mix, hash, mulberry32 } = K;
+const glow = S.glow;
 
 const T = { in: vs('B12') - 0.9, b12: vs('B12'), pct: at('B12', '百分'), push: ve('B12') + 0.1, end: ve('B12') + 1.2 };
 const CAM = () => [[T.in, { x: 0, y: 0, z: 5.4, ax: HW[0], ay: HW[1] }], [T.b12 + 0.2, { x: 0, y: 0, z: 4.8 }], [T.pct - 0.1, { x: 0, y: 0, z: 1.0 }], [T.push, { x: 0, y: 0, z: 0.96 }], [T.push + 0.95, { x: 0, y: 0, z: 9 }, K.easeIn]];

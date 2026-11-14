@@ -11,7 +11,8 @@ const { infp } = require('./pf');
 const MB = require('./mb');
 const S = require('./PWS_kit');
 const { K, GOLD, LIME, PINK, BLUE, vs, ve, at } = X;
-const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, glow, rgba, mix, hash, mulberry32 } = K;
+const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash, mulberry32 } = K;
+const glow = S.glow;
 
 const HY = 980, PY = 1236, PAD = 240, BW = W + PAD * 2, MOON = [230, 290];
 const T = { in: vs('B07') - 0.5, b07: vs('B07'), ever: at('B07', '永远'), b08: vs('B08'), also: at('B08', '同时'), trust: at('B08', '轻信'), b09: vs('B09'),

@@ -15,7 +15,8 @@ const { infp, LIME: FLYL } = require('./pf');
 const MB = require('./mb');
 const S = require('./PWS_kit');
 const { K, GOLD, LIME, PINK, BLUE, RED, vs, ve, at } = X;
-const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, glow, rgba, mix, hash, mulberry32 } = K;
+const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash, mulberry32 } = K;
+const glow = S.glow;
 
 const PAD = 260, HZ = 1000, GY = 1262, FIRE = [600, 1292], WARM = [255, 190, 110];
 const T = { in: vs('C201') - 1.9, c201: vs('C201'), must: at('C201', '不得不'), fb: at('C201', '副本'), c202: vs('C202'), fr: at('C202', '好朋友'), three: at('C202', '两三个'), c203: vs('C203'), good: at('C203', '好事'), bad: at('C203', '坏事'),
