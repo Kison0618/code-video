@@ -18,7 +18,7 @@ const HY = 980, PY = 1236, PAD = 240, BW = W + PAD * 2, MOON = [230, 290];
 const T = { in: vs('B07') - 0.5, b07: vs('B07'), ever: at('B07', '永远'), b08: vs('B08'), also: at('B08', '同时'), trust: at('B08', '轻信'), b09: vs('B09'),
   w: [at('B09', '理想'), at('B09', '自由'), at('B09', '热爱')], b10: vs('B10'), world: at('B10', '对世界'), soul: at('B10', '触动'), b11: vs('B11'), feel: at('B11', '感性'), far: at('B11', '远远'), reason: at('B11', '理性'), end: ve('B11') + 0.4 };
 const CAM = [
-  [T.in, { x: 60, y: 0, z: 1.25, ax: W / 2, ay: PY }], [T.b07 + 0.4, { x: 40, y: 0, z: 1.08 }], [T.b08 - 0.3, { x: 90, y: -10, z: 1.14 }], [T.b08 + 0.5, { x: -150, y: 0, z: 1.1 }], [T.also - 0.2, { x: -150, y: 0, z: 1.12 }],
+  [T.in, { x: 190, y: 500, z: 1.04, ax: W / 2, ay: PY }], [T.b07 + 0.5, { x: 200, y: 560, z: 1.0 }], [T.b07 + 1.25, { x: 200, y: 560, z: 1.0 }], [T.ever + 1.2, { x: 170, y: 110, z: 0.96 }], [T.b08 - 0.1, { x: 150, y: 30, z: 0.96 }], [T.b08 + 1.0, { x: -150, y: 0, z: 1.1 }], [T.also - 0.2, { x: -150, y: 0, z: 1.12 }],
   [T.also + 0.5, { x: 150, y: -30, z: 1.0 }], [T.b09 - 0.4, { x: 150, y: -30, z: 1.03 }], [T.b09 + 0.6, { x: 110, y: 0, z: 1.2 }], [T.w[0] - 0.1, { x: 110, y: -10, z: 1.2 }], [T.w[2] + 0.9, { x: 0, y: -30, z: 1.0 }],
   [T.world + 1.6, { x: 0, y: -44, z: 0.9 }], [T.b11 - 0.3, { x: 0, y: -50, z: 0.9 }], [T.b11 + 0.9, { x: -30, y: 110, z: 1.5 }], [T.feel - 0.1, { x: -30, y: 110, z: 1.54 }], [T.far + 0.5, { x: 0, y: -40, z: 0.92 }], [T.end, { x: 0, y: -50, z: 0.9 }],
 ];
@@ -151,38 +151,58 @@ function draw(ctx, t) {
   // 水雾
   S.add(ctx, () => { for (let i = 0; i < 5; i++) S.rgrad(ctx, 100 + i * 250 + Math.sin(t * 0.2 + i * 2) * 60, HY + 70 + (i % 2) * 50, 380, [[0, [170, 170, 230], 0.12], [1, [170, 170, 230], 0]], 0.16); });
   shimmer(ctx, t, [200, 210, 255], 0.2);
-  // ---- B07：湖面上那个金色的自己 ----
-  const g7 = K.vis(t, T.in, T.b08 + 0.5, 0.6, 0.7);
-  const step = easeInOut(prog(t, T.b07 + 0.5, T.b07 + 1.3)) + easeInOut(prog(t, T.ever, T.ever + 0.8));     // 她走两步
-  const rec = easeInOut(prog(t, T.b07 + 0.9, T.b07 + 1.6)) + easeInOut(prog(t, T.ever + 0.4, T.ever + 1.3));  // 那个自己退两步
-  if (g7 > 0.003) {
-    const gx = lerp(820, 960, rec / 2), gy = lerp(PY + 44, HY + 90, rec / 2), gs = lerp(0.92, 0.3, Math.pow(rec / 2, 0.8));
-    for (const k of [0, 1]) { const u = prog(rec, k, k + 1); if (u > 0 && u < 1) { const ox = lerp(820, 960, k / 2), oy = lerp(PY + 44, HY + 90, k / 2); for (let j = 0; j < 3; j++) S.ring(ctx, ox, oy, (40 + u * 260) * (1 - j * 0.25), 12, [255, 220, 150], 0.5 * (1 - u) * g7, 0.22); } }
-    S.add(ctx, () => { glow(ctx, gx, gy - 260 * gs, 520 * gs, [255, 206, 120], 0.45 * g7); S.rgrad(ctx, gx, gy + 6, 300 * gs, [[0, [255, 220, 150], 0.6 * g7], [1, [255, 220, 150], 0]], 0.2); for (let k = 0; k < 7; k++) S.rgrad(ctx, gx + Math.sin(t * 2 + k) * 10 * gs, gy + (20 + k * 34) * gs, (120 - k * 10) * gs, [[0, [255, 214, 140], (0.34 - k * 0.04) * g7], [1, [255, 214, 140], 0]], 0.1); });
-    ctx.save(); ctx.translate(2 * gx, 0); ctx.scale(-1, 1); S.lit(ctx, c => infp(c, gx, gy, gs, { t, flies: 0, spin: t * 2, eyes: 'happy' }), { at: [gx, gy - 260 * gs], r: 330 * gs, k: 0.2, tint: [[255, 216, 130], 0.72], alpha: 0.92 * g7 }); ctx.restore();
-  }
+  // ---- B07（2026-11-15 反馈 02 重做）：水里的倒影 ----
+  //   她走到栈桥尽头低头看：水里的倒影胸口有一颗星（她想成为的那个自己）。她俯身去碰 —— 指尖一碰水面，倒影碎成一片片金色波光，
+  //   顺着月光路漂远，在更远的水面重新聚成一个更小的她；再伸手，又碎、又漂得更远，最后只剩天边水面上的一点金光 —— 永远在追
+  const g7 = K.vis(t, T.in, T.b08 + 0.6, 0.6, 0.8);
+  const step = 2 * easeInOut(prog(t, T.in + 0.1, T.b07 + 0.5));
+  const t1 = T.b07 + 1.0, t2 = T.ever + 0.35;
+  const RP = [[800, PY + 84, 0.9], [950, 1104, 0.55], [850, 1030, 0.32]];
+  const sc1 = prog(t, t1, t1 + 0.55), rf1 = prog(t, t1 + 0.4, t1 + 1.0), sc2 = prog(t, t2, t2 + 0.55), rf2 = prog(t, t2 + 0.4, t2 + 1.05);
+  draw.REFL = () => {
+    if (g7 <= 0.003) return;
+    const refl = (x, y, s, al, scat) => {
+      if (al <= 0.01) return; const hgt = 590 * s, rows = Math.ceil(hgt / (9 * Math.max(0.4, s * 2)));
+      S.add(ctx, () => { S.rgrad(ctx, x, y + hgt * 0.5, hgt * 0.7, [[0, [255, 206, 120], 0.16 * al * (1 - scat)], [1, [255, 206, 120], 0]], 1.3); });
+      for (let k = 0; k < rows; k++) { const u = k / rows, ry = y + u * hgt, rh = hgt / rows + 0.7, dx = Math.sin(t * 2.2 + k * 0.7) * (2 + u * 9) * (s * 2) + scat * (hash(k * 3.7) - 0.3) * 520 * (0.4 + s), a2 = al * (1 - scat) * (1 - 0.35 * u);
+        if (a2 <= 0.01) continue; ctx.save(); ctx.beginPath(); ctx.rect(x - 400 + dx, ry, 800, rh); ctx.clip(); ctx.translate(dx, 2 * y); ctx.scale(1, -1); infp(ctx, x, y, s, { t, a: a2, flies: 0, spin: t * 2, eyes: 'happy' }); ctx.restore(); }
+      // 胸口那颗星 + 一身金色的波光
+      const cy = y + 0.37 * 590 * s; S.add(ctx, () => { glow(ctx, x - 6 * s, cy, 70 * s, [255, 226, 150], 0.7 * al * (1 - scat)); glow(ctx, x - 6 * s, cy, 22 * s, [255, 255, 240], al * (1 - scat)); for (let k = 0; k < 6; k++) S.rgrad(ctx, x + Math.sin(t * 1.6 + k * 1.3) * 30 * s, y + (0.1 + k * 0.16) * hgt, 170 * s, [[0, [255, 214, 130], 0.12 * al * (1 - scat)], [1, [255, 214, 130], 0]], 0.1); });
+    };
+    refl(...RP[0], g7 * (1 - smooth(sc1)), smooth(sc1));
+    refl(...RP[1], g7 * smooth(rf1) * (1 - smooth(sc2)), Math.max(1 - smooth(rf1), smooth(sc2)) * 0.9);
+    refl(...RP[2], g7 * smooth(rf2), (1 - smooth(rf2)) * 0.9);
+    // 碎开的波光顺着水面漂向下一处
+    [[sc1, rf1, 0], [sc2, rf2, 1]].forEach(([sc, rf, i]) => { const u = prog(t, (i ? t2 : t1), (i ? t2 : t1) + 1.05); if (u <= 0 || u >= 1) return; const A = RP[i], B = RP[i + 1];
+      S.add(ctx, () => { for (let k = 0; k < 16; k++) { const v = clamp(u * 1.5 - hash(k * 2.3) * 0.5), e = easeInOut(v), px = lerp(A[0], B[0], e) + Math.sin(k * 1.9 + t * 3) * 40 * Math.sin(e * Math.PI), py = lerp(A[1] + 120 * A[2] * 2 * hash(k * 5.1), B[1] + 60 * B[2] * 2 * hash(k * 5.1), e); S.rgrad(ctx, px, py, 46 * lerp(A[2], B[2], e) * 2 + 10, [[0, [255, 226, 150], 0.8 * Math.sin(Math.PI * v) * g7], [1, [255, 226, 150], 0]], 0.3); } });
+      const ru = prog(t, i ? t2 : t1, (i ? t2 : t1) + 0.9); for (let j = 0; j < 3; j++) S.ring(ctx, A[0], A[1] + 8, (20 + ru * 300 * (0.5 + A[2])) * (1 - j * 0.25), 11, [255, 226, 160], 0.6 * (1 - ru) * g7, 0.24); });
+    // 最远处那一点金光留在水面上
+    if (rf2 > 0.5) S.add(ctx, () => { const tw = 0.8 + 0.2 * Math.sin(t * 1.2); glow(ctx, RP[2][0], RP[2][1] + 60, 110 * tw, [255, 214, 130], 0.3 * g7 * smooth(rf2)); });
+  };
+  if (t >= t1) draw.REFL();        // 漂远以后在栈桥后面
   // ---- 栈桥 ----
   ctx.drawImage(PIER(), -200, PY - 20);
+  if (t < t1) draw.REFL();         // 一开始就在桥头脚下
   // ---- B08：朋友、花、钓上来的心 ----
-  const f8 = K.vis(t, T.b08 - 0.5, T.b09 - 0.2, 0.6, 0.5), give = prog(t, T.b08 + 0.2, T.also - 0.2), bait = prog(t, T.also - 0.15, T.b09 - 0.3), baitOut = smooth(prog(t, T.b09 - 0.5, T.b09 + 0.1));
+  const f8 = K.vis(t, T.b08 - 0.1, T.b09 - 0.2, 0.3, 0.5), give = prog(t, T.b08 + 0.2, T.also - 0.2), bait = prog(t, T.also - 0.15, T.b09 - 0.3), baitOut = smooth(prog(t, T.b09 - 0.5, T.b09 + 0.1));
   const face8 = t > T.b08 - 0.15 && t < T.also + 0.1;      // 这段她朝左（面向朋友）
-  const hx = lerp(430, 590, step / 2) - 110 * smooth(prog(t, T.w[2] + 0.2, T.b10 + 1.2));
+  const hx = lerp(430, 640, step / 2) - 110 * smooth(prog(t, T.w[2] + 0.2, T.b10 + 1.2));
   if (f8 > 0.003) {
-    const sl = (1 - easeOut(prog(t, T.b08 - 0.5, T.b08 + 0.3))) * -260;
+    const sl = (1 - easeOut(prog(t, T.b08 - 0.1, T.b08 + 0.9))) * -560;
     const F1 = S.lit(ctx, c => MB.person(c, 'enfj-female', 320 + sl, PY, 2.05, { a: f8, bob: Math.abs(Math.sin(t * 5)) * 6 }), { light: LIGHT, at: [320, PY - 250], r: 320, warm: [220, 230, 255], k: 0.8 });
     const F2 = S.lit(ctx, c => MB.person(c, 'esfp-male', 130 + sl, PY, 2.0, { a: f8, bob: Math.abs(Math.sin(t * 5 + 1)) * 6 }), { light: LIGHT, at: [130, PY - 250], r: 320, warm: [220, 230, 255], k: 0.8 });
     draw.F = [F1.chest, F2.chest];
   }
   // ---- 她 ----
   const b9 = smooth(prog(t, T.b09 - 0.3, T.b09 + 0.4)), open = smooth(prog(t, T.b10 + 0.2, T.b10 + 1.2)) * (1 - smooth(prog(t, T.b11 - 0.3, T.b11 + 0.5))), soul = prog(t, T.soul - 0.2, T.b11), b11 = smooth(prog(t, T.b11 - 0.2, T.b11 + 0.6));
-  const reach7 = smooth(prog(t, T.b07 + 0.2, T.b07 + 0.8)) * (1 - smooth(prog(t, T.b08 - 0.5, T.b08)));
+  const reach7 = 0, rd = K.vis(t, T.b07 - 0.2, t1 + 0.6, 0.5, 0.5), rfar = K.vis(t, t2 - 0.5, T.b08 - 0.3, 0.45, 0.5);
   const bu = clamp(bait), grab = smooth(prog(bu, 0.45, 0.8));
   const hold = t > T.b09 - 0.4 && t < T.w[2] + 0.1 ? 1 : 0;
   const o = { t, spin: t * (1.6 + 9 * open), flap: 0,
     eyes: aur > 0.1 || open > 0.5 || (give > 0.5 && bait <= 0) ? 'happy' : bait > 0.2 && bait < 1 ? 'wide' : 'open',
-    mouth: bait > 0.2 && baitOut < 0.5 ? 'o' : 'smile', look: [1.2, -0.8 * (grab + open)], tilt: -0.3 * (grab + open) + 0.2 * b11 * (1 - smooth(aur)),
-    ra: -0.75 * reach7 - 1.0 * grab * (1 - baitOut) - 0.6 * open - 0.35 * hold, la: -0.45 * smooth(prog(give, 0.5, 0.9)) * (1 - smooth(bu)) - 0.9 * open - 0.5 * hold - 0.55 * b11,
-    wind: !(hold) };
+    mouth: bait > 0.2 && baitOut < 0.5 ? 'o' : 'smile', look: [1.2, -0.8 * (grab + open) + 1.6 * (rd + 0.5 * rfar)], tilt: -0.3 * (grab + open) + 0.2 * b11 * (1 - smooth(aur)),
+    ra: 0.75 * smooth(prog(t, t1 - 0.5, t1)) * rd - 0.35 * rfar - 1.0 * grab * (1 - baitOut) - 0.6 * open - 0.35 * hold, la: -0.45 * smooth(prog(give, 0.5, 0.9)) * (1 - smooth(bu)) - 0.9 * open - 0.5 * hold - 0.55 * b11,
+    wind: !(hold), lean: 0.2 * rd + 0.08 * rfar, nod: 2.2 * rd + 0.8 * rfar, tilt: 0 };
   const hop = Math.abs(Math.sin(prog(bu, 0.5, 1) * Math.PI * 2)) * 16 * (bait > 0 && baitOut < 1 ? 1 : 0) + Math.abs(Math.sin(open * Math.PI * 3)) * 10 * (open < 1 ? 1 : 0);
   S.add(ctx, () => S.rgrad(ctx, hx, PY + 6, 200, [[0, [190, 210, 255], 0.16], [1, [190, 210, 255], 0]], 0.14));
   const warmK = Math.max(smooth(prog(give, 0.6, 1)) * (1 - b9) * 0.6, b9 * 0.8, smooth(aur));
@@ -223,7 +243,7 @@ function draw(ctx, t) {
       for (let k = 0; k < 5; k++) { const pts = Array.from({ length: 30 }, (_, q) => { const s = q / 29; return [cx + (k - 2) * 190 * s + Math.sin(s * 5 + t * 1.3 + k) * 40 * s, cy - s * (700 + k * 40) * smooth(aur * 1.6)]; }); S.ribbon(ctx, pts, s => 12 + 60 * s, [[255, 110, 150], [255, 180, 100], [210, 120, 255]][k % 3], 0.22 * hu * (1 - 0.5 * smooth(prog(aur, 0.6, 1))), 1); } } }
   ctx.restore();
   // 前景：右下角虚化的芦苇
-  ctx.save(); S.cam(ctx, C, 1.5); ctx.translate(840, 1330); ctx.rotate(Math.sin(t * 0.6) * 0.015); ctx.drawImage(REED(), 0, 0); ctx.restore();
+  ctx.save(); S.cam(ctx, C, 1.5); ctx.globalAlpha = 1 - K.vis(t, T.in - 1, T.ever + 0.6, 0.01, 0.8); ctx.translate(840, 1330); ctx.rotate(Math.sin(t * 0.6) * 0.015); ctx.drawImage(REED(), 0, 0); ctx.restore();
   ctx.save(); S.cam(ctx, C, 1.7); ctx.translate(-330, 1260); ctx.rotate(-Math.sin(t * 0.5) * 0.015); ctx.drawImage(REED(), 0, 0); ctx.restore();
   S.petals(ctx, t, { n: 16, seed: 14, dir: [-0.6, 0.5], speed: 150, a: (1 - smooth(prog(t, T.b07, T.b07 + 3))) + 0.7 * open, c: [255, 170, 196], c2: [255, 232, 226], size: 18, box: [-100, 0, W + 100, 1400] });
   return { C };

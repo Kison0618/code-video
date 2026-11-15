@@ -158,9 +158,9 @@ function draw(ctx, t) {
   const M = S.lit(ctx, c => MB.person(c, 'estp-male', MATEX + easeOut(st[2]) * 40, 1300, 2.25, { lean: 0.05 * easeOut(st[2]) + 0.02 * Math.sin(t * 2), bob: Math.abs(Math.sin(t * 3)) * 3 }), { light: L0, at: [MATEX, 1040], r: 330, warm: SUN, cool: [50, 30, 50], k: 0.9 });
   // 她
   const boil = smooth(prog(t, T.boil - 0.25, T.boil + 0.25)) * (1 - smooth(prog(t, T.lid + 0.15, T.lid + 0.5))), lid = prog(t, T.lid, T.lid + 0.4), after = smooth(prog(t, T.lid + 0.3, T.lid + 0.9));
-  const big = easeInOut(prog(t, T.small + 0.4, T.big + 0.6)) * (1 - smooth(prog(t, T.c309 - 0.4, T.c309 + 0.2))), push = prog(t, T.c308, T.c309 - 0.2), pcy = push > 0 && push < 1 ? (push * 2.2) % 1 : 0, shove = pcy < 0.6 ? easeOut(pcy / 0.6) : 1 - easeOut((pcy - 0.6) / 0.15);
+  const big = 0, hit = smooth(prog(t, T.big - 0.35, T.big + 0.1)) * (1 - smooth(prog(t, T.c309 - 0.4, T.c309 + 0.2))), push = prog(t, T.c308, T.c309 - 0.2), pcy = push > 0 && push < 1 ? (push * 2.2) % 1 : 0, shove = pcy < 0.6 ? easeOut(pcy / 0.6) : 1 - easeOut((pcy - 0.6) / 0.15);
   const rise = boil * 46;
-  const o = { t, wind: false, eyes: boil > 0.4 ? 'wide' : after > 0.3 && t < T.c304 ? 'happy' : big > 0.3 ? 'sad' : st[0] > 0.5 && t < T.c304 ? 'closed' : 'open', mouth: boil > 0.4 ? 'o' : after > 0.3 && t < T.c304 ? 'smile' : st[0] > 0.5 ? 'flat' : 'smile', tilt: -0.3 * boil + 0.3 * big * (1 - shove), look: big > 0.3 ? [0, -1.8] : [-1.5, 0.3], la: -0.9 * boil - 1.3 * big * shove * (push > 0 ? 1 : 0), ra: -0.7 * boil - 1.2 * big * shove * (push > 0 ? 1 : 0), lean: 0.03 * Math.sin(t * 30) * boil - 0.05 * after * (t < T.c304 ? 1 : 0) };
+  const o = { t, wind: false, eyes: boil > 0.4 ? 'wide' : after > 0.3 && t < T.c304 ? 'happy' : hit > 0.3 ? 'sad' : st[0] > 0.5 && t < T.c304 ? 'closed' : 'open', mouth: boil > 0.4 ? 'o' : after > 0.3 && t < T.c304 ? 'smile' : st[0] > 0.5 ? 'flat' : 'smile', tilt: -0.3 * boil + 0.3 * hit * (1 - shove), look: hit > 0.3 ? [0, -1.8] : [-1.5, 0.3], la: -0.9 * boil - 1.3 * hit * shove * (push > 0 ? 1 : 0), ra: -0.7 * boil - 1.2 * hit * shove * (push > 0 ? 1 : 0), lean: 0.03 * Math.sin(t * 30) * boil - 0.05 * after * (t < T.c304 ? 1 : 0) };
   const R = S.lit(ctx, c => infp(c, HERX, 1296 - rise, 1.0, o), { light: L0, at: [HERX, 1010], r: 340, warm: SUN, cool: [50, 30, 60], k: 0.9, tint: boil > 0.05 ? [[255, 60, 40], 0.25 * boil] : null });
   if (boil > 0.02) S.add(ctx, () => { glow(ctx, HERX, 900, 700 * boil, [255, 70, 50], 0.4 * boil); });
   // 课桌 + 桌上的东西：他的书一摞摞越线
@@ -170,9 +170,39 @@ function draw(ctx, t) {
   // 橡皮：被他拿走 → C307 的主角
   const tk = easeInOut(st[1]), sm = smooth(prog(t, T.c307 - 0.2, T.small + 0.3));
   let ex = lerp(860, M.chest[0] + 150, tk), ey = lerp(DY + 4, M.chest[1] + 40, tk) - Math.sin(tk * Math.PI) * 120, es = 0.5;
-  if (sm > 0) { const hx0 = M.chest[0] + 150, hy0 = M.chest[1] + 40; ex = lerp(hx0, R.top[0] + 10 + 60 * shove * (push > 0 ? 1 : 0), big); ey = lerp(hy0 - 60 * sm, R.top[1] - 220 - 80 * shove * (push > 0 ? 1 : 0), big); es = lerp(0.34, 4.6 + (push > 0 ? Math.floor(push * 2.2) * 0.5 : 0) - 0.5 * shove * (push > 0 ? 1 : 0), big); }
-  if (big > 0.2 && t < T.c309) { ctx.save(); ctx.globalAlpha = 0.4 * big; S.rgrad(ctx, HERX, 1100, 420, [[0, [20, 10, 30], 0.9], [1, [20, 10, 30], 0]], 0.6); ctx.restore(); }
   eraser(ctx, ex, ey, es, 0.1 * (1 - big) + Math.sin(t * 2) * 0.02, 1 - smooth(prog(t, T.c309 - 0.4, T.c309 + 0.2)));
+  // 2026-11-15 反馈 06 重做（原来的巨大橡皮看不懂）：同一句话，在两个人那里的分量
+  //   他随口一句「不就一块橡皮嘛」—— 气泡轻飘飘地缩成一粒小石子，被他随手一弹；
+  //   石子飞过三八线，掉进她头顶那扇「她心里」的圆窗：窗里是一面平静的夜湖，石子一落，水柱溅起、一圈圈大浪往外荡，那句话在水面上一遍遍回响；
+  //   C308 她举起两只手去按水面，按下去一点，浪又弹回来更高（身不由己）
+  const sayA = K.vis(t, T.c307 + 0.15, T.small + 0.5, 0.25, 0.3), fly = prog(t, T.small + 0.2, T.big - 0.3), LK = [750, 480], LR = 226;
+  const winA = smooth(prog(t, T.small - 0.2, T.small + 0.5)) * (1 - smooth(prog(t, T.c309 - 0.5, T.c309 + 0.1)));
+  if (sayA > 0.01) { const bx = M.head[0] + 190, by = M.top[1] - 40, sc = 0.7 + 0.3 * easeOut(prog(t, T.c307 + 0.15, T.c307 + 0.6)); ctx.save(); ctx.globalAlpha = sayA; ctx.translate(bx, by); ctx.scale(sc, sc); ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 6; ctx.fillStyle = 'rgb(255,250,240)'; ctx.beginPath(); ctx.roundRect(-190, -52, 380, 104, 40); ctx.fill(); S.poly(ctx, [[-120, 46], [-80, 46], [-150, 96]], 'rgb(255,250,240)'); ctx.shadowColor = 'transparent'; K.text(ctx, '不就一块橡皮嘛', 0, 18, { size: 46, weight: 500, color: [90, 70, 60] }); ctx.restore(); }
+  if (winA > 0.01) {
+    const age = t - (T.big - 0.3), hitK = age > 0 ? 1 : 0, press = push > 0 && push < 1 ? shove : 0, amp = hitK * (26 * Math.exp(-age * 0.25) + 14) * (1 - 0.6 * press) * (1 + 0.5 * (push > 0 ? Math.floor(push * 2.2) : 0) * (1 - press));
+    const wob = hitK ? Math.sin(t * 46) * 3 * Math.exp(-age * 2.5) : 0;
+    ctx.save(); ctx.globalAlpha = winA; ctx.translate(wob, 0);
+    for (let k = 0; k < 3; k++) { ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.beginPath(); ctx.arc(lerp(R.top[0] + 20, LK[0] - 60, (k + 1) / 4), lerp(R.top[1] - 6, LK[1] + LR - 10, (k + 1) / 4), 8 + k * 6, 0, 6.2832); ctx.fill(); }
+    S.add(ctx, () => glow(ctx, LK[0], LK[1], LR * 1.9, [110, 150, 255], 0.3));
+    ctx.fillStyle = 'rgb(250,246,240)'; ctx.beginPath(); ctx.arc(LK[0], LK[1], LR + 14, 0, 6.2832); ctx.fill();
+    ctx.save(); ctx.beginPath(); ctx.arc(LK[0], LK[1], LR, 0, 6.2832); ctx.clip();
+    S.vgrad(ctx, [[0, [16, 22, 70]], [0.5, [50, 60, 140]], [0.56, [150, 130, 190]], [1, [150, 130, 190]]], LK[1] - LR, LK[1] + 30, LK[0] - LR, LK[0] + LR);
+    S.add(ctx, () => { glow(ctx, LK[0] + 80, LK[1] - 110, 70, [246, 240, 222], 1); for (let k = 0; k < 9; k++) glow(ctx, LK[0] - 160 + hash(k * 3.1) * 320, LK[1] - 170 + hash(k * 7.7) * 130, 8, [226, 232, 255], 0.8); });
+    const wy0 = LK[1] + 30, wy = x => wy0 + Math.sin((x - LK[0]) * 0.03 + t * 5) * amp * Math.exp(-Math.abs(x - LK[0]) / 400) + Math.sin((x - LK[0]) * 0.011 - t * 3) * amp * 0.5 + Math.sin(x * 0.02 + t * 0.8) * 3;
+    ctx.beginPath(); ctx.moveTo(LK[0] - LR, LK[1] + LR); for (let x = LK[0] - LR; x <= LK[0] + LR; x += 12) ctx.lineTo(x, wy(x)); ctx.lineTo(LK[0] + LR, LK[1] + LR); ctx.closePath(); const wg = ctx.createLinearGradient(0, wy0 - 30, 0, LK[1] + LR); wg.addColorStop(0, 'rgb(90,130,230)'); wg.addColorStop(1, 'rgb(20,30,96)'); ctx.fillStyle = wg; ctx.fill();
+    S.add(ctx, () => { for (let k = 0; k < 6; k++) S.rgrad(ctx, LK[0] + 80 + Math.sin(t * 1.3 + k) * (8 + amp), wy0 + 24 + k * 22, 60 - k * 5, [[0, [236, 232, 220], 0.35], [1, [236, 232, 220], 0]], 0.14); });
+    if (hitK) { for (let k = 0; k < 4; k++) { const ph = (age * 0.7 + k / 4) % 1; S.ring(ctx, LK[0] - 10, wy0 + 30, 16 + ph * 230, 12, [200, 220, 255], 0.75 * (1 - ph), 0.26); }
+      const sp = Math.exp(-age * 2.2); if (sp > 0.03) S.add(ctx, () => { for (let k = 0; k < 14; k++) { const an = -1.57 + (hash(k * 2.7) - 0.5) * 1.5, d = (1 - sp) * (150 + hash(k * 5.3) * 150); glow(ctx, LK[0] - 10 + Math.cos(an) * d, wy0 + Math.sin(an) * d + (1 - sp) * (1 - sp) * 150, 30 * sp + 8, [220, 236, 255], sp); } S.rgrad(ctx, LK[0] - 10, wy0 - 70 * sp, 40, [[0, [236, 244, 255], 0.9 * sp], [1, [236, 244, 255], 0]], 3.2 * sp + 0.2); });
+      // 那句话在水面上一遍遍回响
+      for (let k = 0; k < 3; k++) { const ph = (age * 0.3 + k / 3) % 1, ea = Math.sin(Math.PI * ph) * smooth(prog(age, 0.3, 1)); K.text(ctx, '不就一块橡皮嘛', LK[0] + Math.sin(k * 2.1 + age) * 20, LK[1] - 30 - ph * 130 + k * 6, { size: 28 + ph * 14, weight: 500, color: [236, 240, 255], alpha: 0.75 * ea }); } }
+    ctx.restore();
+    // 浪溅到窗外
+    if (hitK && amp > 12) S.add(ctx, () => { for (let k = 0; k < 6; k++) { const ph = (t * 0.9 + k / 6) % 1, sd = k % 2 ? 1 : -1; glow(ctx, LK[0] + sd * (LR - 10 + ph * 60), LK[1] + 60 - Math.sin(ph * Math.PI) * 90 + ph * 60, 20 * (1 - ph) + 6, [190, 214, 255], 0.9 * (1 - ph)); } });
+    K.text(ctx, '她 心 里', LK[0], LK[1] - LR - 32, { size: 40, weight: 500, color: [255, 250, 240] });
+    ctx.restore();
+    // 小石子：从他那边轻飘飘地过来，过了线越来越沉
+    if (fly > 0 && fly < 1) { const A0 = [M.head[0] + 190, M.top[1] - 40], B0 = [LK[0] - 10, LK[1] + 20], e = fly < 0.6 ? fly / 0.6 * 0.55 : 0.55 + easeIn((fly - 0.6) / 0.4) * 0.45, px = lerp(A0[0], B0[0], e), py = lerp(A0[1], B0[1], e) - Math.sin(Math.min(1, e / 0.6) * Math.PI) * 130 * (e < 0.6 ? 1 : 0), ss = lerp(0.6, 1.5, e); ctx.save(); ctx.translate(px, py); ctx.rotate(t * 5); const g = ctx.createRadialGradient(-6 * ss, -8 * ss, 2, 0, 0, 30 * ss); g.addColorStop(0, 'rgb(236,236,244)'); g.addColorStop(1, 'rgb(110,112,136)'); ctx.fillStyle = g; S.poly(ctx, [[-26 * ss, -6 * ss], [-8 * ss, -24 * ss], [20 * ss, -16 * ss], [28 * ss, 8 * ss], [6 * ss, 24 * ss], [-20 * ss, 16 * ss]]); ctx.fill(); ctx.restore(); }
+  }
   // 一头雾水
   if (fog > 0.01) { const fx = M.head[0], fy = M.head[1] - 20; ctx.save(); ctx.globalAlpha = fog; for (let k = 0; k < 9; k++) S.rgrad(ctx, fx + Math.sin(t * 0.7 + k * 1.9) * 70, fy + Math.cos(t * 0.5 + k * 2.3) * 30 - 30, 62 + (k % 3) * 16, [[0, [226, 232, 246], 0.6], [0.6, [190, 200, 226], 0.4], [1, [190, 200, 226], 0]]); ctx.restore();
     ctx.save(); ctx.translate(fx - 110, fy + 20); S.rain(ctx, t, { box: [0, 0, 220, 170], a: 0.9 * fog, n: 24, c: [200, 220, 255], slant: -0.1, seed: 5 }); ctx.restore(); K.text(ctx, '?', fx + 30 + Math.sin(t * 2) * 12, fy - 130, { size: 130, family: 'Latin', weight: 600, color: [255, 250, 236], alpha: fog }); }
@@ -195,9 +225,10 @@ function over(ctx, t, a) {
   if (b > 0.003) { const s = 1 + 0.5 * Math.exp(-Math.max(0, t - T.boil + 0.1) * 7); ctx.save(); ctx.translate(430 + Math.sin(t * 60) * 6, 420 + Math.cos(t * 53) * 5); ctx.rotate(-0.08); ctx.scale(s, s); S.title(ctx, '忍无可忍！', 0, 0, { size: 150, c: [255, 90, 70], a: b, spacing: 0.04, glowA: 0.9 }); ctx.restore(); }
   const c = K.vis(t, T.lid + 0.45, T.c304 - 0.4, 0.4, 0.3) * a; if (c > 0.003) { ctx.save(); ctx.translate(430, 440 + Math.sin(t * 2) * 4); ctx.rotate(0.03); S.title(ctx, '……忍辱负重', 0, 0, { size: 92, c: [226, 220, 236], a: c, spacing: 0.1, glowA: 0.3 }); ctx.restore(); }
   // 橡皮两边的说明
-  const s1 = K.vis(t, T.small - 0.1, T.c308 + 0.6, 0.3, 0.3) * a, s2 = K.vis(t, T.big - 0.3, T.c308 + 0.6, 0.3, 0.3) * a;
+  const s1 = K.vis(t, T.small - 0.3, T.big + 0.4, 0.3, 0.4) * a, s2 = K.vis(t, T.big - 0.1, T.c308 + 0.3, 0.3, 0.3) * a, s3 = K.vis(t, T.cant - 0.3, T.c309 - 0.4, 0.3, 0.3) * a;
   const pill = (str, x, y, c, al, size) => { ctx.fillStyle = `rgba(30,20,30,${0.62 * al})`; ctx.beginPath(); ctx.roundRect(x - str.length * size * 0.56, y - size * 0.95, str.length * size * 1.12, size * 1.36, size * 0.68); ctx.fill(); K.text(ctx, str, x, y, { size, weight: 500, color: c, alpha: al, spacing: 0.06 }); };
-  if (s1 > 0.003) pill('他：多大点事', 250, 760, [255, 226, 160], s1, 50);
-  if (s2 > 0.003) pill('她：天大的事', 760, 640, [255, 190, 206], s2, 56);
+  if (s1 > 0.003) pill('他：随口一句', 300, 1215, [255, 226, 160], s1, 50);
+  if (s2 > 0.003) pill('她心里：掀起大浪', 770, 1215, [190, 214, 255], s2, 50);
+  if (s3 > 0.003) pill('想按，按不住', 770, 1215, [190, 214, 255], s3, 50);
 }
 module.exports = { draw, over, T };

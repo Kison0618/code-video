@@ -10,10 +10,10 @@ const D = require('./PWS_g2d');
 const { K } = X; const { prog, smooth } = K;
 module.exports = function make(G) {
   S.muteFront(G.a - 0.3, G.b + 0.3);
-  const dive = t => prog(t, B.T.in - 0.3, B.T.in + 0.2);
+  const dive = t => prog(t, B.T.in - 0.55, B.T.in + 0.3);   // 反馈 01：扎进城市这一下也放慢（0.5→0.85 秒）
   const LIST = [
     { a: G.a - 0.3, draw: (c, t) => A.draw(c, t, { dive: dive(t) }) },
-    { a: B.T.in - 0.12, fi: 0.4, draw: (c, t) => { const bl = 22 * (1 - smooth(prog(t, B.T.in - 0.12, B.T.in + 0.45))); if (bl > 0.5) { let st; S.comp(c, c2 => { st = B.draw(c2, t); }, { filter: `blur(${bl.toFixed(1)}px)` }); return st; } return B.draw(c, t); } },
+    { a: B.T.in - 0.1, fi: 0.5, draw: (c, t) => { const bl = 18 * (1 - smooth(prog(t, B.T.in - 0.1, B.T.in + 0.55))); if (bl > 0.5) { let st; S.comp(c, c2 => { st = B.draw(c2, t); }, { filter: `blur(${bl.toFixed(1)}px)` }); return st; } return B.draw(c, t); } },
     { a: L.T.in, fi: 0.6, draw: (c, t) => L.draw(c, t) },
     { a: D.T.in - 2, draw: (c, t) => D.draw(c, t) },
   ];

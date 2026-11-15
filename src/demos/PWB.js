@@ -9,43 +9,70 @@ const { W, H, clamp, lerp, prog, smooth, easeOut, easeInOut, mulberry32, glow, r
 const X = require('./pwk');
 
 const TXT = JSON.parse(fs.readFileSync((process.env.INFP_DATA || 'F:/AI/lianai/11_INFP') + '/voice/pages4.json', 'utf8'));
-const KEY = { P1: '让自己和自己所爱的人恢复完整', P2: '他们心中的那种孤立感便愈发地强烈起来', P3: '这种快乐必定是以痛苦为代价的想法', P4: '一场正义对决邪恶的战役拉开了序幕', P5: '我就是“知道一切”' };
+const KEY = { P1: '让自己和自己所爱的人恢复完整', P2: '他们心中的那种孤立感便愈发地强烈起来', P3: '快乐必定以痛苦为代价', P4: '一场正义对决邪恶的战役拉开了序幕', P5: '更愿意跟随直觉的脚步' };
 
 // ---- 版式 ----
 const PW = 880, PH = 1400;               // 一页纸（本地坐标）
-const MX = 84, TOP = 210, FS = 44, LH = 82, MAXL = 12, INK = [46, 36, 30];
+const MX = 84, TOP = 210, FS = 44, LH = 82, MAXL = 14, INK = [46, 36, 30];   // 2026-11-15 反馈 03：一张纸最多 14 行，行距按行数自适应，把一页排满
+const Y0 = TOP + 70, YSPAN = 950;        // 正文首行基线、正文可用高度
 const CX = 572, CY = 930, ROT = -0.013;  // 书页中心在屏幕上的位置、微微歪一点
 const NOSTART = '，。、；：？！”’）》」—…';
 const NOEND = '“‘（《「';
 
 const mc = new K.Canvas(8, 8).getContext('2d'); mc.font = `400 ${FS}px Serif`;
-const WC = {}; const cw = ch => (WC[ch] ??= mc.measureText(ch).width);
+const WC = {}; const cw = ch => (WC[ch] ??= mc.measureText(ch).width); const cwBase = cw, FS0 = FS;
 
-function layout(str) {
-  const maxW = PW - 2 * MX, cs = [...str], lines = []; let cur = [], w = 2 * FS; // 首行缩进两字
-  let indent = true;
+// 把一段连续的句子排成若干行（首行缩进两字、标点不落行首、两端对齐）；fs = 这一页的字号
+function wrap(str, k0, fs) {
+  const q = fs / FS, cwf = ch => cw(ch) * q, maxW = PW - 2 * MX, cs = [...str], lines = []; let cur = [], w = 2 * fs, indent = true;
   for (let i = 0; i < cs.length; i++) {
-    const ch = cs[i], ww = cw(ch);
+    const ch = cs[i], ww = cwf(ch);
     if (w + ww > maxW + 0.5 && cur.length) {
       if (NOSTART.includes(ch)) { cur.push(ch); lines.push({ cs: cur, indent }); cur = []; w = 0; indent = false; continue; }
       let carry = [];
       while (cur.length > 1 && NOEND.includes(cur[cur.length - 1])) carry.unshift(cur.pop());
-      lines.push({ cs: cur, indent }); indent = false; cur = carry; w = carry.reduce((s, c) => s + cw(c), 0);
+      if (/[A-Za-z]/.test(ch)) while (cur.length > 1 && /[A-Za-z]/.test(cur[cur.length - 1])) carry.unshift(cur.pop());   // 英文单词（INFP）不拆行
+      lines.push({ cs: cur, indent }); indent = false; cur = carry; w = carry.reduce((s, c) => s + cwf(c), 0);
     }
     cur.push(ch); w += ww;
   }
-  if (cur.length) lines.push({ cs: cur, indent, last: true });
-  // 每个字的位置；除末行外两端对齐
-  let k = 0;
+  if (cur.length) lines.push({ cs: cur, indent });
+  lines[lines.length - 1].last = true;
+  let k = k0;
   for (const ln of lines) {
-    const x0 = ln.indent ? 2 * FS : 0, nat = ln.cs.reduce((s, c) => s + cw(c), 0);
+    const x0 = ln.indent ? 2 * fs : 0, nat = ln.cs.reduce((s, c) => s + cwf(c), 0);
     const extra = ln.last ? 0 : Math.max(0, (maxW - x0 - nat) / Math.max(1, ln.cs.length - 1));
     let x = MX + x0; ln.pos = [];
-    for (const c of ln.cs) { ln.pos.push([x, k++]); x += cw(c) + Math.min(extra, FS * 0.6); }
+    for (const c of ln.cs) { ln.pos.push([x, k++]); x += cwf(c) + Math.min(extra, fs * 0.6); }
   }
-  const sheets = [], ki = str.indexOf(KEY_CUR), k0 = ki < 0 ? -1 : [...str.slice(0, ki)].length, k1 = k0 < 0 ? -1 : k0 + [...KEY_CUR].length;
-  const per = Math.ceil(lines.length / Math.ceil(lines.length / MAXL));   // 两张纸行数均分
-  for (let i = 0; i < lines.length; i += per) sheets.push({ lines: lines.slice(i, i + per), k0, k1, nTotal: k, end: i + per >= lines.length });
+  return lines;
+}
+// 分页（反馈 03）：只在句号处分页，每张纸都从一个完整句子开始、到一个完整句子结束；
+//   张数取最少，各张行数尽量接近；再把字号从 54 往下试，取能让这几张纸都排满的最大字号 —— 不再出现「半页接半页」
+function split(str, fs, want) {
+  const sents = str.match(/[^。！？]+[。！？]?/g) || [str], n = sents.length, maxL = Math.floor(YSPAN / (fs * 1.6)) + 1;
+  const linesOf = (i, j) => wrap(sents.slice(i, j).join(''), 0, fs).length;
+  let best = null;
+  const rec = (i, left, cuts) => {
+    if (left === 1) { const L = linesOf(i, n); if (L > maxL) return; const all = [...cuts, [i, n, L]], ls = all.map(c => c[2]), sc = Math.max(...ls) - Math.min(...ls); if (!best || sc < best.sc) best = { sc, all, sents }; return; }
+    for (let j = i + 1; j <= n - (left - 1); j++) { const L = linesOf(i, j); if (L > maxL) break; rec(j, left - 1, [...cuts, [i, j, L]]); }
+  };
+  if (want) rec(0, want, []); else for (let m = 1; m <= n && !best; m++) rec(0, m, []);
+  return best;
+}
+function layout(str) {
+  const base = split(str, FS, 0) || { all: [[0, 1, 1]], sents: [str] }, want = base.all.length;
+  let fs = FS, best = base;
+  for (const f of [54, 52, 50, 48, 46]) { const b = split(str, f, want); if (b) { fs = f; best = b; break; } }
+  const ki = str.indexOf(KEY_CUR), k0 = ki < 0 ? -1 : [...str.slice(0, ki)].length, k1 = k0 < 0 ? -1 : k0 + [...KEY_CUR].length;
+  const sheets = []; let k = 0;
+  best.all.forEach(([i, j], q) => {
+    const lines = wrap(best.sents.slice(i, j).join(''), k, fs), nc = lines.reduce((s, l) => s + l.cs.length, 0), end = q === best.all.length - 1;
+    const rows = lines.length - 1 + (end ? 1 : 0), lh = clamp(YSPAN / Math.max(1, rows), fs * 1.6, fs * 2.05);
+    const y0 = Y0 + Math.max(0, (YSPAN - lh * rows) / 2);
+    sheets.push({ lines, k0, k1, kA: k, nc, lh, y0, end, fs }); k += nc;
+  });
+  sheets.forEach(sh => (sh.nTotal = k));
   return { sheets };
 }
 let KEY_CUR = '';
@@ -112,16 +139,18 @@ function cover(t) { let m = 0; for (const p of SPAN) m = Math.max(m, cov(p, t));
 // 每张纸的墨迹起点和翻页时间：时段平均分给各张纸
 function plan(p) {
   const n = p.lay.sheets.length, T = p.b - p.a + 0.4, out = [];
-  for (let i = 0; i < n; i++) {
-    const s0 = p.a - 0.1 + (T * i) / n;
-    out.push({ ink0: i ? -1e9 : s0, hl0: i ? s0 + 0.9 : null, turn: i < n - 1 ? p.a - 0.1 + (T * (i + 1)) / n - 0.6 : null });
-  }
+  // 每张纸的停留时间按字数分（每张至少 4.2 秒）
+  const w = p.lay.sheets.map(sh => sh.nc), tot = w.reduce((s, v) => s + v, 0); let dur = w.map(v => T * v / tot);
+  const MIN = Math.min(4.2, T / n); let need = 0, free = 0; dur.forEach(d => { if (d < MIN) need += MIN - d; else free += d - MIN; });
+  dur = dur.map(d => d < MIN ? MIN : d - (d - MIN) * (need / Math.max(1e-6, free)));
+  let s0 = p.a - 0.1;
+  for (let i = 0; i < n; i++) { out.push({ ink0: i ? -1e9 : s0, hl0: i ? s0 + 0.9 : null, turn: i < n - 1 ? s0 + dur[i] - 0.6 : null }); s0 += dur[i]; }
   return { sheets: out, TURN: 1.2 };
 }
 const CPS = 150;                                           // 墨字洇出速度（字/秒）
 
 function drawSheet(ctx, p, si, t, tex) {
-  const so = p.lay.sheets[si], sh = so.lines, pl = plan(p).sheets[si];
+  const so = p.lay.sheets[si], sh = so.lines, pl = plan(p).sheets[si], FS = so.fs, cw = ch => cwBase(ch) * so.fs / FS0;
   ctx.drawImage(tex, 0, 0);
   // 书页弧度：靠书脊一侧凹下去（暗），中间略鼓（亮），外缘轻微卷起（暗）
   let g = ctx.createLinearGradient(0, 0, PW, 0);
@@ -134,12 +163,12 @@ function drawSheet(ctx, p, si, t, tex) {
   // 书眉、页码
   K.text(ctx, '第五章　理想主义者', PW / 2, 118, { size: 26, weight: 400, color: [120, 100, 84], alpha: 0.85, spacing: 0.25 });
   ctx.fillStyle = 'rgba(120,100,84,0.35)'; ctx.fillRect(MX, 142, PW - 2 * MX, 1.2);
-  K.text(ctx, String(312 + SPAN.indexOf(p) * 2 + si), PW / 2, PH - 74, { size: 30, family: 'Latin', color: [120, 100, 84], alpha: 0.9 });
+  K.text(ctx, String(312 + SPAN.indexOf(p) * 2 + si), PW / 2, PH - 58, { size: 30, family: 'Latin', color: [120, 100, 84], alpha: 0.9 });
   // 正文：墨字洇开（新字先略大略淡，然后收紧变实）
   const kStart = sh[0].pos[0][1];
   ctx.save(); ctx.font = `400 ${FS}px Serif`; ctx.textBaseline = 'alphabetic';
   sh.forEach((ln, li) => {
-    const y = TOP + 70 + li * LH;
+    const y = so.y0 + li * so.lh;
     ln.cs.forEach((c, ci) => {
       const [x, k] = ln.pos[ci], e = (t - pl.ink0 - (k - kStart) / CPS) / 0.35;
       if (e <= 0) return;
@@ -155,7 +184,7 @@ function drawSheet(ctx, p, si, t, tex) {
     const kEnd = sh[sh.length - 1].pos[sh[sh.length - 1].pos.length - 1][1];
     if (so.k0 >= kStart && so.k0 <= kEnd) {
       const h0 = pl.hl0 != null ? pl.hl0 : pl.ink0 + (kEnd - kStart) / CPS + 0.7, segs = [];
-      sh.forEach((ln, li) => { const ps = ln.pos.filter(([, k]) => k >= so.k0 && k < so.k1); if (ps.length) segs.push([ps[0][0] - 6, ps[ps.length - 1][0] + cw(ln.cs[ln.pos.indexOf(ps[ps.length - 1])]) + 6, TOP + 70 + li * LH, ps.length]); });
+      sh.forEach((ln, li) => { const ps = ln.pos.filter(([, k]) => k >= so.k0 && k < so.k1); if (ps.length) segs.push([ps[0][0] - 6, ps[ps.length - 1][0] + cw(ln.cs[ln.pos.indexOf(ps[ps.length - 1])]) + 6, so.y0 + li * so.lh, ps.length]); });
       const tot = segs.reduce((s, q) => s + q[3], 0); let acc = 0;
       ctx.save(); ctx.globalCompositeOperation = 'multiply';
       for (const [x0, x1, y, n] of segs) {
@@ -177,7 +206,7 @@ function drawSheet(ctx, p, si, t, tex) {
   // 最后一张：出处
   if (so.end) {
     const lastK = so.nTotal - 1, e = clamp((t - pl.ink0 - (lastK - kStart) / CPS - 0.3) / 0.5);
-    K.text(ctx, '——《请理解我》', PW - MX, TOP + 70 + (sh.length + 0.9) * LH, { size: 34, color: [110, 86, 70], alpha: e, align: 'right' });
+    K.text(ctx, '——《请理解我》', PW - MX, so.y0 + (sh.length - 1 + 0.95) * so.lh, { size: 34, color: [110, 86, 70], alpha: e, align: 'right' });
   }
 }
 
@@ -195,9 +224,9 @@ function drawBook(ctx, p, t) {
   // 左页（只露出一窄条，字淡、在书脊阴影里）
   ctx.save(); ctx.beginPath(); ctx.rect(-700, 0, 700, PH); ctx.clip();
   ctx.translate(-PW, 0); ctx.drawImage(PAPER2, 0, 0);
-  const left = LAY.P1.sheets[0].lines;
-  ctx.font = `400 ${FS}px Serif`; ctx.fillStyle = 'rgba(46,36,30,0.55)';
-  left.forEach((ln, li) => ln.cs.forEach((c, ci) => ctx.fillText(c, ln.pos[ci][0], TOP + 70 + li * LH)));
+  const left = LAY.P1.sheets[0].lines, lsh = LAY.P1.sheets[0];
+  ctx.font = `400 ${lsh.fs}px Serif`; ctx.fillStyle = 'rgba(46,36,30,0.55)';
+  left.forEach((ln, li) => ln.cs.forEach((c, ci) => ctx.fillText(c, ln.pos[ci][0], lsh.y0 + li * lsh.lh)));
   let g = ctx.createLinearGradient(PW - 160, 0, PW, 0); g.addColorStop(0, 'rgba(60,38,18,0)'); g.addColorStop(1, 'rgba(60,38,18,0.6)'); ctx.fillStyle = g; ctx.fillRect(PW - 160, 0, 160, PH);
   ctx.restore();
   // 右页：翻页中 = 下面那张先画，上面那张裁到折线左边，再画翻过来的背面

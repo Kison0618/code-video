@@ -38,6 +38,8 @@ function at(id, sub, nth = 0) {
 
 // ---------- 字幕：竖屏，离底部约 1/4（y≈1450），每条 ≤13 字 ----------
 const SHOW = s => s.replace('百分之一', '1%');
+// 两行字幕的第二行从哪几个字开始（长句的语义停顿）
+const BRK = ['又社恐、又矛盾', '这样的词汇青睐', '而思考过度', '不得不面对的一个副本', '人际矛盾和人际冲突时', '和正确道路的关注和推演', '和内心理想经常会冲突', '保持友好和睦的关系', '从他人内心所发出的求救呼唤', '牺牲自我来帮助他人', '持续长时间工作'];
 function makeSubs(KEYS, tEnd = 1e9) {
   const out = [], ids = VJ.lines.filter(l => l.start < tEnd).map(l => l.id);
   ids.forEach((id, li) => {
@@ -47,10 +49,8 @@ function makeSubs(KEYS, tEnd = 1e9) {
     const wid = s => [...SHOW(s)].reduce((n, c) => n + (/[A-Za-z0-9%]/.test(c) ? 0.6 : 1), 0);
     for (const p of parts) { if (cur && wid(cur + p) > 12.5) { chunks.push(cur); cur = p; } else cur += p; }
     if (cur) chunks.push(cur);
-    // 单个小句本身太长（>14）就从中间对半切
-    for (let i = 0; i < chunks.length; i++) if (wid(chunks[i]) > 14) { const cs = [...chunks[i]], m0 = Math.ceil(cs.length / 2); let m = m0; while (m > 1 && /[A-Za-z]/.test(cs[m - 1]) && /[A-Za-z]/.test(cs[m])) m--;
-      { let best = -1; cs.forEach((c, j) => { if (c === '、' && j > 2 && j < cs.length - 3 && (best < 0 || Math.abs(j + 1 - m0) < Math.abs(best - m0))) best = j + 1; }); if (best > 0) m = best; }
-      chunks.splice(i, 1, cs.slice(0, m).join(''), cs.slice(m).join('')); }
+    // 2026-11-15 反馈 05：一个小句不再拆到两屏。≤17.6 字的整句一行放完（字号 66→54 自适应）；
+    //   更长的在同一屏里排成两行，断在 BRK 里手工挑的语义停顿处（没列的按「、」或「的/和/与」就近断）
     let hi = 0; const st = [];
     for (const c of chunks) { st.push(hi < ts.length ? ts[hi] : l.start); hi += [...c].filter(isHan).length; }
     st[0] = l.start;
@@ -59,19 +59,27 @@ function makeSubs(KEYS, tEnd = 1e9) {
       const a = st[k] - 0.08, b = k + 1 < chunks.length ? st[k + 1] - 0.1 : Math.min(l.end + 0.4, next - 0.1);
       const zh = SHOW(c).replace(/[，；：。]$/, '');
       const ks = KEYS.filter(([w]) => zh.includes(w));
-      out.push({ t0: a, t1: b, zh, keys: ks.map(q => q[0]), keyColor: ks.length ? ks[0][1] : GOLD });
+      let rows = [zh];
+      if (wid(zh) > 17.6) {
+        const cs = [...zh]; let m = -1; const hit = BRK.find(q => zh.includes(q)); if (hit) m = [...zh.slice(0, zh.indexOf(hit))].length;
+        if (m < 0) { const m0 = cs.length / 2; cs.forEach((c, j) => { if (j > 3 && j < cs.length - 3 && ('、'.includes(c) || '的和与'.includes(c)) && (m < 0 || Math.abs(j + 1 - m0) < Math.abs(m - m0))) m = j + 1; }); if (m < 0) m = Math.ceil(m0); }
+        rows = [cs.slice(0, m).join(''), cs.slice(m).join('')];
+      }
+      const size = Math.min(66, Math.floor(1000 / (Math.max(...rows.map(wid)) * 1.05)));
+      out.push({ t0: a, t1: b, zh, rows, size, keys: ks.map(q => q[0]), keyColor: ks.length ? ks[0][1] : GOLD });
     });
   });
   return function subs(ctx, t) {
     for (const s of out) {
       if (t < s.t0 - 0.05 || t > s.t1 + 0.05) continue;
       const a = Math.min(smooth((t - s.t0) / 0.16), smooth((s.t1 - t) / 0.16)), dy = (1 - easeOut((t - s.t0) / 0.4)) * 6;
+      const two = s.rows.length > 1, y0 = two ? 1300 : 1330, y1 = two ? 1590 : 1560;
       ctx.save();
-      const g = ctx.createLinearGradient(0, 1330, 0, 1560);
-      g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.5, `rgba(0,0,0,${0.42 * a})`); g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = g; ctx.fillRect(0, 1330, W, 230);
+      const g = ctx.createLinearGradient(0, y0, 0, y1);
+      g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.5, `rgba(0,0,0,${(two ? 0.5 : 0.42) * a})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.fillRect(0, y0, W, y1 - y0);
       ctx.restore();
-      L.rich(ctx, s.zh, W / 2, 1470 + dy, { size: 66, weight: 500, spacing: 0.05, color: [244, 240, 230], keys: s.keys, keyColor: s.keyColor, alpha: a, glowKey: 0.35 });
+      s.rows.forEach((row, i) => L.rich(ctx, row, W / 2, (two ? 1426 + i * s.size * 1.36 : 1470) + dy, { size: s.size, weight: 500, spacing: 0.05, color: [244, 240, 230], keys: s.keys, keyColor: s.keyColor, alpha: a, glowKey: 0.35 }));
     }
   };
 }

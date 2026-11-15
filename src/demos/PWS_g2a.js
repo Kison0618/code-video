@@ -117,7 +117,7 @@ const bz = (A, B, Cc, s) => { const u = 1 - s; return [u * u * A[0] + 2 * u * s 
 
 function draw(ctx, t, fx = {}) {
   const C = S.camKF(t, CAM);
-  if (fx.dive > 0) { const z = 1 + 7 * easeIn(fx.dive); C.z *= z; C.x += (760 - 540) * (1 - 1 / z); C.y += (1170 - 1000) * (1 - 1 / z); }
+  if (fx.dive > 0) { const z = 1 + 5 * K.easeInOut(fx.dive) * fx.dive; C.z *= z; C.x += (760 - 540) * (1 - 1 / z); C.y += (1170 - 1000) * (1 - 1 / z); }
   const pw = smooth(prog(t, T.spirit - 0.15, T.spirit + 0.7));           // 「精神的力量」
   const gust = smooth(prog(t, T.b02 - 0.5, T.b02 + 0.2)) * (1 - smooth(prog(t, T.b03 - 0.1, T.b03 + 0.8)));
   CL.world(ctx, t, C, { city: 1 - 0.66 * pw, wave: 0.25 + gust * 0.5 });

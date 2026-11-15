@@ -24,7 +24,7 @@ const T = { in: vs('D01') - 1.2, d01: vs('D01'), infj: at('D01', 'INFJ'), plan: 
   d04: vs('D04'), ask: at('D04', '我真的'), d05: vs('D05'), resp: at('D05', '尊重'), feel: at('D05', '感受是'), remind: at('D05', '提醒'), d06: vs('D06'), press: at('D06', '高压'), nomean: at('D06', '没有价值'), d07: vs('D07'), pay: at('D07', '待遇'), care: at('D07', '谨慎'),
   d08: vs('D08'), drain: at('D08', '耗竭'), sick: at('D08', '生理'), d09: vs('D09'), dead: at('D09', '生无可恋'), end: ve('D09') + 0.7 };
 const OFF = T.d04 - 0.5;
-const CAMA = [[T.in, { x: -60, y: -30, z: 1.0, ax: 540, ay: GY }], [T.infj, { x: -150, y: -10, z: 1.3 }], [T.d02 - 0.2, { x: -150, y: -10, z: 1.34 }], [T.d02 + 0.8, { x: 90, y: 0, z: 1.3 }], [T.d03, { x: 90, y: 0, z: 1.36 }], [T.real, { x: 20, y: -20, z: 1.0 }], [OFF + 0.1, { x: -40, y: -20, z: 1.05 }], [OFF + 0.6, { x: -420, y: -60, z: 2.6 }, easeIn]];
+const CAMA = [[T.in, { x: -60, y: -30, z: 1.0, ax: 540, ay: GY }], [T.infj, { x: -330, y: -30, z: 1.24 }], [T.d02 - 0.1, { x: -330, y: -30, z: 1.28 }], [T.d02 + 1.5, { x: 250, y: 10, z: 1.3 }], [T.d03 - 0.1, { x: 250, y: 10, z: 1.34 }], [T.real + 0.2, { x: 160, y: -10, z: 1.0 }], [OFF - 0.2, { x: 150, y: -10, z: 1.03 }], [OFF + 0.6, { x: -420, y: -60, z: 2.6 }, easeIn]];
 const CAMB = [[OFF, { x: 0, y: 0, z: 1.3, ax: 540, ay: 1000 }], [T.d04 + 0.4, { x: 0, y: 0, z: 1.12 }], [T.d05, { x: 0, y: 10, z: 1.2 }], [T.feel, { x: -20, y: 30, z: 1.5 }], [T.d06 - 0.1, { x: -20, y: 30, z: 1.54 }], [T.d06 + 0.9, { x: 40, y: -20, z: 1.0 }], [T.d08, { x: 30, y: -10, z: 1.06 }], [T.drain + 0.6, { x: 0, y: 20, z: 1.4 }], [T.d09, { x: 0, y: 10, z: 1.44 }], [T.dead + 0.4, { x: 0, y: -40, z: 1.16 }], [T.end, { x: 0, y: -50, z: 1.12 }]];
 // ---------- A：岔路口 ----------
 const SKYA = S.lazy(() => S.bake(W + PAD * 2, 1400, c => {
@@ -52,14 +52,39 @@ const LANDA = S.lazy(() => S.bake(W + PAD * 2, H + PAD, c => {
   for (const [tx, ts] of [[1040, 1], [840, 0.8], [1100, 1.2]]) { c.fillStyle = 'rgb(90,60,50)'; c.fillRect(tx - 5 * ts, hy - 60 * ts, 10 * ts, 70 * ts); for (let k = 0; k < 3; k++) S.poly(c, [[tx - (50 - k * 12) * ts, hy - (50 + k * 40) * ts], [tx + (50 - k * 12) * ts, hy - (50 + k * 40) * ts], [tx, hy - (120 + k * 40) * ts]], rgba(mix([60, 120, 90], [120, 170, 110], k / 3))); }
 }));
 // 地图（INFJ 的）：木架 + 羊皮纸，上面的路线一条条亮
-const ROUTES = [[[40, 250], [90, 180], [170, 200], [230, 120], [300, 60]], [[40, 250], [120, 260], [200, 230], [280, 250], [320, 180]], [[40, 250], [70, 120], [150, 90], [220, 40]]];
+// 2026-11-15 反馈 07 重做：去掉那根上下晃的教鞭。推演直接画在地图上：
+//   第一条路线画到一半撞上山，打叉；第二条绕到河边，打叉；第三条一路画到终点，插上旗、亮起星 —— 这是他推演出来的「正确道路」
+const ROUTES = [[[40, 262], [84, 214], [128, 190], [150, 150]], [[40, 262], [112, 268], [190, 250], [250, 262], [286, 228]], [[40, 262], [70, 150], [120, 96], [200, 84], [262, 118], [318, 60]]];
 function map(ctx, x, y, s, t) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
-  ctx.fillStyle = 'rgb(110,76,60)'; ctx.fillRect(20, 300, 14, 190); ctx.fillRect(330, 300, 14, 190); ctx.fillRect(0, -16, 364, 18);
-  ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 20; ctx.shadowOffsetY = 8; const g = ctx.createLinearGradient(0, 0, 364, 300); g.addColorStop(0, 'rgb(250,236,200)'); g.addColorStop(1, 'rgb(226,200,156)'); ctx.fillStyle = g; ctx.fillRect(0, 0, 364, 310); ctx.shadowColor = 'transparent';
-  ctx.fillStyle = 'rgba(150,170,120,0.5)'; for (const [mx, my, mr] of [[100, 100, 50], [250, 190, 60], [300, 90, 36]]) { ctx.beginPath(); ctx.ellipse(mx, my, mr, mr * 0.6, 0.3, 0, 6.2832); ctx.fill(); }
-  ROUTES.forEach((rt, i) => { const u = easeInOut(prog(t, T.infj - 0.2 + i * 0.75, T.infj + 0.7 + i * 0.75)); ctx.strokeStyle = 'rgba(150,110,80,0.5)'; ctx.lineWidth = 5; ctx.setLineDash([10, 8]); ctx.beginPath(); rt.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke(); ctx.setLineDash([]);
-    S.neon(ctx, rt, u, [[255, 120, 90], [90, 160, 255], [120, 200, 120]][i], 0.9, 5, false, 0.3); if (u >= 1) { const e = rt[rt.length - 1]; ctx.fillStyle = 'rgb(214,70,60)'; ctx.beginPath(); ctx.moveTo(e[0], e[1]); ctx.lineTo(e[0], e[1] - 34); ctx.lineTo(e[0] + 24, e[1] - 24); ctx.lineTo(e[0], e[1] - 14); ctx.fill(); } });
+  ctx.fillStyle = 'rgb(110,76,60)'; ctx.fillRect(20, 300, 14, 190); ctx.fillRect(330, 300, 14, 190); ctx.fillRect(-6, -18, 376, 20);
+  ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 20; ctx.shadowOffsetY = 8; const g = ctx.createLinearGradient(0, 0, 364, 300); g.addColorStop(0, 'rgb(252,240,206)'); g.addColorStop(1, 'rgb(230,204,160)'); ctx.fillStyle = g; ctx.fillRect(0, 0, 364, 310); ctx.shadowColor = 'transparent';
+  // 地形：山（挡住第一条路）、河（挡住第二条路）、树
+  for (const [mx, my, w] of [[150, 150, 70], [196, 170, 54], [110, 168, 44]]) { S.poly(ctx, [[mx - w, my + 30], [mx, my - w * 0.9], [mx + w, my + 30]], 'rgb(170,150,120)'); S.poly(ctx, [[mx, my - w * 0.9], [mx + w, my + 30], [mx + w * 0.2, my + 30]], 'rgb(134,116,96)'); S.poly(ctx, [[mx - w * 0.2, my - w * 0.6], [mx, my - w * 0.9], [mx + w * 0.22, my - w * 0.58], [mx, my - w * 0.5]], 'rgb(250,246,240)'); }
+  ctx.strokeStyle = 'rgb(120,180,214)'; ctx.lineWidth = 22; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(364, 150); ctx.bezierCurveTo(300, 180, 330, 250, 270, 310); ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 5; ctx.stroke();
+  for (const [tx, ty] of [[60, 60], [90, 86], [240, 40], [44, 120], [330, 110]]) { ctx.fillStyle = 'rgb(120,170,120)'; ctx.beginPath(); ctx.arc(tx, ty, 13, 0, 6.2832); ctx.fill(); }
+  ctx.fillStyle = 'rgb(214,90,70)'; ctx.beginPath(); ctx.arc(40, 262, 11, 0, 6.2832); ctx.fill(); K.text(ctx, '现在', 40, 298, { size: 22, weight: 500, color: [110, 76, 60] });
+  ROUTES.forEach((rt, i) => { const t0 = T.infj - 0.3 + i * 0.95, u = easeInOut(prog(t, t0, t0 + (i === 2 ? 1.1 : 0.7))), done = prog(t, t0 + (i === 2 ? 1.1 : 0.7), t0 + (i === 2 ? 1.5 : 1.0)); if (u <= 0) return;
+    const col = i === 2 ? [255, 170, 60] : [150, 130, 120], dim = i < 2 ? 1 - 0.55 * smooth(done) : 1;
+    const P = u >= 1 ? rt : K.partial(rt, u); ctx.save(); ctx.globalAlpha = dim; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); P.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]));
+    if (i === 2) { ctx.strokeStyle = 'rgba(255,190,90,0.45)'; ctx.lineWidth = 18; ctx.stroke(); ctx.strokeStyle = 'rgb(236,110,50)'; ctx.lineWidth = 8; ctx.stroke(); } else { ctx.strokeStyle = 'rgb(120,100,90)'; ctx.lineWidth = 7; ctx.setLineDash([14, 10]); ctx.stroke(); ctx.setLineDash([]); }
+    if (u < 1 && P.length) { const h = P[P.length - 1]; ctx.fillStyle = i === 2 ? 'rgb(236,110,50)' : 'rgb(120,100,90)'; ctx.beginPath(); ctx.arc(h[0], h[1], 11, 0, 6.2832); ctx.fill(); } ctx.restore();
+    const e = rt[rt.length - 1];
+    if (i < 2 && done > 0) { const k = easeOut(done), r = 20 * (1 + 0.5 * (1 - k)); ctx.strokeStyle = 'rgb(214,60,60)'; ctx.lineWidth = 9; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(e[0] - r, e[1] - r); ctx.lineTo(e[0] - r + 2 * r * Math.min(1, k * 2), e[1] - r + 2 * r * Math.min(1, k * 2)); if (k > 0.5) { ctx.moveTo(e[0] + r, e[1] - r); ctx.lineTo(e[0] + r - 2 * r * (k * 2 - 1), e[1] - r + 2 * r * (k * 2 - 1)); } ctx.stroke(); }
+    if (i === 2 && done > 0) { const k = easeOut(done) * (1 + 0.3 * Math.sin(Math.min(1, done) * Math.PI)); S.add(ctx, () => glow(ctx, e[0], e[1] - 20, 110 * k, [255, 200, 90], 0.8)); ctx.fillStyle = 'rgb(110,76,60)'; ctx.fillRect(e[0] - 2.5, e[1] - 50 * k, 5, 50 * k); S.poly(ctx, [[e[0], e[1] - 50 * k], [e[0] + 34 * k, e[1] - 38 * k], [e[0], e[1] - 24 * k]], 'rgb(230,70,60)'); } });
+  ctx.restore();
+}
+function compass(ctx, x, y, r, ang, a, t) {      // 反馈 08：一只看得清的铜罗盘，指针是一颗心
+  if (a <= 0.003) return; ctx.save(); ctx.translate(x, y); ctx.globalAlpha *= a;
+  S.add(ctx, () => glow(ctx, 0, 0, r * 1.7, [255, 214, 150], 0.22));
+  ctx.shadowColor = 'rgba(40,20,10,0.45)'; ctx.shadowBlur = 20; ctx.shadowOffsetY = 8; const g = ctx.createLinearGradient(-r, -r, r, r); g.addColorStop(0, 'rgb(250,214,130)'); g.addColorStop(0.5, 'rgb(190,130,70)'); g.addColorStop(1, 'rgb(240,196,110)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, 6.2832); ctx.fill(); ctx.shadowColor = 'transparent';
+  const f = ctx.createRadialGradient(-r * 0.2, -r * 0.3, 0, 0, 0, r * 0.84); f.addColorStop(0, 'rgb(255,252,240)'); f.addColorStop(1, 'rgb(236,220,190)'); ctx.fillStyle = f; ctx.beginPath(); ctx.arc(0, 0, r * 0.84, 0, 6.2832); ctx.fill();
+  ctx.fillStyle = 'rgb(130,90,60)'; for (let k = 0; k < 12; k++) { ctx.save(); ctx.rotate(k * Math.PI / 6); ctx.beginPath(); ctx.roundRect(-r * 0.03, -r * 0.8, r * 0.06, k % 3 ? r * 0.1 : r * 0.2, 2); ctx.fill(); ctx.restore(); }
+  ctx.fillStyle = 'rgb(210,150,80)'; ctx.beginPath(); ctx.roundRect(-r * 0.12, -r * 1.22, r * 0.24, r * 0.26, 4); ctx.fill();
+  ctx.rotate(ang);
+  S.poly(ctx, [[0, -r * 0.1], [-r * 0.5, 0], [0, r * 0.1]], 'rgb(150,160,180)');
+  ctx.fillStyle = 'rgb(236,84,104)'; ctx.fillRect(0, -r * 0.06, r * 0.44, r * 0.12); ctx.save(); ctx.translate(r * 0.56, 0); ctx.rotate(-Math.PI / 2); const h = r * 0.2; ctx.beginPath(); ctx.moveTo(0, h); ctx.bezierCurveTo(-h * 1.5, 0, -h * 1.2, -h * 1.3, 0, -h * 0.5); ctx.bezierCurveTo(h * 1.2, -h * 1.3, h * 1.5, 0, 0, h); ctx.fill(); ctx.restore();
+  ctx.fillStyle = 'rgb(110,76,60)'; ctx.beginPath(); ctx.arc(0, 0, r * 0.08, 0, 6.2832); ctx.fill();
   ctx.restore();
 }
 function sceneA(ctx, t) {
@@ -69,26 +94,39 @@ function sceneA(ctx, t) {
   const br = 1 + 0.03 * Math.sin(t * 0.7); S.add(ctx, () => { glow(ctx, SUNP[0], SUNP[1], 1200 * br, [255, 190, 130], 0.4); glow(ctx, SUNP[0], SUNP[1], 420, [255, 226, 170], 0.6); glow(ctx, SUNP[0], SUNP[1], 130, [255, 250, 230], 1); }); ctx.restore();
   ctx.save(); S.cam(ctx, C, 1); ctx.drawImage(LANDA(), -PAD, 0);
   const L0 = [SUNP[0] + 400, SUNP[1] - 200];
-  // 两条路的亮度：她的心选了哪条
   const pick = smooth(prog(t, T.inner - 0.2, T.inner + 0.9));
-  S.add(ctx, () => { ctx.filter = 'blur(14px)'; ctx.fillStyle = `rgba(255,214,130,${0.4 * pick})`; ctx.beginPath(); ctx.moveTo(420, 1700); ctx.bezierCurveTo(520, 1500, 800, 1260, 980, 1100); ctx.lineTo(1010, 1108); ctx.bezierCurveTo(900, 1280, 700, 1500, 760, 1700); ctx.fill(); ctx.filter = 'none'; glow(ctx, 940, 1060, 260 * pick, [255, 200, 120], 0.5 * pick); });
-  // INFJ + 地图
-  map(ctx, 60, 760, 1.0, t);
-  const pt = Math.min(2.99, Math.max(0, (t - T.infj + 0.2) / 0.75)), ri = Math.floor(pt), rt = ROUTES[Math.min(2, ri)], pp = rt[Math.min(rt.length - 1, Math.round((pt - ri) * (rt.length - 1)))];
-  const J = S.lit(ctx, c => MB.person(c, 'infj-male', 520, GY + 6, 2.1, { flip: true, bob: Math.abs(Math.sin(t * 2)) * 3 }), { light: L0, at: [520, GY - 250], r: 320, warm: SUNC, cool: [50, 60, 110], k: 0.9 });
-  ctx.strokeStyle = 'rgb(120,84,56)'; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(J.chest[0] - 70, J.chest[1] + 10); ctx.lineTo(60 + pp[0] + 14, 760 + pp[1] + 6); ctx.stroke();
+  // 她的心选了哪条：只是沿着小路一盏盏亮起几点暖光，不再整条路刷亮（反馈 08：黄色光太亮）
+  S.add(ctx, () => { for (let k = 0; k < 6; k++) { const u = smooth(prog(pick, k * 0.14, k * 0.14 + 0.3)), s2 = k / 5, px = lerp(700, 965, s2) + Math.sin(s2 * 3) * 30, py = lerp(1400, 1112, Math.pow(s2, 0.8)); S.rgrad(ctx, px, py, 70 - k * 7, [[0, [255, 214, 140], 0.5 * u], [1, [255, 214, 140], 0]], 0.3); } glow(ctx, 940, 1060, 150 * pick, [255, 200, 120], 0.3 * pick); });
+  // INFJ + 地图：推演完就沿着他的路线走了（画面让给她）
+  const leave = easeInOut(prog(t, T.d02 + 0.2, T.d02 + 1.6)), ja = 1 - smooth(prog(leave, 0.6, 1));
+  if (ja > 0.01) { ctx.save(); ctx.globalAlpha = ja; map(ctx, -170, 690, 1.25, t); ctx.restore();
+    const jx = 470 - leave * 520, think = smooth(prog(t, T.infj - 0.3, T.infj + 0.2)) * (1 - smooth(prog(t, T.plan + 0.3, T.d02)));
+    const J = S.lit(ctx, c => MB.person(c, 'infj-male', jx, GY + 6, 2.1, { a: ja, flip: true, bob: Math.abs(Math.sin(t * (leave > 0 && leave < 1 ? 7 : 2))) * (leave > 0 && leave < 1 ? 8 : 3), lean: -0.02 * think }), { light: L0, at: [jx, GY - 250], r: 320, warm: SUNC, cool: [50, 60, 110], k: 0.9 });
+    for (let k = 0; k < 3; k++) { ctx.fillStyle = `rgba(255,255,255,${0.8 * think * (0.5 + 0.5 * Math.sin(t * 4 - k))})`; ctx.beginPath(); ctx.arc(lerp(J.head[0] - 70, 300, (k + 1) / 4), lerp(J.head[1] - 40, 880, (k + 1) / 4), 7 + k * 5, 0, 6.2832); ctx.fill(); } }
   // 她
-  const heart = smooth(prog(t, T.d02 - 0.2, T.mean)), tug = smooth(prog(t, T.real - 0.3, T.ideal + 0.4)) * (1 - smooth(prog(t, OFF - 0.3, OFF + 0.3))), sway = Math.sin(t * 2.6) * tug;
-  const hx = 800 + sway * 30, o = { t, wind: false, eyes: heart > 0.5 && tug < 0.3 ? 'closed' : tug > 0.4 ? 'sad' : 'open', mouth: tug > 0.4 ? 'flat' : 'smile', la: -0.7 * heart * (1 - tug), tilt: 0.2 * heart - 0.3 * sway, lean: 0.07 * sway, look: [-1, 0] };
+  const heart = smooth(prog(t, T.d02 - 0.2, T.mean)), tug = smooth(prog(t, T.real - 0.4, T.real + 0.4)) * (1 - smooth(prog(t, OFF - 0.1, OFF + 0.4))), win = smooth(prog(t, OFF - 0.6, OFF + 0.3));
+  const sway = (Math.sin(t * 2.4) * 0.8 - 1.3 * win) * tug, hx = lerp(800, 700, smooth(prog(t, T.d03, T.real))) + sway * 44;
+  const o = { t, wind: false, eyes: heart > 0.5 && tug < 0.3 ? 'closed' : tug > 0.4 ? 'wide' : 'open', mouth: tug > 0.4 ? 'o' : 'smile', la: -0.5 * heart * (1 - tug) - 0.9 * tug, ra: -0.9 * tug, tilt: 0.2 * heart * (1 - tug) - 0.3 * sway, lean: 0.07 * sway, look: [sway, 0] };
   const R = S.lit(ctx, c => infp(c, hx, GY, 1.0, o), { light: L0, at: [hx, GY - 290], r: 340, warm: SUNC, cool: [50, 60, 120], k: 0.9 });
-  // 胸口的罗盘光：转半圈，停在右边那条路
-  if (heart > 0.01) { const ang = lerp(-2.6, -0.5, easeOut(prog(t, T.mean - 0.2, T.inner + 0.5))) + Math.sin(t * 9) * 0.3 * (1 - pick); S.add(ctx, () => { glow(ctx, R.chest[0], R.chest[1], 190, [255, 214, 140], 0.6 * heart); });
-    S.ring(ctx, R.chest[0], R.chest[1], 86, 12, [255, 226, 160], 0.5 * heart); ctx.save(); ctx.translate(R.chest[0], R.chest[1]); ctx.rotate(ang); ctx.globalAlpha = heart * (1 - tug); S.poly(ctx, [[0, -15], [118, 0], [0, 15]], 'rgb(255,236,180)'); S.poly(ctx, [[0, -15], [-50, 0], [0, 15]], 'rgb(214,150,90)'); ctx.restore(); }
-  // 现实 vs 理想：两条光绸往两边拉
-  if (tug > 0.01) { const mk = (to, bend) => Array.from({ length: 30 }, (_, k) => { const s = k / 29; return [lerp(R.chest[0], to[0], s), lerp(R.chest[1], to[1], s) + Math.sin(s * Math.PI) * bend + Math.sin(s * 10 - t * 5) * 8]; });
-    S.ribbon(ctx, mk([40, 960], 80 - sway * 60), s => 8 + 20 * Math.sin(s * Math.PI), [90, 110, 190], 0.4 * tug, smooth(prog(t, T.real - 0.3, T.real + 0.5)));
-    S.ribbon(ctx, mk([940, 1064], -150 + sway * 60), s => 8 + 20 * Math.sin(s * Math.PI), [255, 150, 60], 0.4 * tug, smooth(prog(t, T.ideal - 0.3, T.ideal + 0.5))); }
+  // D02：捧在胸前的罗盘 —— 指针转了大半圈，停在通向小木屋的那条路上
+  if (heart > 0.01 && tug < 0.99) { const st = easeOut(prog(t, T.mean - 0.2, T.inner + 0.6)), ang = lerp(-9.5, -0.42, st) + Math.sin(t * 7) * 0.25 * (1 - st); compass(ctx, R.chest[0] + 96, R.chest[1] + 20, 84 * (0.6 + 0.4 * easeOut(heart)), ang, heart * (1 - tug), t); }
+  // D03（反馈 08 重做，不再是两条光线）：现实的她和理想的她，一人拽住她一只手往两边拉
+  if (tug > 0.01) {
+    const self = (dx, col, flip, lab, prop, ph) => { const pull = Math.sin(t * 2.4 + ph) * 0.5 + 0.5, x = hx + dx - sway * 10 + (flip ? -1 : 1) * pull * 14, lean = (flip ? -1 : 1) * (0.1 + 0.08 * pull);
+      S.add(ctx, () => S.rgrad(ctx, x, GY + 4, 190, [[0, col, 0.3 * tug], [1, col, 0]], 0.16));
+      ctx.save(); if (flip) { ctx.translate(2 * x, 0); ctx.scale(-1, 1); }
+      const Q = S.lit(ctx, c => infp(c, x, GY, 0.92, { t: t + ph, flies: 0, wind: false, eyes: 'open', mouth: 'flat', lean: 0.1 + 0.08 * pull, la: -1.0, ra: 0.5 }), { at: [x, GY - 250], r: 300, k: 0.3, tint: [col, 0.5], alpha: Math.min(1, tug * 1.5) });
+      ctx.restore(); const hand = flip ? [2 * x - Q.lh[0], Q.lh[1]] : Q.lh, top = flip ? [2 * x - Q.top[0], Q.top[1]] : Q.top, oh = flip ? [2 * x - Q.rh[0], Q.rh[1]] : Q.rh;
+      // 两只手之间一段绷紧的光带
+      const tgt = flip ? R.lh : R.rh, pts = Array.from({ length: 10 }, (_, k) => [lerp(hand[0], tgt[0], k / 9), lerp(hand[1], tgt[1], k / 9) + Math.sin(k / 9 * Math.PI) * 6]); ctx.save(); ctx.globalAlpha = tug; ctx.lineCap = 'round'; ctx.beginPath(); pts.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.strokeStyle = 'rgb(120,90,70)'; ctx.lineWidth = 13; ctx.stroke(); ctx.strokeStyle = 'rgb(226,196,150)'; ctx.lineWidth = 7; ctx.setLineDash([12, 8]); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+      ctx.save(); ctx.globalAlpha = tug; ctx.translate(oh[0] + (flip ? -10 : 10), oh[1] + 40);
+      if (prop === 'case') { ctx.fillStyle = 'rgb(60,70,100)'; ctx.beginPath(); ctx.roundRect(-46, -10, 92, 66, 8); ctx.fill(); ctx.strokeStyle = 'rgb(60,70,100)'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(0, -10, 18, Math.PI, 0); ctx.stroke(); ctx.fillStyle = 'rgb(214,190,120)'; ctx.fillRect(-8, 14, 16, 12); }
+      else { ctx.rotate(-0.3); ctx.fillStyle = 'rgb(240,214,170)'; ctx.beginPath(); ctx.ellipse(0, 20, 50, 36, 0, 0, 6.2832); ctx.fill(); [[255, 110, 110], [255, 200, 90], [110, 180, 240], [130, 200, 130]].forEach((c2, k) => { ctx.fillStyle = rgba(c2); ctx.beginPath(); ctx.arc(-26 + k * 17, 12 + (k % 2) * 16, 8, 0, 6.2832); ctx.fill(); }); }
+      ctx.restore(); return top; };
+    sceneA.TOPS = [self(-240, [96, 116, 180], true, '现实', 'case', 0), self(240, [255, 186, 90], false, '理想', 'art', Math.PI)];
+  } else sceneA.TOPS = null;
   ctx.restore();
+  sceneA.C = C;
   return { C };
 }
 // ---------- B：格子间 ----------
@@ -162,6 +200,7 @@ function draw(ctx, t) {
   return st;
 }
 function over(ctx, t, a) {
+  if (t < OFF + 0.3 && sceneA.TOPS && sceneA.C) { const la = K.vis(t, T.real - 0.1, OFF - 0.1, 0.4, 0.3) * a; [['现实的选择', [190, 206, 250]], ['内心的理想', [255, 220, 150]]].forEach(([str, col], i) => { const p = S.w2s(sceneA.C, sceneA.TOPS[i][0], sceneA.TOPS[i][1] - 60); ctx.fillStyle = `rgba(30,30,60,${0.6 * la})`; ctx.beginPath(); ctx.roundRect(p[0] - 150, p[1] - 50, 300, 72, 36); ctx.fill(); K.text(ctx, str, p[0], p[1], { size: 46, weight: 500, color: col, alpha: la, spacing: 0.06 }); }); }
   // 那句话：一遍、两遍、三遍
   if (t > T.d04 - 0.2 && t < T.d06 + 0.3) [0, 1, 2].forEach(k => { const t0 = T.d04 + 0.15 + k * 0.9, age = t - t0; if (age <= 0) return; const al = smooth(prog(age, 0, 0.3)) * lerp(1, 0.22, smooth(prog(age, 0.6, 1.6))) * (1 - smooth(prog(t, T.d05 + 1.2, T.d05 + 2.0))) * a, sc = 1 + 0.16 * age; ctx.save(); ctx.translate(540, 300); ctx.scale(sc, sc); S.title(ctx, '我真的喜欢', 0, -44, { size: 84, c: [220, 230, 255], a: al, spacing: 0.06, glowA: 0.3 }); S.title(ctx, '这份工作吗？', 0, 60, { size: 84, c: [220, 230, 255], a: al, spacing: 0.06, glowA: 0.3 }); ctx.restore(); });
   const r = K.vis(t, T.remind - 0.6, T.d06 - 0.1, 0.4, 0.4) * a; if (r > 0.003) S.title(ctx, '感受，是世界给你的提醒', 540, 300, { size: 66, c: [255, 220, 150], a: r, spacing: 0.08, glowA: 0.3 });

@@ -29,7 +29,7 @@ const T = { in: vs('F01') - 2.2, f01: vs('F01'), task: at('F01', '课题'), guar
   f06: vs('F06'), sens: at('F06', '敏感'), take: at('F06', '承接'), f07: vs('F07'), blood: at('F07', '血包'), tired: at('F07', '劳累'), f08: vs('F08'), moral: at('F08', '道德'), f09: vs('F09'), no: at('F09', '拒绝'), edge: at('F09', '边界'), f10: vs('F10'), pity: at('F10', '同情心'), free: at('F10', '绑架'), end: ve('F10') + 0.6 };
 const TB = T.f06 - 0.55, TC = T.f09 - 0.6;
 // ================= A：深夜的书桌 =================
-const CAMA = [[T.in, { x: 0, y: 0, z: 1.0, ax: 540, ay: 1000 }], [T.task, { x: -20, y: 20, z: 1.34 }], [T.f02 - 0.2, { x: -20, y: 20, z: 1.4 }], [T.f02 + 0.8, { x: 60, y: -10, z: 1.06 }], [T.f03 - 0.1, { x: 60, y: -10, z: 1.08 }], [T.f03 + 0.9, { x: 30, y: -150, z: 1.0 }], [T.f05, { x: 30, y: -160, z: 1.04 }], [TB + 0.5, { x: 30, y: -120, z: 1.12 }]];
+const CAMA = [[T.in, { x: 0, y: 0, z: 1.0, ax: 540, ay: 1000 }], [T.task, { x: 90, y: -30, z: 1.16 }], [T.f02 - 0.2, { x: 90, y: -30, z: 1.2 }], [T.f02 + 0.8, { x: 60, y: -10, z: 1.06 }], [T.f03 - 0.1, { x: 60, y: -10, z: 1.08 }], [T.f03 + 0.9, { x: 30, y: -150, z: 1.0 }], [T.f05, { x: 30, y: -160, z: 1.04 }], [TB + 0.5, { x: 30, y: -120, z: 1.12 }]];
 function gear(ctx, x, y, r, n, rot, hot = 0, a = 1, broke = 0) {
   if (a <= 0.003 || r < 2) return;
   ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha *= a;
@@ -41,7 +41,7 @@ function gear(ctx, x, y, r, n, rot, hot = 0, a = 1, broke = 0) {
   ctx.fillStyle = rgba(mix(c1, [0, 0, 20], 0.3)); ctx.beginPath(); ctx.arc(0, 0, r * 0.56, 0, 6.2832); ctx.fill(); ctx.fillStyle = rgba(c0); for (let k = 0; k < 5; k++) { ctx.beginPath(); ctx.arc(Math.cos(k * 1.2566) * r * 0.34, Math.sin(k * 1.2566) * r * 0.34, r * 0.1, 0, 6.2832); ctx.fill(); } ctx.beginPath(); ctx.arc(0, 0, r * 0.14, 0, 6.2832); ctx.fill();
   ctx.restore();
 }
-function flask(ctx, x, y, s, lv, a, label, t) {     // 蓝药瓶：圆肚 + 细颈 + 木塞；lv 水位
+function flask(ctx, x, y, s, lv, a, label, t, cork = 1) {     // 蓝药瓶：圆肚 + 细颈 + 木塞；lv 水位
   if (a <= 0.003) return; ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.globalAlpha *= a;
   S.add(ctx, () => glow(ctx, 0, -150, 330, [70, 150, 255], 0.3 + 0.2 * lv));
   const body = () => { ctx.beginPath(); ctx.moveTo(-34, -330); ctx.lineTo(34, -330); ctx.lineTo(34, -250); ctx.bezierCurveTo(150, -210, 150, 0, 0, 0); ctx.bezierCurveTo(-150, 0, -150, -210, -34, -250); ctx.closePath(); };
@@ -49,7 +49,7 @@ function flask(ctx, x, y, s, lv, a, label, t) {     // 蓝药瓶：圆肚 + 细�
   ctx.save(); body(); ctx.clip(); const wy = -246 * clamp(lv); const g = ctx.createLinearGradient(0, wy, 0, 0); g.addColorStop(0, 'rgba(130,200,255,0.95)'); g.addColorStop(1, 'rgba(40,90,230,0.96)'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-160, 10); ctx.lineTo(-160, wy); for (let k = 0; k <= 10; k++) ctx.lineTo(-160 + k * 32, wy + Math.sin(k * 1.3 + t * 3) * 5); ctx.lineTo(160, 10); ctx.fill();
   for (let k = 0; k < 6; k++) { const ph = (t * 0.5 + hash(k * 3.1)) % 1; ctx.fillStyle = `rgba(255,255,255,${0.5 * (1 - ph)})`; ctx.beginPath(); ctx.arc((hash(k * 7.7) - 0.5) * 150, wy * ph - 8, 5 + hash(k) * 7, 0, 6.2832); ctx.fill(); } ctx.restore();
   ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.beginPath(); ctx.ellipse(-70, -150, 14, 60, 0.3, 0, 6.2832); ctx.fill(); ctx.strokeStyle = 'rgba(226,240,255,0.7)'; ctx.lineWidth = 6; body(); ctx.stroke();
-  ctx.fillStyle = 'rgb(170,120,80)'; ctx.beginPath(); ctx.roundRect(-30, -362, 60, 40, 8); ctx.fill();
+  if (cork > 0.01) { ctx.save(); ctx.globalAlpha *= Math.min(1, cork * 3); const cy2 = -362 - (1 - cork) * 150; const cg = ctx.createLinearGradient(-30, 0, 30, 0); cg.addColorStop(0, 'rgb(214,160,110)'); cg.addColorStop(1, 'rgb(140,96,64)'); ctx.fillStyle = cg; ctx.beginPath(); ctx.roundRect(-32, cy2, 64, 44, 8); ctx.fill(); ctx.restore(); }
   if (label) { ctx.fillStyle = 'rgb(250,240,214)'; ctx.beginPath(); ctx.roundRect(-70, -150, 140, 66, 10); ctx.fill(); K.text(ctx, label, 0, -102, { size: 46, weight: 500, color: [40, 70, 160] }); }
   ctx.restore();
 }
@@ -60,31 +60,40 @@ function actA(ctx, t) {
   RM.room(ctx, t, C, { lamp: 0.9 - 0.25 * hot, curtain: 0, moon: 1 });
   ctx.save(); S.cam(ctx, C, 1);
   const hx = 470, hy = RM.HER[1];
-  // 窗缝里的风（F01）
-  const wind = K.vis(t, T.f01 - 0.4, T.guard + 0.2, 0.5, 0.6), guard = smooth(prog(t, T.guard - 0.4, T.guard + 0.4));
-  if (wind > 0.01) for (let k = 0; k < 3; k++) { const pts = Array.from({ length: 22 }, (_, q) => { const s = q / 21; return [lerp(760, hx + 160, s) + Math.sin(s * 7 + t * 4 + k) * 12, lerp(560 + k * 70, hy - 280 + k * 20, s) + Math.sin(s * 5 + t * 3) * 16]; }); S.ribbon(ctx, pts, s => 4 + 12 * Math.sin(s * Math.PI), [190, 210, 255], 0.3 * wind, ((t * 0.9 + k * 0.3) % 1) * 1.3); }
+  // 2026-11-15 反馈 12 重做：精力 = 她那瓶「蓝量」（和后面 F02–F05 是同一只瓶子）。
+  //   三条消息（在吗？/ 帮个忙呗 / 再改一版）各插了一根吸管进瓶子，一口一口把蓝量吸走，水位往下掉；
+  //   说到「保护好」，她把吸管一根根拔掉，「啵」地塞上瓶塞，一圈柔光把瓶子护住，水位慢慢回满
+  const FX = 770, FY2 = 1160, sip = clamp(prog(t, T.f01 - 0.6, T.guard - 0.5)), corkU = prog(t, T.guard - 0.35, T.guard + 0.15), guard = smooth(corkU), refill = smooth(prog(t, T.guard + 0.3, T.mana));
+  const lv1 = 1 - 0.42 * sip + 0.42 * refill;
   const tired = smooth(prog(t, T.wear - 0.2, T.wear + 0.6));
-  const o = { t, wind: false, eyes: tired > 0.4 ? 'closed' : guard > 0.5 && t < T.f02 ? 'happy' : 'open', mouth: tired > 0.4 ? 'flat' : 'smile', la: -0.7 * (1 - tired), ra: -0.5 * (1 - tired), tilt: 0.25 * guard * (t < T.f02 ? 1 : 0) + 0.8 * tired - 0.3 * smooth(prog(t, T.f03, T.f03 + 0.8)) * (1 - tired), lean: 0.05 * tired - 0.04 * wind * (1 - guard), dim: 0.4 * tired, look: t > T.f03 && tired < 0.3 ? [0, -1.8] : [0.8, 0.6] };
+  const o = { t, wind: false, eyes: tired > 0.4 ? 'closed' : guard > 0.5 && t < T.f02 ? 'happy' : sip > 0.5 && guard < 0.5 ? 'wide' : 'open', mouth: tired > 0.4 ? 'flat' : sip > 0.5 && guard < 0.5 ? 'o' : 'smile', la: -0.2 * (1 - tired), ra: -1.0 * K.vis(t, T.guard - 0.8, T.guard + 0.5, 0.3, 0.5), tilt: 0.25 * guard * (t < T.f02 ? 1 : 0) + 0.8 * tired - 0.3 * smooth(prog(t, T.f03, T.f03 + 0.8)) * (1 - tired), lean: 0.05 * tired, dim: 0.4 * tired, look: t > T.f03 && tired < 0.3 ? [0, -1.8] : [0.8, 0.6] };
   ctx.save(); ctx.globalAlpha = 0.4; S.rgrad(ctx, hx + 50, hy + 6, 210, [[0, [10, 8, 30], 0.9], [1, [10, 8, 30], 0]], 0.16); ctx.restore();
   const R = S.lit(ctx, c => infp(c, hx, hy, 1.0, o), { light: RM.LAMP, at: [hx, hy - 290], r: 340, warm: [255, 214, 150], cool: [20, 20, 64], k: 1.1 });
-  // 玻璃罩里的小火苗（精力）
-  const jx = (R.lh[0] + R.rh[0]) / 2 + 26, jy = Math.min(R.lh[1], R.rh[1]) - 6, fl = (0.6 + 0.4 * guard) * (1 - 0.75 * tired) * (0.5 + 0.5 * drainLv), bend = Math.sin(t * 9) * 0.5 * wind * (1 - guard) - 0.5 * wind * (1 - guard);
-  S.add(ctx, () => { glow(ctx, jx, jy - 50, 260 * fl, [255, 190, 110], 0.5 * fl + 0.1); });
-  ctx.fillStyle = 'rgb(120,84,70)'; ctx.beginPath(); ctx.roundRect(jx - 44, jy - 4, 88, 18, 6); ctx.fill();
-  ctx.save(); ctx.translate(jx, jy - 4); ctx.rotate(bend * 0.4); for (let i = 0; i < 3; i++) { const w = (26 - i * 7) * (0.6 + 0.6 * fl), h = (96 - i * 24) * (0.5 + 0.7 * fl) * (1 + 0.07 * Math.sin(t * 7 + i)), sw = bend * 30, col = [[255, 120, 60], [255, 196, 90], [255, 246, 206]][i]; ctx.fillStyle = rgba(col, 0.95); ctx.beginPath(); ctx.moveTo(-w, 0); ctx.bezierCurveTo(-w, -h * 0.5, -w * 0.2 + sw, -h * 0.7, sw * 1.4, -h); ctx.bezierCurveTo(w * 0.3 + sw, -h * 0.6, w, -h * 0.4, w, 0); ctx.closePath(); ctx.fill(); } ctx.restore();
-  ctx.beginPath(); ctx.moveTo(jx - 48, jy - 2); ctx.bezierCurveTo(jx - 60, jy - 150, jx + 60, jy - 150, jx + 48, jy - 2); const jg = ctx.createLinearGradient(jx - 50, 0, jx + 50, 0); jg.addColorStop(0, 'rgba(255,255,255,0.3)'); jg.addColorStop(0.3, 'rgba(255,255,255,0.04)'); jg.addColorStop(1, 'rgba(255,255,255,0.22)'); ctx.fillStyle = jg; ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 3; ctx.stroke();
   // 蓝药瓶 ×3：水位线一样高
-  const fa = smooth(prog(t, T.f02 - 0.2, T.mana)), oa = smooth(prog(t, T.other - 0.5, T.other + 0.1)) * (1 - smooth(prog(t, T.f03, T.f03 + 0.8)));
-  flask(ctx, 700, 1120, 0.62, 1, oa * 0.8, null, t + 1); flask(ctx, 1010, 1130, 0.62, 1, oa * 0.8, null, t + 2);
-  flask(ctx, 860, 1160, 1.0, drainLv, fa, '蓝量', t);
-  if (oa > 0.01) { const lu = easeInOut(prog(t, T.other - 0.3, T.other + 0.6)); S.add(ctx, () => { ctx.fillStyle = `rgba(190,230,255,${0.7 * oa})`; ctx.fillRect(600, 1160 - 246 - 3, 520 * lu, 6); glow(ctx, 600 + 520 * lu, 1160 - 246, 40, [200, 236, 255], oa); }); }
+  const fa = 1, oa = smooth(prog(t, T.other - 0.5, T.other + 0.1)) * (1 - smooth(prog(t, T.f03, T.f03 + 0.8)));
+  flask(ctx, 960, 1130, 0.6, 1, oa * 0.85, null, t + 1); flask(ctx, 1100, 1140, 0.6, 1, oa * 0.85, null, t + 2);
+  flask(ctx, FX, FY2, 1.0, Math.min(lv1, drainLv), fa, '蓝量', t, t < T.f03 ? easeOut(corkU) : 1 - smooth(prog(t, T.f03, T.f03 + 0.5)) * 0);
+  // 吸管 + 消息气泡
+  const MSG = [['在吗？', [940, 560], [150, 190, 255]], ['帮个忙呗', [930, 800], [255, 190, 130]], ['再改一版', [720, 470], [190, 150, 250]]];
+  MSG.forEach(([str, at2, col], i) => { const inA = smooth(prog(t, T.in + 0.9 + i * 0.35, T.in + 1.5 + i * 0.35)), outU = prog(t, T.guard - 0.75 + i * 0.16, T.guard - 0.2 + i * 0.16), out = easeIn(outU); if (inA <= 0.01 || outU >= 1) return;
+    const bx = at2[0] + out * (260 + i * 40) + Math.sin(t * 0.9 + i * 2) * 8, by = at2[1] - out * 200 + Math.cos(t * 0.8 + i) * 6, tipx = FX + (i - 1) * 16 + out * (bx - FX) * 0.8, tipy = FY2 - 250 - out * 260, al = inA * (1 - smooth(prog(outU, 0.6, 1)));
+    const pts = Array.from({ length: 20 }, (_, q) => { const s2 = q / 19; return [lerp(bx - 60, tipx, s2) + Math.sin(s2 * Math.PI) * (-70 + i * 50), lerp(by + 40, tipy, Math.pow(s2, 0.8))]; });
+    ctx.save(); ctx.globalAlpha = al; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); pts.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.strokeStyle = 'rgb(250,250,255)'; ctx.lineWidth = 20; ctx.stroke(); ctx.strokeStyle = rgba(mix(col, [255, 255, 255], 0.2)); ctx.lineWidth = 12; ctx.setLineDash([22, 16]); ctx.stroke(); ctx.setLineDash([]);
+    // 一口口吸上去的蓝量
+    if (outU <= 0) for (let k = 0; k < 2; k++) { const ph = (t * 0.9 + k / 2 + i * 0.3) % 1, pp = pts[Math.floor((1 - ph) * 19)]; S.add(ctx, () => { glow(ctx, pp[0], pp[1], 30, [90, 170, 255], 0.9); glow(ctx, pp[0], pp[1], 10, [226, 244, 255], 1); }); }
+    ctx.translate(bx, by); ctx.rotate(0.05 * Math.sin(t + i)); ctx.shadowColor = 'rgba(0,0,20,0.4)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 6; ctx.fillStyle = rgba(mix(col, [255, 255, 255], 0.75)); ctx.beginPath(); ctx.roundRect(-112, -50, 224, 100, 36); ctx.fill(); ctx.shadowColor = 'transparent';
+    K.text(ctx, str, 0, 17, { size: 46, weight: 500, color: mix(col, [30, 30, 70], 0.75) }); ctx.restore(); });
+  // 塞上瓶塞的那一下 + 护住瓶子的一圈光
+  if (corkU > 0.6 && corkU < 1.0 || (t > T.guard + 0.15 && t < T.guard + 0.8)) { const pu = prog(t, T.guard + 0.1, T.guard + 0.8); S.ring(ctx, FX, FY2 - 340, 30 + pu * 220, 16, [255, 240, 200], 0.8 * (1 - pu)); }
+  const sh = guard * (1 - smooth(prog(t, T.f03 - 0.3, T.f03 + 0.4))); if (sh > 0.01) S.add(ctx, () => { S.rgrad(ctx, FX, FY2 - 170, 300, [[0, [170, 220, 255], 0], [0.8, [170, 220, 255], 0.05 * sh], [0.96, [200, 236, 255], 0.3 * sh], [1, [200, 236, 255], 0]], 1.1); });
+  if (oa > 0.01) { const lu = easeInOut(prog(t, T.other - 0.3, T.other + 0.6)); S.add(ctx, () => { ctx.fillStyle = `rgba(190,230,255,${0.7 * oa})`; ctx.fillRect(640, 1160 - 246 - 3, 520 * lu, 6); glow(ctx, 640 + 520 * lu, 1160 - 246, 40, [200, 236, 255], oa); }); }
   // 齿轮组（脑子里的机器）
   const ga = smooth(prog(t, T.f03 - 0.1, T.mach + 0.2)); if (ga > 0.01) {
     const rot = (t - T.f03) * 1.1 * speed;
     S.add(ctx, () => S.rgrad(ctx, 480, 460, 560, [[0, [60, 70, 130], 0.3 * ga], [1, [60, 70, 130], 0]], 0.8));
     for (let k = 0; k < 3; k++) { ctx.fillStyle = `rgba(226,232,255,${0.5 * ga})`; ctx.beginPath(); ctx.arc(lerp(R.top[0] + 20, 440, (k + 1) / 4), lerp(R.top[1] - 10, 640, (k + 1) / 4), 9 + k * 6, 0, 6.2832); ctx.fill(); }
     // 药液顺着管子流进机器
-    const pipe = Array.from({ length: 24 }, (_, q) => { const s = q / 23; return [lerp(860, 600, s) + Math.sin(s * Math.PI) * 120, lerp(1160 - 362, 520, s)]; }); S.ribbon(ctx, pipe, s => 7 + 10 * Math.exp(-Math.pow((s - (t * 0.8 % 1)) * 5, 2)), [80, 150, 255], 0.6 * ga * (drainLv > 0.12 ? 1 : 0.2), 1);
+    const pipe = Array.from({ length: 24 }, (_, q) => { const s = q / 23; return [lerp(770, 600, s) + Math.sin(s * Math.PI) * 120, lerp(1160 - 362, 520, s)]; }); S.ribbon(ctx, pipe, s => 7 + 10 * Math.exp(-Math.pow((s - (t * 0.8 % 1)) * 5, 2)), [80, 150, 255], 0.6 * ga * (drainLv > 0.12 ? 1 : 0.2), 1);
     const g1 = easeOut(prog(t, T.g1 - 0.1, T.g1 + 0.4)), g2 = easeInOut(prog(t, T.g2 - 0.1, T.g2 + 0.9)), g3 = smooth(prog(t, T.g3 - 0.2, T.g3 + 0.3));
     const sh = hot ? Math.sin(t * 60) * 4 * hot : 0;
     GEARS.forEach(([x, y, r, n, sp], i) => { const rr = i === 2 ? r * (1 + 1.0 * g2) : r; gear(ctx, x + sh * (i % 2 ? 1 : -1), y, rr, i === 2 ? n + Math.round(6 * g2) : n, rot * sp * (i === 2 ? 1 / (1 + g2) : 1), hot, ga, hot * 0.3); });
