@@ -90,6 +90,15 @@ const MIDB = S.lazy(() => S.bake(900, 1500, c => {
     if (r() < 0.4) { c.fillStyle = 'rgb(80,84,110)'; c.fillRect(x + WW + 10, y + WH - 60, 50, 50); }
   }
 }));
+// 第 6 章复用同一个公交站：只画环境（不含人物），o.city 让对面楼的窗一扇扇亮起暖光
+function scene(ctx, t, C, o = {}) {
+  const { ad = 1, city = 0, myWin = 1 } = o;
+  ctx.save(); S.cam(ctx, C, 0.35); ctx.drawImage(FAR(), -PAD, -120); ctx.restore();
+  ctx.save(); S.cam(ctx, C, 0.6); ctx.drawImage(MIDB(), 400, -900);
+  if (city > 0.01) for (let j = 0; j < 7; j++) for (let i = 0; i < 4; i++) { if (hash(i * 3 + j * 7 + 11) < 0.45) continue; const on = smooth(prog(city, hash(i * 3 + j * 7) * 0.7, hash(i * 3 + j * 7) * 0.7 + 0.3)); if (on <= 0.01) continue; const x = 400 + 70 + i * 210, y = -900 + 40 + j * 230; const wg = ctx.createLinearGradient(0, y, 0, y + WH); wg.addColorStop(0, rgba([255, 226, 170], on)); wg.addColorStop(1, rgba([255, 170, 110], on)); ctx.fillStyle = wg; ctx.fillRect(x, y, WW, WH); ctx.fillStyle = 'rgb(26,24,46)'; ctx.fillRect(x + WW / 2 - 4, y, 8, WH); S.add(ctx, () => glow(ctx, x + WW / 2, y + WH / 2, 280, [255, 196, 124], 0.4 * on)); }
+  ctx.restore();
+  ctx.save(); S.cam(ctx, C, 1); wetRoad(ctx, t); streetLamp(ctx); shelter(ctx, t, ad); ctx.restore();
+}
 function draw(ctx, t) {
   const C = S.camKF(t, CAM);
   // A04：她上车，车开走；他挥挥手往街对面走；镜头升起来，推进对面楼他家那扇窗
@@ -147,4 +156,4 @@ function over(ctx, t) {
   const ad = smooth(prog(t, T.a02 + 0.1, T.a02 + 1.3));
   if (ad > 0.01) { const C = S.camKF(t, CAM), p = S.w2s(C, 210, 650); ctx.save(); ctx.globalAlpha = ad; const s = C.z; K.text(ctx, 'ESFJ', p[0], p[1], { size: 64 * s, family: 'Latin', weight: 600, color: [120, 60, 40], spacing: 0.12 }); K.text(ctx, '供给者', p[0], p[1] + 64 * s, { size: 46 * s, weight: 700, color: [140, 70, 50], spacing: 0.3 }); ctx.restore(); }
 }
-module.exports = { draw, over, T };
+module.exports = { draw, over, T, scene };
