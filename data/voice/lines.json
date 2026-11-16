@@ -1,0 +1,372 @@
+[
+ {
+  "id": "A01",
+  "section": "A",
+  "chapter": 0,
+  "itemStart": true,
+  "text": "ESFJ，被称为供给者。"
+ },
+ {
+  "id": "A02",
+  "section": "A",
+  "chapter": 0,
+  "itemStart": false,
+  "text": "网上更爱叫他们：蓝妈妈、男妈妈。",
+  "gag": 1
+ },
+ {
+  "id": "A03",
+  "section": "A",
+  "chapter": 0,
+  "itemStart": false,
+  "text": "这期视频，我们就来介绍ESFJ。",
+  "bigAfter": 1
+ },
+ {
+  "id": "B01",
+  "section": "B",
+  "chapter": 1,
+  "itemStart": true,
+  "text": "供给，就是给别人提供生活所需。"
+ },
+ {
+  "id": "B02",
+  "section": "B",
+  "chapter": 1,
+  "itemStart": false,
+  "text": "ESFJ天生爱照顾人。看到别人吃饱穿暖，他们就高兴。"
+ },
+ {
+  "id": "B03",
+  "section": "B",
+  "chapter": 1,
+  "itemStart": false,
+  "text": "他们还希望，每个人都能有归属感。",
+  "pause": 0.6
+ },
+ {
+  "id": "B04",
+  "section": "B",
+  "chapter": 1,
+  "itemStart": false,
+  "text": "ESFJ属于护卫者。护卫者一共四种，都踏实、守规矩，擅长把事情安排妥当。"
+ },
+ {
+  "id": "B05",
+  "section": "B",
+  "chapter": 1,
+  "itemStart": false,
+  "text": "ESTJ是监管者，盯着每个人有没有各司其职。"
+ },
+ {
+  "id": "B06",
+  "section": "B",
+  "chapter": 1,
+  "itemStart": false,
+  "text": "ISTJ是检查者，账目和产品，一点瑕疵都逃不过。"
+ },
+ {
+  "id": "B07",
+  "section": "B",
+  "chapter": 1,
+  "itemStart": false,
+  "text": "ISFJ是保护者，默默守着身边人的安全。"
+ },
+ {
+  "id": "B08",
+  "section": "B",
+  "chapter": 1,
+  "itemStart": false,
+  "text": "ESFJ是供给者，大家缺什么，他们就及时送到手上。"
+ },
+ {
+  "id": "B09",
+  "section": "B",
+  "chapter": 1,
+  "itemStart": false,
+  "text": "四种里，ESFJ最随和，也最好交际。"
+ },
+ {
+  "id": "B10",
+  "section": "B",
+  "chapter": 1,
+  "itemStart": false,
+  "text": "好在这样的人不少：每十个人里，就有一个以上。",
+  "bigAfter": 1
+ },
+ {
+  "id": "C01",
+  "section": "C",
+  "chapter": 2,
+  "itemStart": true,
+  "text": "他们是天生的主人。聚会、义卖、晚会交给他们，每位客人都能尽兴。"
+ },
+ {
+  "id": "C02",
+  "section": "C",
+  "chapter": 2,
+  "itemStart": false,
+  "text": "别人刚自我介绍完，他们就记住了名字，还时刻留意谁需要什么。"
+ },
+ {
+  "id": "C03",
+  "section": "C",
+  "chapter": 2,
+  "itemStart": false,
+  "text": "学校、社区、各种社团里，最积极的往往也是他们。"
+ },
+ {
+  "id": "C04",
+  "section": "C",
+  "chapter": 2,
+  "itemStart": false,
+  "text": "在他们看来，这是自己该尽的责任。",
+  "pause": 0.5
+ },
+ {
+  "id": "C05",
+  "section": "C",
+  "chapter": 2,
+  "itemStart": false,
+  "text": "他们聊的都是身边具体的事：天气、菜价、亲戚邻居的家常。"
+ },
+ {
+  "id": "C06",
+  "section": "C",
+  "chapter": 2,
+  "itemStart": false,
+  "text": "想知道附近的新鲜事，问他们最快。",
+  "gag": 1
+ },
+ {
+  "id": "C07",
+  "section": "C",
+  "chapter": 2,
+  "itemStart": false,
+  "text": "可一聊到哲学、心理学这种抽象话题，他们就沉默了。",
+  "pause": 1.5
+ },
+ {
+  "id": "C08",
+  "section": "C",
+  "chapter": 2,
+  "itemStart": false,
+  "text": "有意思的是，同样的话换成权威来讲，他们不但认真听，还会照着做。"
+ },
+ {
+  "id": "C09",
+  "section": "C",
+  "chapter": 2,
+  "itemStart": false,
+  "text": "他们重视传统，常常怀念过去的好日子；说到以后，又总担心会出事。",
+  "bigAfter": 1
+ },
+ {
+  "id": "D01",
+  "section": "D",
+  "chapter": 3,
+  "itemStart": true,
+  "text": "他们很敏感，喜欢和讨厌都写在脸上。"
+ },
+ {
+  "id": "D02",
+  "section": "D",
+  "chapter": 3,
+  "itemStart": false,
+  "text": "他们也很在意形象，别人提的意见，都会当真。"
+ },
+ {
+  "id": "D03",
+  "section": "D",
+  "chapter": 3,
+  "itemStart": false,
+  "text": "一句批评，就能让他们消沉好久；",
+  "pause": 1.8
+ },
+ {
+  "id": "D03B",
+  "section": "D",
+  "chapter": 3,
+  "itemStart": false,
+  "text": "被大家认可，他们才干劲十足。",
+  "pause": 0.8
+ },
+ {
+  "id": "D04",
+  "section": "D",
+  "chapter": 3,
+  "itemStart": false,
+  "text": "对他们说一句我需要你，就像打了一针强心剂。",
+  "pause": 1.2
+ },
+ {
+  "id": "D05",
+  "section": "D",
+  "chapter": 3,
+  "itemStart": false,
+  "text": "事情出了错，他们也习惯先怪自己。",
+  "bigAfter": 1
+ },
+ {
+  "id": "E01",
+  "section": "E",
+  "chapter": 4,
+  "itemStart": true,
+  "text": "这份在意别人的心，放到工作里，就是长处。他们的长处，都从同一件事来：眼里有人。",
+  "pause": 0.6
+ },
+ {
+  "id": "E02",
+  "section": "E",
+  "chapter": 4,
+  "itemStart": false,
+  "text": "对同事，他们跟谁都配合得来；安排起细节，精力旺盛，不知疲倦。",
+  "pause": 0.4
+ },
+ {
+  "id": "E03",
+  "section": "E",
+  "chapter": 4,
+  "itemStart": false,
+  "text": "谁缺什么，他们总是先想到，像个军需官，让大家要用的东西永远不缺。",
+  "pause": 0.6
+ },
+ {
+  "id": "E04",
+  "section": "E",
+  "chapter": 4,
+  "itemStart": false,
+  "text": "对顾客，他们也是真心替人着想，所以天生会卖东西：顾客买走的不只是商品，还有那份热心。",
+  "pause": 0.6
+ },
+ {
+  "id": "E05",
+  "section": "E",
+  "chapter": 4,
+  "itemStart": false,
+  "text": "对上司，他们守规矩、有条理、忠心耿耿，几乎是完美的下属。",
+  "pause": 0.6
+ },
+ {
+  "id": "E06",
+  "section": "E",
+  "chapter": 4,
+  "itemStart": false,
+  "text": "所以凡是跟人打交道的工作，都适合他们：老师、教练、销售、秘书、前台。",
+  "bigAfter": 1
+ },
+ {
+  "id": "F01",
+  "section": "F",
+  "chapter": 5,
+  "itemStart": true,
+  "text": "回到家里，他们还是那个供给者：全家的吃穿住，都安排得妥妥当当。"
+ },
+ {
+  "id": "F02",
+  "section": "F",
+  "chapter": 5,
+  "itemStart": false,
+  "text": "他们心里有一整套该做和不该做，也希望全家意见一致。",
+  "pause": 0.9
+ },
+ {
+  "id": "F03",
+  "section": "F",
+  "chapter": 5,
+  "itemStart": false,
+  "text": "作为伴侣，他们忠诚又多情，愿意同甘共苦；生日、纪念日，一个都不会忘。",
+  "pause": 0.9
+ },
+ {
+  "id": "F04",
+  "section": "F",
+  "chapter": 5,
+  "itemStart": false,
+  "text": "只是他们有点家长作风：照顾对方的同时，也会按自己那一套去要求对方。",
+  "pause": 1
+ },
+ {
+  "id": "F05",
+  "section": "F",
+  "chapter": 5,
+  "itemStart": false,
+  "text": "跟他们最配的，是ISTP。"
+ },
+ {
+  "id": "F06",
+  "section": "F",
+  "chapter": 5,
+  "itemStart": false,
+  "text": "ISTP安静、坚毅，渴望冒险的自由；ESFJ外向、温柔，最会照顾和安抚人。"
+ },
+ {
+  "id": "F07",
+  "section": "F",
+  "chapter": 5,
+  "itemStart": false,
+  "text": "ISTP在外面闯够了，需要有人迎接他们回家，安抚那颗躁动的心。"
+ },
+ {
+  "id": "F08",
+  "section": "F",
+  "chapter": 5,
+  "itemStart": false,
+  "text": "一个在外面闯，一个把家守好，正好互补。",
+  "pause": 0.6
+ },
+ {
+  "id": "F09",
+  "section": "F",
+  "chapter": 5,
+  "itemStart": false,
+  "text": "当了父母，他们会先把孩子的衣食住行照顾周全，甚至委屈自己。"
+ },
+ {
+  "id": "F10",
+  "section": "F",
+  "chapter": 5,
+  "itemStart": false,
+  "text": "然后才用严格的标准，要求孩子的言行。",
+  "pause": 0.6
+ },
+ {
+  "id": "F11",
+  "section": "F",
+  "chapter": 5,
+  "itemStart": false,
+  "text": "孩子有礼貌，他们比谁都骄傲；孩子没礼貌，他们尴尬得不行。",
+  "bigAfter": 1
+ },
+ {
+  "id": "G01",
+  "section": "G",
+  "chapter": 6,
+  "itemStart": true,
+  "text": "说到底，ESFJ最渴望的，是被认可。",
+  "pause": 0.8
+ },
+ {
+  "id": "G02",
+  "section": "G",
+  "chapter": 6,
+  "itemStart": false,
+  "text": "他们愿意一直付出，只希望这份付出，有人看得见。",
+  "pause": 0.8
+ },
+ {
+  "id": "G03",
+  "section": "G",
+  "chapter": 6,
+  "itemStart": false,
+  "text": "所以，对身边的ESFJ，别吝啬一句谢谢。",
+  "bigAfter": 1
+ },
+ {
+  "id": "G04",
+  "section": "G",
+  "chapter": 6,
+  "itemStart": false,
+  "text": "你身边，有这样的ESFJ吗？"
+ }
+]
