@@ -7,7 +7,7 @@ const { W, clamp, smooth, easeOut, rgba } = K;
 const LS = JSON.parse(fs.readFileSync((process.env.ESFJ_DATA || 'F:/AI/lianai/08_ESFJ/voice6').replace(/\/voice$/, '') + (process.env.ESFJ_DATA ? '/voice/lines.json' : '/lines.json'), 'utf8'));
 const Q = LS.filter(o => o.quote).map(o => { const l = X.VT[o.id], sl = l.quote_slot || [l.end + 0.2, l.end + 0.2 + 1.7 * (o.quotes || 1)]; return { id: o.id, txt: o.quote, a: sl[0] - 0.15, b: sl[1] + 0.6 }; });
 const MC = new K.Canvas(8, 8).getContext('2d');
-function wrapZh(str, size, maxW) { const out = []; let cur = ''; for (const ch of str) { if (K.measure(MC, cur + ch, { size, weight: 500 }) > maxW && cur) { out.push(cur); cur = ch; } else cur += ch; } if (cur) out.push(cur); return out; }
+function wrapZh(str, size, maxW) { const out = []; let cur = ''; for (const ch of str) { if (K.measure(MC, cur + ch, { size, weight: 500 }) > maxW && cur && !'，。、；：？！”）'.includes(ch)) { out.push(cur); cur = ch; } else cur += ch; } if (cur) out.push(cur); return out; }
 function draw(ctx, t, o = {}) {
   const { y = 250 } = o;
   for (const q of Q) {
