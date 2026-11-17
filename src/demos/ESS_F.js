@@ -13,6 +13,7 @@ const X = require('./ehk');
 const S = require('./ESS_kit');
 const PR = require('./ESS_props');
 const SET = require('./ESS_set');
+const TP = require('./ESS_type');
 const { K, ES, MB, vs, ve, at } = X;
 const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash, mulberry32 } = K;
 const glow = S.glow;
@@ -27,11 +28,15 @@ const HOUSE = S.lazy(() => S.bake(W + PAD * 2, H + PAD, c => {
   // 地毯
   c.save(); c.translate(440, 1300); c.scale(1, 0.2); const rg = c.createRadialGradient(0, 0, 40, 0, 0, 480); rg.addColorStop(0, 'rgb(200,120,100)'); rg.addColorStop(0.7, 'rgb(160,90,80)'); rg.addColorStop(0.72, 'rgb(240,200,160)'); rg.addColorStop(0.8, 'rgb(160,90,80)'); rg.addColorStop(1, 'rgb(120,64,64)'); c.fillStyle = rg; c.beginPath(); c.arc(0, 0, 480, 0, 6.2832); c.fill(); c.restore();
   // 家规板
-  c.fillStyle = 'rgb(110,74,56)'; c.fillRect(40, 300, 330, 380); c.fillStyle = 'rgb(250,244,230)'; c.fillRect(56, 316, 298, 348); K.text(c, '家 规', 205, 380, { size: 50, weight: 700, color: [170, 60, 50], spacing: 0.3 });
-  ['回家先洗手', '吃饭不看手机', '九点前回家', '见人要问好'].forEach((ln, i) => { c.fillStyle = 'rgb(214,80,70)'; c.beginPath(); c.arc(88, 436 + i * 62, 8, 0, 6.2832); c.fill(); K.text(c, ln, 108, 448 + i * 62, { size: 34, weight: 600, color: [70, 50, 50], align: 'left' }); });
+  c.save(); c.shadowColor = 'rgba(0,0,0,0.4)'; c.shadowBlur = 20; c.shadowOffsetY = 8; const fg = c.createLinearGradient(30, 290, 380, 690); fg.addColorStop(0, 'rgb(150,104,70)'); fg.addColorStop(1, 'rgb(90,58,40)'); c.fillStyle = fg; c.beginPath(); c.roundRect(28, 288, 354, 404, 16); c.fill(); c.restore();
+  const bg = c.createLinearGradient(0, 306, 0, 676); bg.addColorStop(0, 'rgb(48,74,64)'); bg.addColorStop(1, 'rgb(36,56,50)'); c.fillStyle = bg; c.beginPath(); c.roundRect(46, 306, 318, 368, 8); c.fill(); // 黑板
+  c.fillStyle = 'rgba(255,255,255,0.05)'; for (let k = 0; k < 5; k++) { c.beginPath(); c.ellipse(90 + k * 60, 360 + k * 50, 70, 16, -0.3, 0, 6.2832); c.fill(); }
+  c.save(); c.shadowColor = 'rgba(255,230,180,0.5)'; c.shadowBlur = 10; K.text(c, '家规', 205, 384, { size: 62, family: 'ESHeavy', weight: 900, color: [255, 226, 170], spacing: 0.4 }); c.restore();
+  ['回家先洗手', '吃饭不看手机', '九点前回家', '见人要问好'].forEach((ln, i) => { c.strokeStyle = 'rgb(240,140,120)'; c.lineWidth = 6; c.lineCap = 'round'; c.beginPath(); c.moveTo(72, 438 + i * 62); c.lineTo(82, 450 + i * 62); c.lineTo(98, 426 + i * 62); c.stroke(); K.text(c, ln, 112, 452 + i * 62, { size: 38, family: 'ESSans', weight: 700, color: [240, 240, 228], align: 'left' }); });
   // 日历
-  c.fillStyle = 'rgb(250,250,246)'; c.fillRect(420, 340, 170, 200); c.fillStyle = 'rgb(214,70,70)'; c.fillRect(420, 340, 170, 46); K.text(c, '十一月', 505, 374, { size: 28, weight: 700, color: [255, 250, 240] });
-  for (let k = 0; k < 20; k++) { c.fillStyle = 'rgba(90,90,110,0.5)'; c.fillRect(434 + (k % 5) * 30, 404 + Math.floor(k / 5) * 32, 18, 14); }
+  c.save(); c.shadowColor = 'rgba(0,0,0,0.35)'; c.shadowBlur = 14; c.shadowOffsetY = 6; c.fillStyle = 'rgb(250,248,242)'; c.beginPath(); c.roundRect(410, 330, 190, 220, 10); c.fill(); c.restore();
+  c.fillStyle = 'rgb(214,70,70)'; c.beginPath(); c.roundRect(410, 330, 190, 58, [10, 10, 0, 0]); c.fill(); K.text(c, '十一月', 505, 372, { size: 34, family: 'ESSans', weight: 900, color: [255, 250, 240], spacing: 0.1 });
+  K.text(c, '17', 505, 500, { size: 110, family: 'ESHeavy', weight: 900, color: [60, 50, 60] }); c.fillStyle = 'rgba(0,0,0,0.08)'; c.fillRect(410, 520, 190, 4);
   SET.frame(c, 640, 330, 150, 180, 1); SET.shelf(c, 640, 620, 220, 3);
   // 门框 + 门（右边）+ 鞋架、衣帽钩
   c.fillStyle = 'rgb(90,60,50)'; c.fillRect(DOOR[0] - 150, DOOR[1] - 660, 300, 660); c.fillStyle = 'rgb(30,24,30)'; c.fillRect(DOOR[0] - 130, DOOR[1] - 640, 260, 640);
@@ -51,14 +56,14 @@ function roadOut(ctx, x, y, w, h, t, k) {
   for (let L = 0; L < 2; L++) { ctx.fillStyle = L ? 'rgb(150,100,110)' : 'rgb(190,130,120)'; ctx.beginPath(); ctx.moveTo(x - 100, y + h * 0.62); for (let q = 0; q <= 8; q++) ctx.lineTo(x - 100 + q * 60, y + h * (0.42 + 0.1 * L) - Math.abs(Math.sin(q * 1.7 + L)) * 80 + ((t * 30 * (L + 1)) % 60) * 0); ctx.lineTo(x + w + 100, y + h); ctx.lineTo(x - 100, y + h); ctx.fill(); }
   ctx.fillStyle = 'rgb(70,60,70)'; S.poly(ctx, [[x + w * 0.45, y + h * 0.6], [x + w * 0.55, y + h * 0.6], [x + w + 60, y + h], [x - 60, y + h]]); ctx.fill();
   ctx.fillStyle = 'rgba(255,240,200,0.8)'; for (let q = 0; q < 6; q++) { const u = ((q / 6 + t * 1.6) % 1), yy = lerp(y + h * 0.6, y + h, u * u), ww = lerp(3, 26, u * u); ctx.fillRect(x + w / 2 - ww / 2, yy, ww, 10 + 40 * u * u); }
-  S.add(ctx, () => glow(ctx, x + w * 0.5, y + h * 0.4, 260, [255, 220, 170], 0.5 * k));
+  S.add(ctx, () => glow(ctx, x + w * 0.5, y + h * 0.4, 240, [255, 210, 160], 0.22 * k));
 }
-function hallOut(ctx, x, y, w, h) { S.vgrad(ctx, [[0, [190, 180, 160]], [1, [130, 120, 110]]], y, y + h, x, x + w); S.add(ctx, () => glow(ctx, x + w / 2, y + 60, 260, [255, 240, 210], 0.6)); }
+function hallOut(ctx, x, y, w, h) { S.vgrad(ctx, [[0, [190, 170, 150]], [1, [120, 104, 96]]], y, y + h, x, x + w); S.add(ctx, () => glow(ctx, x + w / 2, y + 60, 240, [255, 230, 200], 0.25)); }
 // ISTP 的摩托车（只在门口露出车头）
 function bike(ctx, x, y, s, a) { if (a <= 0.003) return; ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.scale(s, s); PR.contact(ctx, 0, 0, 200, 0.4);
   ctx.fillStyle = 'rgb(30,30,40)'; for (const dx of [-110, 110]) { ctx.beginPath(); ctx.arc(dx, -60, 60, 0, 6.2832); ctx.fill(); ctx.fillStyle = 'rgb(150,150,160)'; ctx.beginPath(); ctx.arc(dx, -60, 22, 0, 6.2832); ctx.fill(); ctx.fillStyle = 'rgb(30,30,40)'; }
   const g = ctx.createLinearGradient(0, -200, 0, -80); g.addColorStop(0, 'rgb(255,214,90)'); g.addColorStop(1, 'rgb(200,140,40)'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-130, -110); ctx.lineTo(-40, -190); ctx.lineTo(90, -190); ctx.lineTo(140, -120); ctx.lineTo(40, -90); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = 'rgb(255,250,230)'; ctx.beginPath(); ctx.arc(150, -150, 20, 0, 6.2832); ctx.fill(); S.add(ctx, () => glow(ctx, 150, -150, 120, [255, 240, 200], 0.6)); ctx.restore(); }
+  ctx.fillStyle = 'rgb(255,250,230)'; ctx.beginPath(); ctx.arc(150, -150, 20, 0, 6.2832); ctx.fill(); S.add(ctx, () => glow(ctx, 150, -150, 110, [255, 230, 190], 0.3)); ctx.restore(); }
 function goggles(ctx, x, y, s, a) { if (a <= 0.003) return; ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.scale(s, s); ctx.fillStyle = 'rgb(60,50,40)'; ctx.fillRect(-60, -6, 120, 12); for (const dx of [-28, 28]) { ctx.fillStyle = 'rgb(200,140,40)'; ctx.beginPath(); ctx.ellipse(dx, 0, 26, 20, 0, 0, 6.2832); ctx.fill(); ctx.fillStyle = 'rgba(150,220,255,0.8)'; ctx.beginPath(); ctx.ellipse(dx, 0, 18, 13, 0, 0, 6.2832); ctx.fill(); } ctx.restore(); }
 function cake(ctx, x, y, s, t, a) { if (a <= 0.003) return; ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.scale(s, s); PR.contact(ctx, 0, 4, 120, 0.4); ctx.fillStyle = 'rgb(252,248,244)'; ctx.beginPath(); ctx.ellipse(0, 0, 120, 26, 0, 0, 6.2832); ctx.fill();
   const g = ctx.createLinearGradient(-90, 0, 90, 0); g.addColorStop(0, 'rgb(240,200,210)'); g.addColorStop(0.5, 'rgb(255,236,240)'); g.addColorStop(1, 'rgb(220,170,190)'); ctx.fillStyle = g; ctx.fillRect(-90, -110, 180, 110); ctx.fillStyle = 'rgb(255,250,250)'; ctx.beginPath(); ctx.ellipse(0, -110, 90, 20, 0, 0, 6.2832); ctx.fill(); ctx.fillStyle = 'rgb(236,90,110)'; for (let k = 0; k < 6; k++) { ctx.beginPath(); ctx.arc(-70 + k * 28, -114, 10, 0, 6.2832); ctx.fill(); }
@@ -72,7 +77,7 @@ function draw(ctx, t) {
   ctx.save(); S.cam(ctx, C, 1);
   ctx.drawImage(HOUSE(), -PAD, -PAD / 2);
   // 日历上的红圈（F03）
-  const ring = easeOut(prog(t, T.mate - 0.2, T.bday)); if (ring > 0) { ctx.strokeStyle = 'rgb(220,50,50)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(530, 470, 24, -1.5, -1.5 + 6.2832 * ring); ctx.stroke(); }
+  const ring = easeOut(prog(t, T.mate - 0.2, T.bday)); if (ring > 0) { ctx.strokeStyle = 'rgb(226,50,60)'; ctx.lineWidth = 9; ctx.lineCap = 'round'; ctx.beginPath(); ctx.ellipse(505, 462, 76, 56, -0.1, -1.5, -1.5 + 6.6 * ring); ctx.stroke(); }
   // 家规板上的那一条亮一下（F02、F07）
   const hl = Math.max(Math.sin(Math.PI * prog(t, T.rule, T.agree)), Math.sin(Math.PI * prog(t, T.strict - 0.2, T.strict + 1.2)));
   if (hl > 0.01) S.add(ctx, () => S.rgrad(ctx, 205, 470 + (t > T.f07 ? 124 : 0), 220, [[0, [255, 220, 140], 0.45 * hl], [1, [255, 220, 140], 0]], 0.3));
@@ -93,11 +98,11 @@ function draw(ctx, t) {
     goggles(ctx, P.head[0] + 6, P.head[1] - 30, 1.1, ia * (1 - smooth(prog(t, T.tired, T.tired + 0.5))));
     // 修好的台灯（F06）：一开始是暗的、坏的，ISTP 一拧就亮
     const fix = smooth(prog(t, T.keep - 0.1, T.keep + 0.5)); ctx.save(); ctx.globalAlpha = ia; ctx.fillStyle = 'rgb(70,70,90)'; ctx.beginPath(); ctx.ellipse(880, GY - 230, 46, 12, 0, 0, 6.2832); ctx.fill(); ctx.strokeStyle = 'rgb(90,90,110)'; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(880, GY - 236); ctx.quadraticCurveTo(860, GY - 340, 910, GY - 390); ctx.stroke(); S.poly(ctx, [[890, GY - 410], [960, GY - 400], [980, GY - 340], [880, GY - 356]], 'rgb(230,170,90)'); ctx.restore();
-    if (fix > 0.01) S.add(ctx, () => { glow(ctx, 930, GY - 350, 420 * fix, WARM, 0.45 * fix * ia); glow(ctx, 930, GY - 360, 60, [255, 246, 220], fix * ia); });
+    if (fix > 0.01) S.add(ctx, () => { glow(ctx, 930, GY - 350, 400 * fix, WARM, 0.28 * fix * ia); glow(ctx, 930, GY - 360, 50, [255, 236, 200], 0.4 * fix * ia); });
     ctx.fillStyle = 'rgb(120,84,64)'; ctx.fillRect(820, GY - 224, 160, 18); ctx.fillStyle = 'rgb(90,60,50)'; ctx.fillRect(840, GY - 206, 14, 200); ctx.fillRect(950, GY - 206, 14, 200); }
   // 伴侣、孩子
   const mA = smooth(prog(t, T.f02 - 0.4, T.f02 + 0.3)) * (1 - smooth(prog(t, T.f04 - 0.4, T.f04)));
-  if (mA > 0.01) { const vote = Math.sin(Math.PI * prog(t, T.agree - 0.2, T.agree + 1.0)), cover = Math.sin(Math.PI * prog(t, T.bday, T.bday + 1.6)); S.lit(ctx, c => MB.person(c, MATE, 640, GY - 20, 2.25, { a: mA, flip: true, bob: 12 * vote, lean: -0.04 * cover, warm: 0.4 * cover }), { light: L0, at: [640, GY - 280], r: 300, warm: [255, 210, 160], cool: [40, 24, 30], k: 0.9 }); if (cover > 0.2) S.add(ctx, () => glow(ctx, 640, GY - 460, 200, [255, 170, 180], 0.4 * cover)); }
+  if (mA > 0.01) { const vote = Math.sin(Math.PI * prog(t, T.agree - 0.2, T.agree + 1.0)), cover = Math.sin(Math.PI * prog(t, T.bday, T.bday + 1.6)); S.lit(ctx, c => MB.person(c, MATE, 640, GY - 20, 2.25, { a: mA, flip: true, bob: 12 * vote, lean: -0.04 * cover, warm: 0.4 * cover }), { light: L0, at: [640, GY - 280], r: 300, warm: [255, 210, 160], cool: [40, 24, 30], k: 0.9 }); if (cover > 0.2) S.add(ctx, () => glow(ctx, 640, GY - 460, 200, [255, 170, 180], 0.18 * cover)); }
   const kidA = smooth(prog(t, T.f02 - 0.2, T.f02 + 0.5)) * (1 - smooth(prog(t, T.f03 + 0.2, T.f03 + 0.8))) + smooth(prog(t, T.f07 - 0.6, T.f07));
   const kidX = t < T.f03 ? 830 : t < T.f08 ? lerp(800, 620, smooth(prog(t, T.strict - 0.6, T.strict))) : 600, face = smooth(prog(t, T.rude - 0.2, T.rude + 0.2)), bowK = Math.sin(Math.PI * prog(t, T.polite - 0.3, T.polite + 0.9)) + Math.sin(Math.PI * prog(t, T.awk + 0.3, T.end - 0.2));
   const KP = kidA > 0.01 ? S.lit(ctx, c => MB.person(c, KID, kidX, GY + (t > T.strict - 0.6 && t < T.f08 ? 140 : 60), 1.65, { a: clamp(kidA), flip: t > T.f08, lean: 0.3 * bowK, bob: 6 * face * Math.abs(Math.sin(t * 9)) }), { light: L0, at: [kidX, GY - 160], r: 220, warm: [255, 210, 160], cool: [40, 24, 30], k: 0.9 }) : null;
@@ -115,13 +120,13 @@ function draw(ctx, t) {
   const o = { t, flip: t < T.f02 ? false : t >= T.f02 && t < T.f03 ? true : false, umbrella: false, book: false, cake: false,
     rs: -1.4 * Math.max(Math.sin(tidy * Math.PI * 6) * 0.5 + 0.5 * (tidy > 0 && tidy < 1 ? 1 : 0), point, carry, serve, give) - 1.5 * blush, re: -0.6 * point - 1.2 * blush,
     eyes: proud > 0.4 ? 'happy' : blush > 0.3 ? 'closed' : cold > 0.4 ? 'wide' : crouch > 0.4 ? 'open' : 'happy', mouth: proud > 0.4 ? 'grin' : blush > 0.3 ? 'flat' : crouch > 0.4 ? 'flat' : cold > 0.3 ? 'o' : 'grin', brow: crouch > 0.4 ? 1 : 0,
-    lean: -0.05 * proud + 0.2 * bow2 + 0.06 * crouch, nod: 0.8 * bow2 + 0.4 * crouch, bob: -18 * crouch, glow: 0.35 * proud + 0.3 * carry, warm: 0.3 * proud };
+    lean: -0.05 * proud + 0.2 * bow2 + 0.06 * crouch, nod: 0.8 * bow2 + 0.4 * crouch, bob: -18 * crouch, glow: 0.12 * proud + 0.12 * carry, warm: 0.3 * proud };
   const R = S.lit(ctx, c => ES.hero(c, hx, GY + 40 * crouch, 1.0 - 0.1 * crouch, o), { light: L0, at: [hx, GY - 300], r: 340, warm: [255, 210, 160], cool: [40, 24, 30], k: 0.9, tint: blush > 0.05 ? [[255, 60, 60], 0.22 * blush] : null });
   // F01：玄关的鞋、外套、书包
   const shoesU = clamp(tidy * 3), coatU = clamp(tidy * 3 - 1), bagU = clamp(tidy * 3 - 2), fa = 1 - smooth(prog(t, T.f02 - 0.4, T.f02 + 0.2));
   if (fa > 0.01) { ctx.save(); ctx.globalAlpha = fa;
-    [0, 1, 2].forEach(k => { const neat = smooth(clamp(shoesU * 3 - k)), x = 700 + k * 110, rot = (1 - neat) * (hash(k) - 0.5) * 1.2; ctx.save(); ctx.translate(x + (1 - neat) * (hash(k * 3) - 0.5) * 80, GY + 30); ctx.rotate(rot); ctx.fillStyle = rgba([[200, 80, 70], [70, 110, 170], [240, 190, 90]][k]); ctx.beginPath(); ctx.roundRect(-50, -34, 100, 38, 14); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fillRect(-50, -6, 100, 8); ctx.restore(); });
-    [0, 1, 2].forEach(k => { const hang = smooth(clamp(coatU * 3 - k)); if (hang <= 0) return; const col = [[200, 80, 70], [70, 110, 170], [240, 190, 90]][k]; ctx.save(); ctx.translate(680 + k * 70, 736 + (1 - hang) * 120); ctx.fillStyle = rgba(col); S.poly(ctx, [[-30, 0], [30, 0], [44, 140], [-44, 140]]); ctx.fill(); ctx.restore(); });
+    [0, 1, 2].forEach(k => { const neat = smooth(clamp(shoesU * 3 - k)), x = 700 + k * 110, rot = (1 - neat) * (hash(k) - 0.5) * 1.2; ctx.save(); ctx.translate(x + (1 - neat) * (hash(k * 3) - 0.5) * 80, GY + 30); ctx.rotate(rot); const sc = [[200, 80, 70], [70, 110, 170], [240, 190, 90]][k]; for (const dx of [-24, 24]) { ctx.save(); ctx.translate(dx, 0); ctx.fillStyle = 'rgb(240,236,226)'; ctx.beginPath(); ctx.roundRect(-30, -8, 62, 12, 6); ctx.fill(); const g = ctx.createLinearGradient(0, -36, 0, -6); g.addColorStop(0, rgba(mix(sc, [255, 255, 255], 0.2))); g.addColorStop(1, rgba(mix(sc, [0, 0, 0], 0.2))); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-30, -6); ctx.lineTo(-24, -34); ctx.quadraticCurveTo(-4, -40, 4, -26); ctx.quadraticCurveTo(24, -20, 32, -6); ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-16, -28); ctx.lineTo(-4, -22); ctx.moveTo(-14, -20); ctx.lineTo(-2, -15); ctx.stroke(); ctx.restore(); } ctx.restore(); });
+    [0, 1, 2].forEach(k => { const hang = smooth(clamp(coatU * 3 - k)); if (hang <= 0) return; const col = [[200, 80, 70], [70, 110, 170], [240, 190, 90]][k]; ctx.save(); ctx.translate(680 + k * 70, 736 + (1 - hang) * 120); ctx.rotate((1 - hang) * 0.3 + Math.sin(t * 2 + k) * 0.02); const g = ctx.createLinearGradient(-40, 0, 40, 0); g.addColorStop(0, rgba(mix(col, [0, 0, 0], 0.3))); g.addColorStop(0.5, rgba(col)); g.addColorStop(1, rgba(mix(col, [0, 0, 0], 0.35))); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(-34, 12); ctx.lineTo(-44, 110); ctx.lineTo(-36, 112); ctx.lineTo(-30, 50); ctx.lineTo(-30, 150); ctx.lineTo(30, 150); ctx.lineTo(30, 50); ctx.lineTo(36, 112); ctx.lineTo(44, 110); ctx.lineTo(34, 12); ctx.lineTo(10, 0); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(0, 40); ctx.lineTo(10, 0); ctx.fill(); ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fillRect(-1, 40, 2, 108); ctx.restore(); });
     [0, 1, 2].forEach(k => { const u = smooth(clamp(bagU * 3 - k)); if (u <= 0) return; ctx.save(); ctx.translate(710 + k * 110, GY - 70); ctx.fillStyle = rgba(mix([[200, 80, 70], [70, 110, 170], [240, 190, 90]][k], [255, 255, 255], 0.2)); ctx.beginPath(); ctx.roundRect(-52, -140, 104, 140, 24); ctx.fill(); ctx.fillStyle = 'rgba(0,0,0,0.15)'; ctx.fillRect(-40, -70, 80, 50); PR.lunchbox(ctx, 0, -126 - (1 - u) * 80, 0.42, { lid: 1, a: 1 - smooth(prog(u, 0.6, 1)) }); ctx.restore(); });
     ctx.restore(); }
   // F03：蛋糕
@@ -133,15 +138,15 @@ function draw(ctx, t) {
     PR.bowl(ctx, 800, GY - 182, 0.62, t, { a: ta, food: [240, 170, 90] }); PR.bowl(ctx, 600, GY - 182, 0.62, t, { a: ta, food: [110, 170, 90], fill: 0.4, hot: 0.3 });
     const leg = easeInOut(prog(t, T.wrong - 0.5, T.wrong + 0.2)); ctx.save(); ctx.globalAlpha = ta; ctx.translate(lerp(600, 800, leg), GY - 250 - Math.sin(leg * Math.PI) * 80); ctx.rotate(0.4); ctx.fillStyle = 'rgb(214,140,70)'; ctx.beginPath(); ctx.ellipse(0, 0, 40, 28, 0, 0, 6.2832); ctx.fill(); ctx.fillStyle = 'rgb(250,240,220)'; ctx.fillRect(30, -6, 34, 12); ctx.restore(); }
   // F08：骄傲的金光点落在肩上 / 冷场：头顶冒蒸汽
-  if (proud > 0.01) S.add(ctx, () => { for (let k = 0; k < 14; k++) { const ph = (t * 0.4 + hash(k * 3.1)) % 1; glow(ctx, R.top[0] - 200 + hash(k * 7.7) * 400, R.top[1] - 260 + ph * 360, 12, [255, 214, 120], proud * Math.sin(Math.PI * ph)); } glow(ctx, R.chest[0], R.chest[1], 300, [255, 210, 130], 0.22 * proud); });
-  if (blush > 0.05) for (let k = 0; k < 3; k++) { const ph = (t * 0.9 + k / 3) % 1; S.rgrad(ctx, R.top[0] + (k - 1) * 40 + Math.sin(ph * 6) * 12, R.top[1] - ph * 160, 30 + ph * 40, [[0, [255, 255, 255], 0.6 * (1 - ph) * blush], [1, [255, 255, 255], 0]]); }
+  if (proud > 0.01) { S.add(ctx, () => glow(ctx, R.chest[0], R.chest[1] - 60, 420, [255, 200, 120], 0.16 * proud)); const p = prog(t, T.polite - 0.1, T.polite + 1.3); if (p > 0 && p < 1) S.ring(ctx, R.chest[0], R.chest[1] - 60, 120 + p * 380, 18, [255, 214, 150], 0.25 * (1 - p)); }
+  if (blush > 0.05) for (let k = 0; k < 3; k++) { const ph = (t * 0.9 + k / 3) % 1; S.rgrad(ctx, R.top[0] + (k - 1) * 40 + Math.sin(ph * 6) * 12, R.top[1] - ph * 160, 30 + ph * 40, [[0, [240, 236, 236], 0.4 * (1 - ph) * blush], [1, [240, 236, 236], 0]]); }
   ctx.restore();
   // 冷场：整个画面冷下去 + 一阵冷风
   if (cold > 0.01) { ctx.fillStyle = `rgba(30,50,90,${0.36 * cold})`; ctx.fillRect(0, 0, W, H); S.petals(ctx, t, { n: 16, seed: 23, dir: [1, 0.1], speed: 700, a: cold * (1 - smooth(prog(t, T.awk, T.awk + 0.6))), c: [200, 220, 255], c2: [240, 250, 255], size: 12, box: [-100, 300, W + 100, 1300] }); }
   return { C };
 }
 function over(ctx, t) {
-  const say = (str, x, y, a0, a1, tx, ty) => { const a = K.vis(t, a0, a1, 0.2, 0.3); if (a > 0.003) PR.say(ctx, str, x, y, { a, tx, ty, size: 48 }); };
+  const say = (str, x, y, a0, a1, tx, ty) => { const a = K.vis(t, a0, a1, 0.01, 0.3); if (a > 0.003) TP.bubble(ctx, str, x, y, { a, p: prog(t, a0, a0 + 0.45), tx, ty, size: 54 }); };
   say('阿姨好！', 640, 860, T.polite - 0.3, T.polite + 1.1, 620, 1000);
   say('对不起对不起……', 360, 700, T.awk + 0.2, T.end - 0.2, 360, 820);
 }

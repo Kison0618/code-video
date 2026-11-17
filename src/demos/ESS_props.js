@@ -137,7 +137,7 @@ function notebook(ctx, x, y, s, o = {}) {
   ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 8; ctx.fillStyle = 'rgb(120,70,60)'; ctx.beginPath(); ctx.roundRect(-176, -124, 352, 248, 12); ctx.fill(); ctx.shadowColor = 'transparent';
   for (const sd of [-1, 1]) { const g = ctx.createLinearGradient(0, 0, sd * 170, 0); g.addColorStop(0, 'rgb(214,204,186)'); g.addColorStop(0.15, 'rgb(252,248,238)'); g.addColorStop(1, 'rgb(240,232,214)'); ctx.fillStyle = g; ctx.fillRect(sd < 0 ? -168 : 0, -116, 168, 232); }
   ctx.fillStyle = 'rgba(110,140,200,0.25)'; for (let k = 0; k < 7; k++) { ctx.fillRect(-160, -84 + k * 28, 150, 2); ctx.fillRect(10, -84 + k * 28, 150, 2); }
-  lines.forEach((ln, i) => { const n = [...ln].length, m = Math.round(n * clamp(write * lines.length - i)); if (m <= 0) return; K.text(ctx, [...ln].slice(0, m).join(''), 20, -60 + i * 56, { size: 34, weight: 600, color: [60, 60, 90], align: 'left' }); });
+  lines.forEach((ln, i) => { const u = clamp(write * lines.length - i); if (u <= 0) return; if (ln[0] === '═') { ctx.strokeStyle = 'rgb(214,70,70)'; ctx.lineWidth = 5; ctx.lineCap = 'round'; for (let k = 0; k < 2; k++) { ctx.beginPath(); ctx.moveTo(14, -48 + i * 60 + k * 12); ctx.lineTo(14 + 150 * clamp(u * 2 - k), -48 + i * 60 + k * 12 + (k ? 2 : -2)); ctx.stroke(); } return; } const n = [...ln].length, m = Math.round(n * u); K.text(ctx, [...ln].slice(0, m).join(''), 14, -56 + i * 60, { size: 40, family: 'ESSans', weight: 700, color: [50, 50, 90], align: 'left' }); });
   ctx.restore();
 }
 module.exports = { steam, contact, mug, bowl, lunchbox, scarf, bag, phone, chat, say, candle, notebook };

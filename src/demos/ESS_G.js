@@ -11,6 +11,8 @@ const S = require('./ESS_kit');
 const PR = require('./ESS_props');
 const QT = require('./ESS_quote');
 const A = require('./ESS_A');
+const TP = require('./ESS_type');
+let HEAD = null; // 她头顶在屏幕上的位置（over 里画「谢谢你」气泡用）
 const { K, L, ES, MB, vs, ve, at } = X;
 const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash, mulberry32 } = K;
 const glow = S.glow;
@@ -25,7 +27,7 @@ function draw(ctx, t) {
   ctx.fillStyle = 'rgb(10,12,28)'; ctx.fillRect(0, 0, W, H);
   // 背景、楼、雨夜的街：直接复用第 0 章的场景（同一个公交站）
   const thanks = smooth(prog(t, T.thank - 0.2, T.thank + 0.8)), city = smooth(prog(t, T.g04 - 0.2, TC));
-  A.scene(ctx, t, C, { ad: 1, city, myWin: 1 });
+  A.scene(ctx, t, C, { ad: lerp(0.25, 1, thanks), city, myWin: 1 });
   ctx.save(); S.cam(ctx, C, 1);
   // 路人（G02）：在他左边淋雨，被他的伞遮住，然后走开没回头
   const tilt = smooth(prog(t, T.give - 0.3, T.give + 0.5)) * (1 - smooth(prog(t, T.g03 + 0.4, T.thank))), pa = K.vis(t, T.g02 - 0.3, T.g02e + 0.4, 0.4, 0.8), pleave = easeIn(prog(t, T.heart - 0.2, T.g02e + 0.4));
@@ -34,22 +36,23 @@ function draw(ctx, t) {
   const gIn = easeOut(prog(t, T.g03 - 0.4, T.g03 + 0.9)), gx = lerp(-200, 360, gIn), giveCup = easeInOut(prog(t, T.thank - 0.8, T.thank - 0.1)), cover = smooth(prog(t, T.g03e - 0.6, T.g03e + 0.3));
   // 他
   const lonely = smooth(prog(t, T.need - 0.3, T.g02)) * (1 - thanks), wet = smooth(prog(t, T.give, T.heart + 0.6)) * (1 - thanks);
-  const o = { t, flip: true, warm: 0.0, umbrella: t < T.g03e - 0.6, um: 0.9 * tilt, cake: false, book: false, rs: -1.3 * giveCup * 0 - 1.1 * thanks, re: -0.4 * thanks, eyes: thanks > 0.5 ? 'happy' : lonely > 0.4 ? 'closed' : 'open', mouth: thanks > 0.4 ? 'grin' : 'flat', nod: 0.5 * lonely + 0.2 * wet, gray: 0.35 * wet + 0.25 * lonely, glow: 0.25 * thanks, look: [0, 1.2 * wet] };
+  const o = { t, flip: true, warm: 0.0, umbrella: false, cake: false, book: false, rs: -2.4 * tilt - 1.1 * thanks, re: -0.6 * tilt - 0.4 * thanks, eyes: thanks > 0.5 ? 'happy' : lonely > 0.4 ? 'closed' : 'open', mouth: thanks > 0.4 ? 'grin' : 'flat', nod: 0.5 * lonely + 0.2 * wet, gray: 0.35 * wet + 0.25 * lonely, glow: 0.25 * thanks, look: [0, 1.2 * wet] };
   const R = S.lit(ctx, c => ES.hero(c, 700, GY, 1.06, o), { light: thanks > 0.3 ? [420, 900] : LAMP, at: [700, GY - 300], r: 340, warm: thanks > 0.3 ? [240, 190, 140] : [226, 232, 255], cool: [14, 16, 44], k: 0.95, tint: thanks > 0.05 ? [[150, 90, 60], 0.12 * thanks] : null });
   // 他手上提满的东西（G01）
   const bags = 1 - smooth(prog(t, T.g03 + 0.4, T.thank - 0.6));
   if (bags > 0.01) { PR.bag(ctx, 830, GY - 30, 0.6, { a: bags }); PR.lunchbox(ctx, 590, GY - 20, 0.6, { lid: 1, a: bags }); }
   // 湿掉的肩膀：雨点打在他身上（G02）
-  if (wet > 0.01) S.add(ctx, () => { for (let k = 0; k < 10; k++) { const ph = (t * 2.4 + hash(k * 2.9)) % 1; glow(ctx, R.top[0] - 80 + hash(k * 8.3 + Math.floor(t * 2.4 + hash(k * 2.9))) * 160, R.top[1] + 40 + hash(k * 1.7) * 300 - ph * 20, 16 * (1 - ph) + 5, [220, 232, 255], 0.8 * (1 - ph) * wet); } });
+  if (wet > 0.01) { ctx.save(); ctx.strokeStyle = `rgba(200,214,255,${0.45 * wet})`; ctx.lineWidth = 3; ctx.lineCap = 'round'; for (let k = 0; k < 8; k++) { const ph = (t * 1.6 + hash(k * 2.9)) % 1, x = R.top[0] - 90 + hash(k * 8.3) * 180, y = R.top[1] + 80 + hash(k * 1.7) * 260 + ph * 60; ctx.globalAlpha = Math.sin(ph * Math.PI); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 2, y + 22); ctx.stroke(); } ctx.restore(); }
   if (gIn > 0.01) { const GP = S.lit(ctx, c => MB.person(c, 'isfp-female', gx, GY, 2.5, { warm: 0.4, bob: Math.abs(Math.sin(gIn * Math.PI * 4)) * 8 * (gIn < 1 ? 1 : 0) }), { light: LAMP, at: [gx, GY - 300], r: 340, warm: [255, 214, 160], cool: [20, 20, 50], k: 0.95 });
     // 她的伞：先撑在自己头上 → 举到他头顶
-    const ux = lerp(gx + 40, 620, cover), uy = lerp(GY - 640, GY - 700, cover); ctx.save(); ctx.translate(ux, uy); ctx.rotate(lerp(0, -0.25, cover)); const g = ctx.createLinearGradient(-240, 0, 240, 0); g.addColorStop(0, 'rgb(150,40,50)'); g.addColorStop(0.5, 'rgb(230,90,90)'); g.addColorStop(1, 'rgb(140,40,50)'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-250, 60); ctx.quadraticCurveTo(-200, -110, 0, -130); ctx.quadraticCurveTo(200, -110, 250, 60); for (let k = 5; k >= 0; k--) ctx.quadraticCurveTo(-250 + (k + 0.5) * 83, 30, -250 + k * 83, 60); ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgb(80,30,40)'; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(0, -130); ctx.lineTo(0, 240); ctx.stroke(); ctx.restore();
+    const ux = lerp(gx + 40, 560, cover), uy = lerp(GY - 640, GY - 700, cover); A.neckScarf(ctx, GP.head[0] + 4, GP.head[1] + 195, 1.15, t, 1); // 第 4 章他送她的那条红围巾，她一直戴着
+    A.umbrella(ctx, ux, uy, 1.0, lerp(0, -0.18, cover), [214, 70, 76]);
+    { const m = ctx.getTransform(), hx0 = GP.head[0], hy0 = GP.head[1]; HEAD = [m.a * hx0 + m.c * hy0 + m.e, m.b * hx0 + m.d * hy0 + m.f]; }
     // 杯子 + 便签
     const cx = lerp(GP.chest[0] + 90, R.hand[0] - 10, giveCup), cy = lerp(GP.chest[1] + 40, R.hand[1] + 30, giveCup); PR.mug(ctx, cx, cy, 0.68, t, { c: [240, 130, 96], hot: 1 - 0.7 * giveCup });
-    ctx.save(); ctx.translate(cx + 30, cy - 70); ctx.rotate(0.12); ctx.fillStyle = 'rgb(255,236,140)'; ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 8; ctx.fillRect(-56, -40, 112, 80); ctx.shadowColor = 'transparent'; K.text(ctx, '谢谢你', 0, 12, { size: 32, weight: 700, color: [160, 70, 50] }); ctx.restore();
-    if (thanks > 0.01) S.add(ctx, () => { glow(ctx, 540, GY - 500, 900, [255, 190, 120], 0.12 * thanks); }); }
+    if (thanks > 0.01) S.add(ctx, () => { glow(ctx, 600, GY - 420, 760, [255, 180, 110], 0.1 * thanks); }); }
   // 心跳一下（G03 接过杯子那一刻）
-  { const p = prog(t, T.thank + 0.2, T.thank + 1.8); if (p > 0 && p < 1) S.ring(ctx, R.chest[0], R.chest[1], 160 + p * 560, 30, [255, 214, 150], 0.3 * (1 - p)); }
+  { const p = prog(t, T.thank + 0.2, T.thank + 1.8); if (p > 0 && p < 1) S.ring(ctx, R.chest[0], R.chest[1], 160 + p * 560, 24, [255, 200, 140], 0.2 * (1 - p)); }
   ctx.restore();
   S.rain(ctx, t, { a: 0.85 * (1 - 0.3 * city), n: 110 });
   // 片尾暗下来
@@ -93,6 +96,8 @@ function gatherLite(ctx, Q, Ln, t) {
 }
 function over(ctx, t) {
   QT.draw(ctx, t);
+  // G03：她亲口说「谢谢你」（不是一张便签）
+  if (HEAD && t > T.thank - 0.6 && t < T.g04) { const a = K.vis(t, T.thank - 0.5, T.g04 - 0.3, 0.01, 0.4); TP.bubble(ctx, '谢谢你', clamp(HEAD[0] + 40, 200, 880), HEAD[1] - 420, { a, p: prog(t, T.thank - 0.5, T.thank), tx: HEAD[0] + 10, ty: HEAD[1] - 260, size: 64, c: [255, 246, 232], ink: [170, 60, 50] }); }
   for (const Ln of LINES) { const real = smooth(prog(t, Ln.t0 + 1.35, Ln.t0 + 1.9)); if (real > 0.003) L.rich(ctx, Ln.str, W / 2, Ln.y, { size: Ln.size, weight: Ln.weight, spacing: Ln.spacing, color: [255, 246, 228], keys: [Ln.str], keyColor: Ln.col, alpha: real, glowKey: 0.55 }); }
 }
 module.exports = { draw, over, T, END };

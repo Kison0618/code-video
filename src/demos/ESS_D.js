@@ -11,6 +11,9 @@ const S = require('./ESS_kit');
 const PR = require('./ESS_props');
 const SET = require('./ESS_set');
 const QT = require('./ESS_quote');
+const TP = require('./ESS_type');
+const CT = require('./ESS_city');
+const DSKY = S.lazy(() => CT.skyline({ w: 900, h: 700, seed: 21, sky: [[14, 18, 44], [44, 40, 86]], fog: [70, 60, 110], base: [30, 26, 56], lit: 0.04, ground: 640, blurK: 1.6 }));
 const { K, ES, MB, vs, ve, at } = X;
 const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash, mulberry32 } = K;
 const glow = S.glow;
@@ -21,8 +24,8 @@ const PAD = SET.PAD, FY = 1040, GY = 1290, LAMP = [540, 560];
 const ROOM = S.lazy(() => S.bake(W + PAD * 2, H + PAD, c => {
   c.translate(PAD, PAD / 2);
   SET.walls(c, { FY, wall: [110, 76, 80], wall2: [44, 30, 44], floor: [100, 66, 60], floor2: [30, 20, 28] });
-  SET.window(c, 700, 260, 340, 480, { sky: (c2, x, y, w, h) => { S.vgrad(c2, [[0, [14, 18, 44]], [1, [40, 44, 90]]], y, y + h, x, x + w); const r = mulberry32(4); S.add(c2, () => { for (let k = 0; k < 12; k++) glow(c2, x + r() * w, y + h * 0.55 + r() * h * 0.4, 14, [255, 200, 140], 0.5); }); }, curtain: [150, 80, 90] });
-  SET.shelf(c, 40, 520, 440, 7, { jars: true }); SET.frame(c, 120, 300, 150, 170, 0); SET.frame(c, 320, 330, 120, 140, 2);
+  SET.window(c, 700, 260, 340, 480, { sky: (c2, x, y, w, h) => { S.vgrad(c2, [[0, [14, 18, 44]], [1, [40, 44, 90]]], y, y + h, x, x + w); c2.drawImage(DSKY(), x - 260, y + h * 0.2, 900, 700 * (h * 0.85) / 700); }, curtain: [150, 80, 90] });
+  SET.shelf(c, 40, 520, 440, 7); SET.frame(c, 120, 300, 150, 170, 0); SET.frame(c, 320, 330, 120, 140, 2);
 }));
 const TB = 1150;
 function table(ctx) {
@@ -64,36 +67,50 @@ function draw(ctx, t) {
   // 筷子尖上的菜（D01）
   if (taste1 > 0.05 || taste2 > 0.05) { const a = Math.max(taste1, taste2); ctx.strokeStyle = 'rgb(160,110,70)'; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(R.hand[0], R.hand[1]); ctx.lineTo(R.mouth[0] + 10, R.mouth[1] + 20); ctx.stroke(); ctx.fillStyle = taste1 > taste2 ? 'rgb(240,170,90)' : 'rgb(110,150,80)'; ctx.beginPath(); ctx.arc(R.mouth[0] + 14, R.mouth[1] + 22, 12 * a, 0, 6.2832); ctx.fill(); }
   // 尝到喜欢的：脸边一圈暖光；讨厌的：头上一小朵冷云
-  if (face === 'love') S.add(ctx, () => glow(ctx, R.head[0], R.head[1], 320, [255, 200, 120], 0.4 * taste1));
+  if (face === 'love') S.add(ctx, () => glow(ctx, R.head[0], R.head[1], 300, [255, 190, 110], 0.2 * taste1));
   table(ctx);
   // 桌上：两碟菜、蜡烛、他的本子、手机、杯子
   const dA = 1 - smooth(prog(t, T.d02 + 2.4, T.d03));
   dish(ctx, 380, TB - 30, 0.9, [240, 170, 90], dA); dish(ctx, 720, TB - 30, 0.9, [110, 150, 80], dA);
   PR.candle(ctx, 880, TB - 30, 0.9, t, { len: lerp(1, 0.25, smooth(prog(t, T.d03, T.d04))) });
-  if (writeU > 0 && t < T.d03 - 0.2) PR.notebook(ctx, 420, TB - 80, 0.8, { rot: -0.08, lines: ['汤：少放盐', '══════'], write: clamp(writeU * 1.3), a: 1 - smooth(prog(t, T.d03 - 0.9, T.d03 - 0.3)) });
+  if (writeU > 0 && t < T.d03 - 0.2) PR.notebook(ctx, 430, TB - 90, 1.0, { rot: -0.08, lines: ['汤：少放盐', '══════'], write: clamp(writeU * 1.3), a: 1 - smooth(prog(t, T.d03 - 0.9, T.d03 - 0.3)) });
   // 手机：D04 亮起「我需要你」；D05 群里点赞；D06 没人回
   const ph = t > T.d03e + 0.3;
   if (ph) { const lit = smooth(prog(t, T.need - 0.4, T.need)), big = phoneLook;
-    const px = lerp(640, R.hand[0] + 80, big), py = lerp(TB - 36, R.hand[1] - 200, big), s = lerp(0.42, 1.3, big), rot = lerp(-1.45, -0.1, big);
-    if (lit > 0.01 && big < 0.5) S.add(ctx, () => { glow(ctx, px, py, 520 * lit, [255, 210, 150], 0.5 * lit * (1 - big)); });
-    PR.phone(ctx, px, py, s, { rot, on: lit, draw: (c, w, h) => {
-      if (t < T.d05 - 0.3) { PR.chat(c, '我需要你', 16, h * 0.45, { size: 34, c: [255, 255, 255] }); return; }
-      S.vgrad(c, [[0, [236, 240, 246]], [1, [214, 220, 230]]], 0, h, 0, w);
-      c.fillStyle = 'rgb(250,236,210)'; c.fillRect(14, 30, w - 28, 160); MB.person(c, 'enfp-female', 60, 180, 0.42, { shadow: 0 }); MB.person(c, 'entp-male', 120, 180, 0.42, { shadow: 0 }); ES.hero(c, 150, 186, 0.26, { umbrella: false, cake: false, book: false });
-      const likes = Math.min(4, Math.floor(Math.max(0, t - T.d05 - 0.3) / 0.7)) * (t < T.cold ? 1 : 0);
-      for (let k = 0; k < likes; k++) { c.fillStyle = 'rgb(240,90,110)'; const hx2 = 30 + k * 34, hy2 = 214; c.beginPath(); c.moveTo(hx2, hy2 + 10); c.bezierCurveTo(hx2 - 16, hy2, hx2 - 10, hy2 - 12, hx2, hy2 - 4); c.bezierCurveTo(hx2 + 10, hy2 - 12, hx2 + 16, hy2, hx2, hy2 + 10); c.fill(); }
-      if (t > T.cold - 0.6) { PR.chat(c, '大家都到家了吗？', w - 12, 290, { size: 22, c: [150, 220, 140], right: true, a: smooth(prog(t, T.cold - 0.6, T.cold - 0.3)) }); K.text(c, '无人回复', w / 2, 340, { size: 22, color: [140, 146, 160], alpha: smooth(prog(t, T.cold, T.cold + 0.6)) }); }
+    const px = lerp(640, R.hand[0] + 90, big), py = lerp(TB - 36, R.hand[1] - 220, big), s = lerp(0.38, 1.15, big), rot = lerp(-1.45, -0.1, big);
+    if (lit > 0.01 && big < 0.5) S.add(ctx, () => { glow(ctx, px, py, 460 * lit, [255, 200, 140], 0.26 * lit * (1 - big)); });
+    PR.phone(ctx, px, py, s, { rot, on: lit, w: 230, h: 450, draw: (c, w, h) => {
+      if (t < T.d05 - 0.3) { S.vgrad(c, [[0, [40, 30, 50]], [1, [20, 16, 30]]], 0, h, 0, w); c.fillStyle = 'rgba(255,255,255,0.12)'; c.beginPath(); c.roundRect(8, h * 0.3, w - 16, 96, 18); c.fill(); K.text(c, '小美', 24, h * 0.3 + 34, { size: 24, family: 'ESSans', weight: 700, color: [255, 214, 150], align: 'left' }); K.text(c, '我需要你', 24, h * 0.3 + 76, { size: 34, family: 'ESSans', weight: 900, color: [255, 255, 255], align: 'left' }); return; }
+      S.vgrad(c, [[0, [250, 246, 240]], [1, [236, 230, 222]]], 0, h, 0, w);
+      // 下拉刷新：他刷了又刷（顶上一圈转动的弧）
+      const refresh = [0, 1, 2].map(k => prog(t, T.d05 + 1.2 + k * 0.9, T.d05 + 1.7 + k * 0.9)).find(u => u > 0 && u < 1), dy = refresh ? Math.sin(refresh * Math.PI) * 40 : 0;
+      if (refresh) { c.strokeStyle = 'rgb(240,140,90)'; c.lineWidth = 5; c.lineCap = 'round'; c.beginPath(); c.arc(w / 2, 22, 12, refresh * 12, refresh * 12 + 4.4); c.stroke(); }
+      c.save(); c.translate(0, dy);
+      c.fillStyle = 'rgb(240,140,90)'; c.beginPath(); c.arc(30, 30, 16, 0, 6.2832); c.fill(); K.text(c, '我', 30, 39, { size: 22, family: 'ESSans', weight: 900, color: [255, 255, 255] }); K.text(c, '今晚的饭局', 56, 40, { size: 24, family: 'ESSans', weight: 700, color: [60, 50, 50], align: 'left' });
+      const pg = c.createLinearGradient(0, 56, 0, 230); pg.addColorStop(0, 'rgb(255,214,160)'); pg.addColorStop(1, 'rgb(220,130,100)'); c.fillStyle = pg; c.beginPath(); c.roundRect(10, 56, w - 20, 176, 12); c.fill();
+      c.save(); c.beginPath(); c.roundRect(10, 56, w - 20, 176, 12); c.clip(); MB.person(c, 'enfp-female', w * 0.25, 236, 0.62, { shadow: 0 }); MB.person(c, 'entp-male', w * 0.75, 236, 0.62, { shadow: 0 }); ES.hero(c, w * 0.52, 240, 0.34, { umbrella: false, cake: false, book: false, eyes: 'happy', mouth: 'grin' }); c.restore();
+      const likes = Math.min(4, Math.floor(Math.max(0, t - T.d05 - 0.3) / 0.8)) * (t < T.cold ? 1 : 0);
+      for (let k = 0; k < 4; k++) { const pop = k < likes ? TP.back(prog(t, T.d05 + 0.3 + k * 0.8, T.d05 + 0.7 + k * 0.8)) : 0; const hx2 = 34 + k * 40, hy2 = 262; c.save(); c.translate(hx2, hy2); c.scale(Math.max(0.001, pop), Math.max(0.001, pop)); c.fillStyle = k < likes ? 'rgb(240,80,100)' : 'rgba(0,0,0,0)'; c.beginPath(); c.moveTo(0, 12); c.bezierCurveTo(-20, 0, -12, -15, 0, -5); c.bezierCurveTo(12, -15, 20, 0, 0, 12); c.fill(); c.restore(); }
+      if (t < T.cold) K.text(c, likes + ' 个赞', 18, 318, { size: 30, family: 'ESSans', weight: 900, color: [200, 70, 80], align: 'left' });
+      if (t > T.cold - 0.6) { const ca = smooth(prog(t, T.cold - 0.6, T.cold - 0.3)); c.fillStyle = rgba([255, 255, 255], ca); c.fillRect(0, 290, w, h - 290); c.fillStyle = rgba([150, 220, 140], ca); c.beginPath(); c.roundRect(w - 200, 306, 190, 56, 22); c.fill(); K.text(c, '都到家了吗？', w - 105, 344, { size: 28, family: 'ESSans', weight: 700, color: [30, 60, 30], alpha: ca }); K.text(c, '— 无人回复 —', w / 2, 410, { size: 26, family: 'ESSans', weight: 500, color: [150, 150, 160], alpha: smooth(prog(t, T.cold, T.cold + 0.6)) }); }
+      c.restore();
     } }); }
   // D04：心跳光晕慢慢散开
-  { const p = prog(t, T.up - 0.1, T.d04e + 1.2); if (p > 0 && p < 1) for (let k = 0; k < 2; k++) { const u = clamp(p * 1.6 - k * 0.4); if (u > 0 && u < 1) S.ring(ctx, R.chest[0], R.chest[1], 60 + u * 520, 34, [255, 214, 150], 0.4 * (1 - u)); } }
+  { const p = prog(t, T.up - 0.1, T.d04e + 1.2); if (p > 0 && p < 1) for (let k = 0; k < 2; k++) { const u = clamp(p * 1.6 - k * 0.4); if (u > 0 && u < 1) S.ring(ctx, R.chest[0], R.chest[1], 60 + u * 520, 30, [255, 200, 140], 0.2 * (1 - u)); } }
   // D06：杯子被碰倒（朋友回来时）
-  const cupU = prog(t, T.err - 0.2, T.err + 0.6); if (comeBack > 0.01) { const fall = easeIn(clamp(cupU * 1.6)); ctx.save(); ctx.translate(820, TB - 40); ctx.rotate(fall * 1.5); ctx.globalAlpha = comeBack; PR.mug(ctx, 0, 0, 0.6, t, { c: [130, 180, 230], hot: 0 }); ctx.restore(); if (cupU > 0.6) S.add(ctx, () => { for (let k = 0; k < 8; k++) S.rgrad(ctx, 820 + k * 24, TB - 30 + (k % 2) * 6, 40, [[0, [200, 220, 255], 0.4 * comeBack], [1, [200, 220, 255], 0]], 0.3); }); }
+  const cupU = prog(t, T.err - 0.2, T.err + 0.6); if (comeBack > 0.01) { const fall = easeIn(clamp(cupU * 1.6)); ctx.save(); ctx.translate(820, TB - 40); ctx.rotate(fall * 1.5); ctx.globalAlpha = comeBack; PR.mug(ctx, 0, 0, 0.6, t, { c: [130, 180, 230], hot: 0 }); ctx.restore(); if (cupU > 0.6) { ctx.save(); ctx.globalAlpha = comeBack * smooth(prog(cupU, 0.6, 1)); ctx.fillStyle = 'rgba(150,190,230,0.55)'; ctx.beginPath(); ctx.ellipse(900, TB - 26, 110 * smooth(prog(cupU, 0.6, 1)), 14, 0, 0, 6.2832); ctx.fill(); ctx.restore(); } }
   ctx.restore();
   return { C };
 }
 function over(ctx, t) {
-  QT.draw(ctx, t);
-  const say = (str, x, y, a0, a1, tx, ty, o = {}) => { const a = K.vis(t, a0, a1, 0.2, 0.3); if (a > 0.003) PR.say(ctx, str, x, y, { a, tx, ty, size: 48, ...o }); };
+  QT.draw(ctx, t, { y: 1090 });
+  // D04「我需要你」：手机消息的特写插入（画面上方，暖光托着，弹出来）
+  { const a = K.vis(t, T.need - 0.45, T.up + 0.2, 0.01, 0.35), p = prog(t, T.need - 0.45, T.need + 0.1); if (a > 0.003) { const sc = TP.back(p); ctx.save(); ctx.globalAlpha = a; S.add(ctx, () => glow(ctx, 540, 560, 520, [255, 190, 120], 0.3 * smooth(p))); ctx.translate(540, 560); ctx.rotate(-0.05); ctx.scale(sc, sc);
+    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 16; ctx.fillStyle = 'rgb(28,26,36)'; ctx.beginPath(); ctx.roundRect(-300, -150, 600, 300, 44); ctx.fill(); ctx.shadowColor = 'transparent';
+    ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.beginPath(); ctx.roundRect(-284, -134, 568, 268, 32); ctx.fill(); ctx.fillStyle = 'rgb(240,140,90)'; ctx.beginPath(); ctx.arc(-206, -50, 40, 0, 6.2832); ctx.fill(); K.text(ctx, '美', -206, -36, { size: 40, family: 'ESSans', weight: 900, color: [255, 255, 255] });
+    K.text(ctx, '小美', -146, -60, { size: 36, family: 'ESSans', weight: 700, color: [255, 214, 150], align: 'left' }); K.text(ctx, '刚刚', 260, -60, { size: 28, family: 'ESSans', weight: 500, color: [170, 170, 190], align: 'right' });
+    ctx.restore(); TP.foil(ctx, '我需要你', 540 + 40, 620, { size: 84, family: 'ESSans', weight: 900, spacing: 0.06, p: prog(t, T.need - 0.2, T.need + 0.4), sweep: prog(t, T.need + 0.4, T.need + 1.3), a, top: [255, 255, 255], bot: [255, 214, 160], glowA: 0.35, shadow: 0 }); } }
+  const say = (str, x, y, a0, a1, tx, ty, o = {}) => { const a = K.vis(t, a0, a1, 0.01, 0.3); if (a > 0.003) TP.bubble(ctx, str, x, y, { a, p: prog(t, a0, a0 + 0.45), tx, ty, size: 54, ...o }); };
   say('汤有点咸。', 330, 620, T.d02 - 0.1, T.d02 + 1.4, 240, 780);
   say('都怪我没放好！', 430, 640, T.self - 0.4, T.end - 0.3, 560, 820);
 }
