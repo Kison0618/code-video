@@ -1,159 +1,230 @@
 'use strict';
-// ESFJ v9 第 0 章「雨夜公交站」：A01–A04
-//   场景：深夜下雨的公交站。玻璃候车亭（冷白顶灯）+ 右侧路灯（钠灯暖黄，主光源）+ 街对面被雨打虚的楼和店招；湿路面倒映灯光；前景雨帘、虚化的伞骨
-//   A01 一个女孩缩着肩在等车，冻得发抖、呵着白气（镜头贴着她）。他撑伞从右边走进来，停一拍，说到「热水」时把一杯冒热气的杯子递到她手边，她身上的冷色一点点退掉
-//   A02 镜头往后退、抬高：候车亭侧面的灯箱广告慢慢亮起来，是他自己的海报「ESFJ 供给者」
-//   A03 男妈妈：他还没完 —— 又把自己的围巾绕到她脖子上，再从袋子里掏出一个便当盒塞给她；她被裹成一团，笑了。网友原话上屏
-//   A04 车灯从左边扫进来，她上车；镜头升起来越过候车亭顶，他撑着伞往街对面那栋亮着暖灯的楼走，最后推进其中一扇窗（→ 下一章他的厨房）
+// ESFJ v9 第 0 章「雨夜公交站」：A01–A04（2026-11-17 重做）
+//   开场：镜头从雨夜的城市上空往下摇（长焦的远景天际线 → 街对面的住宅楼 → 公交站），停在一个冻得缩着肩的女孩身上
+//   A01 他撑着伞、挎着帆布包走进来，手里一直捧着一只冒热气的杯子；说到「热水」时把杯子沿一道弧线递到她手里，她身上的冷色一点点退掉
+//   A02 镜头横移到候车亭的灯箱：灯箱从下往上一格格亮起（暖色海报，不是白光），画面上方金箔大字「ESFJ / 供给者」逐字升起、扫光
+//   A03 男妈妈：他把手伸进帆布包 —— 先抽出一条红围巾，在空中甩开、绕到她脖子上；再捧出便当盒，沿弧线放进她怀里。（反馈 1：东西不再凭空叠上去）
+//   A04 她要走了：他把自己的伞递给她，自己站进雨里；她撑着他的伞往左走出画面。镜头升起来越过候车亭顶，街对面那栋楼他家的窗亮起，推进去（→ 下一章厨房）
+//   去掉了：公交车灯的大白光团（反馈 2：13s 左侧光斑）、灯箱过曝的白、对面楼满墙的小方窗（反馈 7）
 const X = require('./ehk');
 const S = require('./ESS_kit');
 const PR = require('./ESS_props');
 const QT = require('./ESS_quote');
+const TY = require('./ESS_type');
+const CT = require('./ESS_city');
 const { K, ES, MB, vs, ve, at } = X;
-const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash, mulberry32 } = K;
+const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash } = K;
 const glow = S.glow;
 
-const T = { a01: vs('A01'), hot: at('A01', '热水'), a02: vs('A02'), a03: vs('A03'), a03e: ve('A03'), a04: vs('A04'), end: vs('B01') };
-const GY = 1250, HER = [470, GY], HIM = [820, GY], LAMP = [980, 300], SODIUM = [255, 186, 110], COOL = [200, 226, 255];
+const T = { a01: vs('A01'), hot: at('A01', '热水'), a02: vs('A02'), a03: vs('A03'), mm: at('A03', '男妈妈'), a03e: ve('A03'), a04: vs('A04'), a04e: ve('A04'), end: vs('B01') };
+const GY = 1250, HERX = 340, HIMX = 800, LAMP = [1010, 330], SODIUM = [255, 186, 110], COOL = [190, 214, 255];
+// 动作时间
+const M = {
+  walk: [T.a01 + 0.1, T.hot - 0.5], give: [T.hot - 0.4, T.hot + 0.5],
+  scIn: [T.a03 - 0.05, T.a03 + 0.45], scFly: [T.a03 + 0.45, T.a03 + 1.25],
+  lbIn: [T.a03 + 1.3, T.a03 + 1.75], lbFly: [T.a03 + 1.75, T.a03e + 0.35],
+  umb: [T.a04 + 0.1, T.a04 + 0.9], leave: [T.a04 + 1.0, T.a04 + 3.2],
+};
 const CAM = [
-  [0, { x: 30, y: -230, z: 2.1, ax: 540, ay: 1000 }], [T.hot - 0.9, { x: 60, y: -210, z: 1.9 }], [T.hot + 0.7, { x: 110, y: -140, z: 1.45 }],
-  [T.a02 + 0.2, { x: 100, y: -130, z: 1.4 }], [T.a02 + 1.7, { x: -40, y: -40, z: 1.0 }], [T.a03 - 0.1, { x: -30, y: -50, z: 1.04 }], [T.a03e + 1.2, { x: 80, y: -130, z: 1.34 }], [T.a04 - 0.3, { x: 80, y: -130, z: 1.36 }], [T.a04 + 1.0, { x: 40, y: -60, z: 1.08 }],
+  [0, { x: 60, y: -1150, z: 0.92, ax: 540, ay: 1000 }], [T.a01 + 2.0, { x: 60, y: -180, z: 1.3 }, easeInOut], [T.hot + 0.8, { x: 40, y: -170, z: 1.36 }],
+  [T.a02 + 0.2, { x: 10, y: -170, z: 1.34 }], [T.a02 + 1.6, { x: -250, y: -170, z: 1.28 }], [T.a03 - 0.2, { x: -220, y: -170, z: 1.3 }],
+  [T.a03 + 0.6, { x: 60, y: -170, z: 1.3 }], [T.a03e + 0.6, { x: 50, y: -170, z: 1.36 }], [T.a04 - 0.2, { x: 50, y: -170, z: 1.38 }],
+  [T.a04 + 1.4, { x: 0, y: -120, z: 1.18 }], [T.a04e + 0.3, { x: 0, y: -170, z: 1.1 }], [T.end - 1.7, { x: 0, y: -1030, z: 0.98 }],
 ];
-// ---------- 预渲：街对面（雨夜、楼、店招，被雨打虚） ----------
-const PAD = 300;
-const FAR = S.lazy(() => S.bake(W + PAD * 2, 1400, c => {
-  c.translate(PAD, 0); const r = mulberry32(5);
-  S.vgrad(c, [[0, [10, 12, 28]], [0.5, [26, 26, 56]], [1, [60, 44, 70]]], 0, 1400, -PAD, W + PAD);
-  for (let L = 0; L < 2; L++) for (let i = 0; i < 12; i++) {
-    const w = 160 + r() * 140, x = -PAD + i * 150 + r() * 40 - L * 70, h = (L ? 700 : 1000) + r() * 300, top = 1300 - h, col = L ? [24, 24, 52] : [40, 34, 70];
-    const g = c.createLinearGradient(0, top, 0, 1300); g.addColorStop(0, rgba(col)); g.addColorStop(1, rgba(mix(col, [110, 70, 90], 0.4))); c.fillStyle = g; c.fillRect(x, top, w, h);
-    S.add(c, () => { for (let yy = top + 30; yy < 1180; yy += 56) for (let xx = x + 16; xx < x + w - 30; xx += 44) if (r() < (L ? 0.2 : 0.12)) { const wc = r() < 0.8 ? [255, 196, 120] : [170, 210, 255]; c.fillStyle = rgba(wc, 0.5 + r() * 0.4); c.fillRect(xx, yy, 24, 32); glow(c, xx + 12, yy + 16, 50, wc, 0.25); } });
-  }
-  // 一楼的店：暖色招牌和橱窗
-  for (let i = 0; i < 5; i++) { const x = -PAD + 60 + i * 340, col = [[255, 120, 110], [255, 200, 110], [120, 220, 200], [255, 160, 210], [150, 190, 255]][i]; c.fillStyle = 'rgb(255,214,160)'; c.fillRect(x, 1120, 230, 170); S.add(c, () => { glow(c, x + 115, 1200, 240, [255, 190, 120], 0.45); glow(c, x + 115, 1090, 160, col, 0.6); }); c.fillStyle = rgba(col); c.fillRect(x + 20, 1070, 190, 40); }
-  c.filter = 'blur(16px)'; c.drawImage(c.canvas, 0, 0); c.filter = 'none';
-}));
-const RAINFG = mulberry32(9);
-// 候车亭：顶棚 + 玻璃 + 长凳 + 灯箱（灯箱内容 lit 时亮）
-function shelter(ctx, t, ad) {
-  // 后玻璃（透出街景，雨水往下流）
-  ctx.save(); ctx.fillStyle = 'rgba(160,190,230,0.10)'; ctx.fillRect(40, 520, 900, 690);
-  S.add(ctx, () => { for (let i = 0; i < 30; i++) { const ph = (t * (0.06 + hash(i) * 0.1) + hash(i * 3)) % 1, x = 50 + hash(i * 7) * 880, y = 520 + ph * 700; const g = ctx.createLinearGradient(0, y - 60, 0, y); g.addColorStop(0, 'rgba(220,230,255,0)'); g.addColorStop(1, 'rgba(220,230,255,0.35)'); ctx.fillStyle = g; ctx.fillRect(x - 2, y - 60, 4, 60); glow(ctx, x, y, 7, [230, 240, 255], 0.8); } });
-  ctx.restore();
-  // 立柱、顶棚
-  const steel = (x, y, w, h) => { const g = ctx.createLinearGradient(x, 0, x + w, 0); g.addColorStop(0, 'rgb(40,46,60)'); g.addColorStop(0.5, 'rgb(130,140,160)'); g.addColorStop(1, 'rgb(30,34,48)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); };
-  steel(30, 470, 24, 780); steel(930, 470, 24, 780);
-  ctx.fillStyle = 'rgb(34,38,52)'; ctx.beginPath(); ctx.moveTo(-60, 470); ctx.lineTo(1040, 470); ctx.lineTo(1080, 430); ctx.lineTo(-100, 430); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = 'rgba(200,220,255,0.5)'; ctx.fillRect(-60, 466, 1100, 4);
-  // 顶灯（冷白）
-  ctx.fillStyle = 'rgb(236,244,255)'; ctx.fillRect(200, 472, 560, 12); S.add(ctx, () => { glow(ctx, 480, 490, 620, COOL, 0.22); });
-  // 长凳
-  ctx.fillStyle = 'rgb(60,50,50)'; ctx.fillRect(400, 1060, 480, 26); ctx.fillStyle = 'rgb(90,70,60)'; ctx.fillRect(390, 1040, 500, 24); ctx.fillStyle = 'rgb(40,40,52)'; ctx.fillRect(430, 1086, 16, 160); ctx.fillRect(830, 1086, 16, 160);
-  // 灯箱：右侧
-  const bx = 60, by = 560, bw = 300, bh = 560;
-  ctx.fillStyle = 'rgb(30,32,44)'; ctx.fillRect(bx - 14, by - 14, bw + 28, bh + 28);
-  const g = ctx.createLinearGradient(0, by, 0, by + bh); g.addColorStop(0, rgba(mix([30, 34, 50], [255, 230, 190], ad))); g.addColorStop(1, rgba(mix([24, 26, 40], [255, 180, 120], ad))); ctx.fillStyle = g; ctx.fillRect(bx, by, bw, bh);
-  if (ad > 0.01) { ctx.save(); ctx.beginPath(); ctx.rect(bx, by, bw, bh); ctx.clip(); ctx.globalAlpha = ad; ES.hero(ctx, bx + 150, by + bh + 60, 0.62, { umbrella: true, cake: true, eyes: 'happy', mouth: 'grin' });
-    const sh = ctx.createLinearGradient(0, by, 0, by + bh); sh.addColorStop(0, 'rgba(255,240,210,0)'); sh.addColorStop(1, 'rgba(255,190,120,0.45)'); ctx.fillStyle = sh; ctx.fillRect(bx, by, bw, bh); ctx.restore();
-    S.add(ctx, () => glow(ctx, bx + bw / 2, by + bh / 2, 560, [255, 200, 140], 0.36 * ad)); }
-}
+// ---------- 预渲 ----------
+const SKY = S.lazy(() => CT.skyline({ w: 1900, h: 1700, seed: 4, sky: [[8, 10, 26], [48, 36, 70]], fog: [92, 66, 98], base: [24, 22, 44], lit: 0.07, ground: 1560 }));
+const FAC = S.lazy(() => CT.facade({ cols: 3, rows: 7, uw: 300, uh: 250, seed: 31, lit: 0.3, skip: [[1, 1]] }));
+const FX = 400, FY = -930, MYW = [1, 1]; // 立面在 p=0.6 层的位置；他家 = 第 2 列第 2 层
+// 雨夜的街：路面、路沿、倒影
 function wetRoad(ctx, t) {
-  S.vgrad(ctx, [[0, [70, 70, 96]], [1, [40, 40, 64]]], GY - 6, GY + 50, -PAD, W + PAD);
-  ctx.fillStyle = 'rgb(140,140,160)'; ctx.fillRect(-PAD, GY + 50, W + PAD * 2, 8);
-  S.vgrad(ctx, [[0, [22, 22, 40]], [1, [6, 6, 16]]], GY + 58, H + 200, -PAD, W + PAD);
-  // 路面倒影：路灯和店招拉长的光
-  S.add(ctx, () => { for (const [x, c, w] of [[LAMP[0] - 10, SODIUM, 120], [480, COOL, 260], [1110, [255, 200, 140], 160], [-120, [255, 140, 120], 120], [200, [120, 220, 200], 90]]) for (let k = 0; k < 10; k++) S.rgrad(ctx, x + Math.sin(t * 2 + k) * 6, GY + 90 + k * 46, w * (1 - k * 0.06), [[0, c, 0.16 - k * 0.012], [1, c, 0]], 0.12); });
-  for (let i = 0; i < 18; i++) { const ph = (t * 1.4 + hash(i * 3.1)) % 1, rx = hash(i * 7.7 + Math.floor(t * 1.4 + hash(i * 3.1))) * W, ry = GY + 100 + hash(i * 5.3) * 360; S.ring(ctx, rx, ry, 6 + ph * 50, 5, [200, 210, 255], 0.3 * (1 - ph), 0.25); }
+  S.vgrad(ctx, [[0, [66, 64, 92]], [1, [38, 36, 60]]], GY - 6, GY + 50, -500, W + 500);
+  ctx.fillStyle = 'rgb(120,118,146)'; ctx.fillRect(-500, GY + 48, W + 1000, 8);
+  S.vgrad(ctx, [[0, [22, 20, 40]], [1, [6, 6, 16]]], GY + 56, H + 400, -500, W + 500);
+  S.add(ctx, () => { for (const [x, c, w, a] of [[LAMP[0], SODIUM, 140, 0.13], [200, [255, 200, 150], 220, 0.08], [560, COOL, 260, 0.06]]) for (let k = 0; k < 9; k++) S.rgrad(ctx, x + Math.sin(t * 2 + k) * 6, GY + 100 + k * 50, w * (1 - k * 0.06), [[0, c, a - k * 0.011], [1, c, 0]], 0.12); });
+  for (let i = 0; i < 14; i++) { const ph = (t * 1.3 + hash(i * 3.1)) % 1, rx = hash(i * 7.7 + Math.floor(t * 1.3 + hash(i * 3.1))) * W, ry = GY + 110 + hash(i * 5.3) * 380; S.ring(ctx, rx, ry, 8 + ph * 46, 4, [190, 200, 240], 0.22 * (1 - ph), 0.25); }
 }
 function streetLamp(ctx) {
-  const [x, y] = LAMP; const g = ctx.createLinearGradient(x - 10, 0, x + 10, 0); g.addColorStop(0, 'rgb(30,30,44)'); g.addColorStop(0.5, 'rgb(90,90,110)'); g.addColorStop(1, 'rgb(24,24,36)');
-  ctx.fillStyle = g; ctx.fillRect(x + 60, y, 18, GY - y); ctx.strokeStyle = 'rgb(60,60,80)'; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(x + 68, y + 10); ctx.quadraticCurveTo(x + 60, y - 40, x, y - 20); ctx.stroke();
-  ctx.fillStyle = 'rgb(50,50,66)'; ctx.beginPath(); ctx.ellipse(x, y - 14, 50, 16, 0, 0, 6.2832); ctx.fill();
-  S.add(ctx, () => { glow(ctx, x, y, 700, SODIUM, 0.28); glow(ctx, x, y, 150, [255, 230, 190], 0.7); });
-  // 光锥里的雨
-  ctx.save(); ctx.beginPath(); ctx.moveTo(x - 40, y); ctx.lineTo(x + 40, y); ctx.lineTo(x + 420, GY); ctx.lineTo(x - 420, GY); ctx.closePath(); ctx.clip();
-  S.add(ctx, () => { const g2 = ctx.createLinearGradient(0, y, 0, GY); g2.addColorStop(0, rgba(SODIUM, 0.22)); g2.addColorStop(1, rgba(SODIUM, 0.03)); ctx.fillStyle = g2; ctx.fillRect(x - 440, y, 880, GY - y); });
+  const [x, y] = LAMP; const g = ctx.createLinearGradient(x + 50, 0, x + 80, 0); g.addColorStop(0, 'rgb(30,30,44)'); g.addColorStop(0.5, 'rgb(84,84,104)'); g.addColorStop(1, 'rgb(24,24,36)');
+  ctx.fillStyle = g; ctx.fillRect(x + 56, y, 18, GY - y); ctx.strokeStyle = 'rgb(56,56,76)'; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(x + 64, y + 10); ctx.quadraticCurveTo(x + 58, y - 40, x, y - 20); ctx.stroke();
+  ctx.fillStyle = 'rgb(46,46,62)'; ctx.beginPath(); ctx.ellipse(x, y - 14, 50, 16, 0, 0, 6.2832); ctx.fill();
+  S.add(ctx, () => { glow(ctx, x, y, 520, SODIUM, 0.2); glow(ctx, x, y - 4, 70, [255, 224, 180], 0.55); });
+  ctx.save(); ctx.beginPath(); ctx.moveTo(x - 40, y); ctx.lineTo(x + 40, y); ctx.lineTo(x + 380, GY); ctx.lineTo(x - 380, GY); ctx.closePath(); ctx.clip();
+  S.add(ctx, () => { const g2 = ctx.createLinearGradient(0, y, 0, GY); g2.addColorStop(0, rgba(SODIUM, 0.16)); g2.addColorStop(1, rgba(SODIUM, 0.02)); ctx.fillStyle = g2; ctx.fillRect(x - 400, y, 800, GY - y); });
   ctx.restore();
 }
-// 街对面的居民楼（中景，看得清：窗框、窗帘、阳台、空调外机）；目标窗 TW 是他家
-const TW = [700, 170], WW = 150, WH = 190;
-const MIDB = S.lazy(() => S.bake(900, 1500, c => {
-  const r = mulberry32(31);
-  const g = c.createLinearGradient(0, 0, 900, 0); g.addColorStop(0, 'rgb(46,44,74)'); g.addColorStop(0.7, 'rgb(36,34,62)'); g.addColorStop(1, 'rgb(22,22,44)'); c.fillStyle = g; c.fillRect(0, 0, 900, 1500);
-  for (let j = 0; j < 7; j++) for (let i = 0; i < 4; i++) {
-    const x = 70 + i * 210, y = 40 + j * 230;
-    c.fillStyle = 'rgb(26,24,46)'; c.fillRect(x - 12, y - 12, WW + 24, WH + 24);
-    const on = r() < 0.32, wc = r() < 0.8 ? [255, 196, 124] : [180, 210, 255];
-    const wg = c.createLinearGradient(0, y, 0, y + WH); wg.addColorStop(0, on ? rgba(mix(wc, [255, 255, 255], 0.2)) : 'rgb(44,48,84)'); wg.addColorStop(1, on ? rgba(mix(wc, [180, 90, 60], 0.3)) : 'rgb(24,26,52)'); c.fillStyle = wg; c.fillRect(x, y, WW, WH);
-    if (on) { c.fillStyle = 'rgba(120,60,50,0.35)'; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 46, y); c.quadraticCurveTo(x + 36, y + 110, x, y + 170); c.fill(); S.add(c, () => glow(c, x + WW / 2, y + WH / 2, 200, wc, 0.25)); }
-    c.fillStyle = 'rgb(26,24,46)'; c.fillRect(x + WW / 2 - 4, y, 8, WH); c.fillStyle = 'rgb(70,66,100)'; c.fillRect(x - 18, y + WH + 8, WW + 36, 12);
-    if (r() < 0.4) { c.fillStyle = 'rgb(80,84,110)'; c.fillRect(x + WW + 10, y + WH - 60, 50, 50); }
+// 灯箱：暖色海报（他捧着杯子的剪影 + 夕阳），亮起是从下往上一格格点亮的灯管；最亮也只到奶油色
+const BOX = [70, 560, 300, 560];
+function lightbox(ctx, t, ad) {
+  const [bx, by, bw, bh] = BOX;
+  ctx.fillStyle = 'rgb(28,30,42)'; ctx.fillRect(bx - 16, by - 16, bw + 32, bh + 32);
+  ctx.fillStyle = 'rgb(46,48,62)'; ctx.fillRect(bx - 16, by - 16, bw + 32, 6);
+  ctx.save(); ctx.beginPath(); ctx.rect(bx, by, bw, bh); ctx.clip();
+  ctx.fillStyle = 'rgb(26,26,40)'; ctx.fillRect(bx, by, bw, bh);
+  if (ad > 0.003) {
+    const g = ctx.createLinearGradient(0, by, 0, by + bh); g.addColorStop(0, 'rgb(226,168,120)'); g.addColorStop(0.55, 'rgb(206,116,86)'); g.addColorStop(1, 'rgb(120,56,64)');
+    // 从下往上亮：遮罩一条渐变边
+    const yEdge = by + bh * (1 - ad * 1.15);
+    ctx.save(); ctx.beginPath(); ctx.rect(bx, yEdge, bw, by + bh - yEdge); ctx.clip();
+    ctx.fillStyle = g; ctx.fillRect(bx, by, bw, bh);
+    S.rgrad(ctx, bx + bw * 0.62, by + bh * 0.4, 130, [[0, [255, 226, 180], 0.7], [1, [255, 200, 140], 0]]);
+    ES.hero(ctx, bx + bw * 0.45, by + bh + 30, 0.6, { umbrella: false, cake: false, book: false, rs: -1.0, re: -0.5, eyes: 'happy', mouth: 'smile', dim: 0.0, warm: 0.5 });
+    const sh = ctx.createLinearGradient(0, by + bh * 0.5, 0, by + bh); sh.addColorStop(0, 'rgba(120,50,50,0)'); sh.addColorStop(1, 'rgba(90,30,40,0.55)'); ctx.fillStyle = sh; ctx.fillRect(bx, by, bw, bh);
+    ctx.restore();
+    S.add(ctx, () => { const e = ctx.createLinearGradient(0, yEdge - 20, 0, yEdge + 20); e.addColorStop(0, 'rgba(255,230,190,0)'); e.addColorStop(0.5, `rgba(255,230,190,${0.5 * (1 - ad)})`); e.addColorStop(1, 'rgba(255,230,190,0)'); ctx.fillStyle = e; ctx.fillRect(bx, yEdge - 20, bw, 40); });
   }
-}));
-// 第 6 章复用同一个公交站：只画环境（不含人物），o.city 让对面楼的窗一扇扇亮起暖光
-function scene(ctx, t, C, o = {}) {
-  const { ad = 1, city = 0, myWin = 1 } = o;
-  ctx.save(); S.cam(ctx, C, 0.35); ctx.drawImage(FAR(), -PAD, -120); ctx.restore();
-  ctx.save(); S.cam(ctx, C, 0.6); ctx.drawImage(MIDB(), 400, -900);
-  if (city > 0.01) for (let j = 0; j < 7; j++) for (let i = 0; i < 4; i++) { if (hash(i * 3 + j * 7 + 11) < 0.45) continue; const on = smooth(prog(city, hash(i * 3 + j * 7) * 0.7, hash(i * 3 + j * 7) * 0.7 + 0.3)); if (on <= 0.01) continue; const x = 400 + 70 + i * 210, y = -900 + 40 + j * 230; const wg = ctx.createLinearGradient(0, y, 0, y + WH); wg.addColorStop(0, rgba([255, 226, 170], on)); wg.addColorStop(1, rgba([255, 170, 110], on)); ctx.fillStyle = wg; ctx.fillRect(x, y, WW, WH); ctx.fillStyle = 'rgb(26,24,46)'; ctx.fillRect(x + WW / 2 - 4, y, 8, WH); S.add(ctx, () => glow(ctx, x + WW / 2, y + WH / 2, 280, [255, 196, 124], 0.4 * on)); }
+  // 玻璃面板的反光
+  ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + bw * 0.5, by); ctx.lineTo(bx, by + bh * 0.6); ctx.fill();
   ctx.restore();
+  if (ad > 0.01) S.add(ctx, () => glow(ctx, bx + bw / 2, by + bh / 2, 420, [255, 170, 110], 0.13 * ad));
+}
+function shelter(ctx, t, ad) {
+  // 后玻璃：磨砂，雨水往下流
+  ctx.save(); const gg = ctx.createLinearGradient(0, 520, 0, 1210); gg.addColorStop(0, 'rgba(150,170,220,0.12)'); gg.addColorStop(1, 'rgba(150,170,220,0.05)'); ctx.fillStyle = gg; ctx.fillRect(400, 520, 540, 690);
+  ctx.strokeStyle = 'rgba(200,214,255,0.25)'; ctx.lineWidth = 3; ctx.strokeRect(400, 520, 540, 690);
+  ctx.save(); ctx.beginPath(); ctx.rect(400, 520, 540, 690); ctx.clip(); ctx.lineCap = 'round';
+  for (let i = 0; i < 16; i++) { const ph = (t * (0.05 + hash(i) * 0.08) + hash(i * 3)) % 1, x = 410 + hash(i * 7) * 520, y = 520 + ph * 700; const g = ctx.createLinearGradient(0, y - 80, 0, y); g.addColorStop(0, 'rgba(210,222,255,0)'); g.addColorStop(1, 'rgba(210,222,255,0.3)'); ctx.strokeStyle = g; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x, y - 80); ctx.quadraticCurveTo(x + 3, y - 40, x, y); ctx.stroke(); }
+  ctx.restore(); ctx.restore();
+  const steel = (x, y, w, h) => { const g = ctx.createLinearGradient(x, 0, x + w, 0); g.addColorStop(0, 'rgb(36,40,56)'); g.addColorStop(0.5, 'rgb(110,118,140)'); g.addColorStop(1, 'rgb(28,30,44)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); };
+  steel(30, 470, 24, 780); steel(930, 470, 24, 780);
+  // 顶棚：深色金属 + 下沿一条暖白灯带（柔，不刺眼）
+  ctx.fillStyle = 'rgb(32,34,48)'; ctx.beginPath(); ctx.moveTo(-60, 476); ctx.lineTo(1040, 476); ctx.lineTo(1080, 430); ctx.lineTo(-100, 430); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgb(54,58,76)'; ctx.fillRect(-60, 470, 1100, 8);
+  const lg = ctx.createLinearGradient(0, 478, 0, 492); lg.addColorStop(0, 'rgba(255,236,206,0.9)'); lg.addColorStop(1, 'rgba(255,236,206,0)'); ctx.fillStyle = lg; ctx.fillRect(160, 478, 700, 14);
+  S.add(ctx, () => { const cg = ctx.createLinearGradient(0, 480, 0, 1250); cg.addColorStop(0, 'rgba(255,226,190,0.13)'); cg.addColorStop(1, 'rgba(255,226,190,0)'); ctx.fillStyle = cg; ctx.beginPath(); ctx.moveTo(160, 480); ctx.lineTo(860, 480); ctx.lineTo(980, 1250); ctx.lineTo(40, 1250); ctx.fill(); });
+  // 长凳
+  ctx.fillStyle = 'rgb(58,46,46)'; ctx.fillRect(470, 1062, 420, 24); ctx.fillStyle = 'rgb(96,72,58)'; ctx.fillRect(460, 1040, 440, 24); ctx.fillStyle = 'rgb(38,38,50)'; ctx.fillRect(500, 1086, 14, 160); ctx.fillRect(840, 1086, 14, 160);
+  lightbox(ctx, t, ad);
+}
+// 伞（单独画：A04 他把伞交给她；G 她把红伞举到他头顶）
+function umbrella(ctx, x, y, s, rot, c = [92, 200, 196], a = 1) {
+  if (a <= 0.003) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+  const g = ctx.createLinearGradient(-240, 0, 240, 0); g.addColorStop(0, rgba(mix(c, [0, 0, 0], 0.35))); g.addColorStop(0.5, rgba(mix(c, [255, 255, 255], 0.15))); g.addColorStop(1, rgba(mix(c, [0, 0, 0], 0.4)));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-250, 60); ctx.quadraticCurveTo(-200, -110, 0, -130); ctx.quadraticCurveTo(200, -110, 250, 60); for (let k = 5; k >= 0; k--) ctx.quadraticCurveTo(-250 + (k + 0.5) * 83, 30, -250 + k * 83, 60); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = rgba(mix(c, [0, 0, 0], 0.5), 0.6); ctx.lineWidth = 4; for (const k of [-1, -0.33, 0.33, 1]) { ctx.beginPath(); ctx.moveTo(0, -128); ctx.quadraticCurveTo(k * 120, -90, k * 166 * 1.5 * 0.6, 50); ctx.stroke(); }
+  ctx.strokeStyle = 'rgb(60,50,50)'; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(0, -130); ctx.lineTo(0, 230); ctx.arc(-22, 230, 22, 0, Math.PI); ctx.stroke();
+  ctx.restore();
+}
+// 背景（第 6 章复用）：o.city 让对面楼的窗一扇扇亮起暖光；o.myWin 他家那扇窗
+function scene(ctx, t, C, o = {}) {
+  const { ad = 1, city = 0, myWin = 0 } = o;
+  ctx.save(); S.cam(ctx, C, 0.3); ctx.drawImage(SKY(), -420, -560, 1900, 1700); ctx.restore();
+  const F = FAC();
+  ctx.save(); S.cam(ctx, C, 0.6); ctx.drawImage(F.img, FX, FY, F.W, F.H);
+  for (const u of F.units) { const isMine = u.i === MYW[0] && u.j === MYW[1]; const on = isMine ? myWin : (u.on ? 0 : smooth(prog(city, hash(u.i * 3 + u.j * 7) * 0.7, hash(u.i * 3 + u.j * 7) * 0.7 + 0.3))); if (on > 0.01) homeWin(ctx, FX + 30 + u.i * F.uw, FY + 20 + u.j * F.uh, F.uw, F.uh, on, isMine); }
+  ctx.restore();
+  ctx.fillStyle = 'rgba(12,12,30,0.32)'; ctx.fillRect(0, 0, W, H); // 雨雾：把背景压下去一档，人和候车亭才跳得出来
   ctx.save(); S.cam(ctx, C, 1); wetRoad(ctx, t); streetLamp(ctx); shelter(ctx, t, ad); ctx.restore();
+}
+// 亮起来的一户：暖光 + 窗帘 + 窗台上的绿植；isMine 时窗里有他家厨房的吊灯
+function homeWin(ctx, x, y, uw, uh, on, isMine) {
+  const ww = uw * 0.56, wh = uh * 0.62, wx = x + (uw - ww) / 2, wy = y + uh * 0.12;
+  ctx.save(); ctx.globalAlpha *= on;
+  const g = ctx.createLinearGradient(0, wy, 0, wy + wh); g.addColorStop(0, 'rgb(255,226,170)'); g.addColorStop(1, 'rgb(236,150,100)'); ctx.fillStyle = g; ctx.fillRect(wx, wy, ww, wh);
+  if (isMine) { ctx.fillStyle = 'rgb(70,150,140)'; ctx.beginPath(); ctx.moveTo(wx + ww * 0.5 - 24, wy + 34); ctx.lineTo(wx + ww * 0.5 + 24, wy + 34); ctx.lineTo(wx + ww * 0.5 + 14, wy + 20); ctx.lineTo(wx + ww * 0.5 - 14, wy + 20); ctx.fill(); }
+  ctx.fillStyle = 'rgba(196,92,76,0.85)'; ctx.fillRect(wx, wy, ww * 0.18, wh); ctx.fillRect(wx + ww * 0.82, wy, ww * 0.18, wh);
+  ctx.fillStyle = 'rgba(16,14,30,0.9)'; ctx.fillRect(wx + ww / 2 - 4, wy, 8, wh); ctx.fillRect(wx, wy + wh * 0.3, ww, 6);
+  ctx.restore();
+  S.add(ctx, () => glow(ctx, wx + ww / 2, wy + wh / 2, ww * 1.4, [255, 190, 120], 0.25 * on));
+}
+// 飞起来的围巾：一条随风抖动的厚布带，从 a 点沿弧线飞到 b 点（头部领先、尾巴拖后）
+function flyingScarf(ctx, t, a, b, u, c = [214, 72, 70]) {
+  const N = 16, pts = [];
+  for (let i = 0; i < N; i++) { const lag = i / (N - 1) * 0.35, v = clamp(u * 1.35 - lag), e = easeInOut(v), x = lerp(a[0], b[0], e), y = lerp(a[1], b[1], e) - Math.sin(e * Math.PI) * 260 + Math.sin(t * 14 + i * 0.7) * 14 * (1 - e) * (i / N); pts.push([x, y]); }
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = rgba(mix(c, [0, 0, 0], 0.3)); ctx.lineWidth = 46; ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke();
+  ctx.strokeStyle = rgba(c); ctx.lineWidth = 36; ctx.stroke();
+  ctx.setLineDash([10, 22]); ctx.strokeStyle = 'rgba(255,236,220,0.35)'; ctx.lineWidth = 30; ctx.stroke(); ctx.setLineDash([]);
+  ctx.restore();
+}
+// 围在脖子上的围巾：一圈厚针织（前高后低的椭圆环）+ 打结后垂下的一条，带流苏；k 落定进度（从松到紧）
+function neckScarf(ctx, x, y, s, t, k) {
+  const c = [214, 72, 70], dk = mix(c, [60, 10, 20], 0.45), hi = mix(c, [255, 220, 200], 0.25);
+  ctx.save(); ctx.translate(x, y); ctx.scale(s * lerp(1.25, 1, k), s * lerp(1.25, 1, k));
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = rgba(dk); ctx.lineWidth = 30; ctx.beginPath(); ctx.ellipse(0, 0, 38, 13, 0, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke(); // 后半圈
+  const sw = Math.sin(t * 2.2) * 5;
+  const g = ctx.createLinearGradient(-30, 0, 30, 0); g.addColorStop(0, rgba(dk)); g.addColorStop(0.5, rgba(c)); g.addColorStop(1, rgba(dk));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(4, 8); ctx.quadraticCurveTo(14 + sw, 60, 10 + sw * 1.6, 112); ctx.lineTo(40 + sw * 1.6, 108); ctx.quadraticCurveTo(38 + sw, 50, 30, 4); ctx.closePath(); ctx.fill(); // 垂下的一条
+  ctx.fillStyle = 'rgba(255,236,220,0.22)'; for (let i = 0; i < 4; i++) ctx.fillRect(12 + sw * (0.6 + i * 0.25), 30 + i * 20, 26, 5);
+  ctx.fillStyle = rgba(hi); for (let i = 0; i < 5; i++) ctx.fillRect(12 + sw * 1.6 + i * 6, 110, 3, 12);
+  ctx.strokeStyle = rgba(c); ctx.lineWidth = 32; ctx.beginPath(); ctx.ellipse(0, 0, 38, 13, 0, -0.05 * Math.PI, Math.PI * 1.05); ctx.stroke(); // 前半圈
+  ctx.strokeStyle = 'rgba(255,236,220,0.25)'; ctx.lineWidth = 4; ctx.setLineDash([6, 8]); ctx.beginPath(); ctx.ellipse(0, -4, 38, 13, 0, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = rgba(mix(c, [40, 0, 10], 0.2)); ctx.beginPath(); ctx.ellipse(20, 12, 15, 12, 0.3, 0, 6.2832); ctx.fill(); // 结
+  ctx.restore();
 }
 function draw(ctx, t) {
   const C = S.camKF(t, CAM);
-  // A04：她上车，车开走；他挥挥手往街对面走；镜头升起来，推进对面楼他家那扇窗
-  const up = easeInOut(prog(t, T.a04 + 2.0, T.end - 1.6)), push = easeIn(prog(t, T.end - 2.1, T.end - 0.2));
-  C.y -= up * 760; C.z = lerp(C.z, 0.95, up);
+  const push = easeIn(prog(t, T.end - 1.9, T.end - 0.1));
   ctx.fillStyle = 'rgb(10,12,28)'; ctx.fillRect(0, 0, W, H);
   ctx.save();
-  if (push > 0) { const C0 = { ...C }, wp = S.w2s(C0, TW[0], TW[1], 0.6), z = 1 + 9 * push * push; ctx.translate(lerp(wp[0], 540, push), lerp(wp[1], 820, push)); ctx.scale(z, z); ctx.translate(-wp[0], -wp[1]); }
-  ctx.save(); S.cam(ctx, C, 0.35); ctx.drawImage(FAR(), -PAD, -120); ctx.restore();
-  ctx.save(); S.cam(ctx, C, 0.6); ctx.drawImage(MIDB(), 400, -900);
-  { const on = smooth(prog(t, T.a04 + 1.6, T.a04 + 2.6)), x = TW[0] - WW / 2, y = TW[1] - WH / 2; const wg = ctx.createLinearGradient(0, y, 0, y + WH); wg.addColorStop(0, rgba(mix([44, 48, 84], [255, 226, 170], on))); wg.addColorStop(1, rgba(mix([24, 26, 52], [255, 170, 110], on))); ctx.fillStyle = wg; ctx.fillRect(x, y, WW, WH);
-    ctx.fillStyle = `rgba(200,90,80,${0.6 * on})`; ctx.fillRect(x, y, 34, WH); ctx.fillRect(x + WW - 34, y, 34, WH); ctx.fillStyle = 'rgb(26,24,46)'; ctx.fillRect(x + WW / 2 - 4, y, 8, WH);
-    ctx.fillStyle = `rgba(80,150,100,${on})`; for (let k = 0; k < 5; k++) { ctx.beginPath(); ctx.ellipse(x + 40 + k * 14, y + WH - 14 - (k % 2) * 8, 12, 6, k, 0, 6.2832); ctx.fill(); }
-    S.add(ctx, () => { glow(ctx, TW[0], TW[1], 300, [255, 196, 124], 0.5 * on); }); }
-  ctx.restore();
+  const F = FAC(), TW = [FX + 30 + MYW[0] * F.uw + F.uw / 2, FY + 20 + MYW[1] * F.uh + F.uh * 0.43];
+  if (push > 0) { const wp = S.w2s(C, TW[0], TW[1], 0.6), z = 1 + 11 * push * push; ctx.translate(lerp(wp[0], 540, push), lerp(wp[1], 900, push)); ctx.scale(z, z); ctx.translate(-wp[0], -wp[1]); }
+  const ad = smooth(prog(t, T.a02 + 0.1, T.a02 + 1.4)), myWin = smooth(prog(t, T.a04e - 0.2, T.a04e + 0.8));
+  scene(ctx, t, C, { ad, myWin });
   ctx.save(); S.cam(ctx, C, 1);
-  wetRoad(ctx, t);
-  streetLamp(ctx);
-  const ad = smooth(prog(t, T.a02 + 0.1, T.a02 + 1.3));
-  shelter(ctx, t, ad);
-  // 她：冷得发抖 → 暖起来；A04 上车离开
-  const warm = smooth(prog(t, T.hot + 0.1, T.hot + 1.6)), leave = easeIn(prog(t, T.a04 + 0.5, T.a04 + 1.3)), bus = prog(t, T.a04 - 0.2, T.a04 + 2.6);
-  const shiver = (1 - warm) * Math.sin(t * 34) * 0.012, hx = HER[0] - leave * 520;
-  if (leave < 1) S.lit(ctx, c => MB.person(c, 'istj-female', hx, GY, 2.5, { lean: shiver, gray: 0.55 * (1 - warm), warm: 0.6 * warm, a: 1 - smooth(prog(leave, 0.6, 1)) }), { light: warm > 0.4 ? [HIM[0], 700] : [480, 480], at: [hx, GY - 300], r: 340, warm: warm > 0.4 ? [255, 214, 160] : COOL, cool: [10, 12, 40], k: 1.0 });
-  // 呵出的白气（冷的时候）
-  if (warm < 0.95) for (let k = 0; k < 2; k++) { const ph = (t * 0.6 + k * 0.5) % 1; S.rgrad(ctx, hx + 120 + ph * 60, GY - 520 - ph * 40, 26 + ph * 50, [[0, [236, 240, 250], 0.4 * (1 - ph) * (1 - warm)], [1, [236, 240, 250], 0]]); }
-  // 他：撑伞走进来 → 停一拍 → 递杯子 → 围巾 → 便当 → A04 往街对面走
-  const walkIn = easeOut(prog(t, T.a01 + 0.2, T.hot - 0.7)), give = easeInOut(prog(t, T.hot - 0.35, T.hot + 0.4)), back = smooth(prog(t, T.hot + 1.4, T.hot + 2.2));
-  const sc = smooth(prog(t, T.a03 - 0.2, T.a03 + 0.6)), lb = easeInOut(prog(t, T.a03 + 0.9, T.a03e + 0.2)), walkOut = easeIn(prog(t, T.a04 + 2.0, T.end - 0.4)), wave = K.vis(t, T.a04 + 1.3, T.a04 + 2.3, 0.25, 0.3);
-  const mx = lerp(1300, HIM[0], walkIn) + walkOut * 700, step = walkIn < 1 ? Math.abs(Math.sin(walkIn * Math.PI * 5)) * 10 : walkOut > 0 ? Math.abs(Math.sin(walkOut * Math.PI * 6)) * 10 : 0;
-  const reach = Math.max(give * (1 - back), sc * (1 - smooth(prog(t, T.a03 + 0.6, T.a03 + 0.9))), lb * (1 - smooth(prog(t, T.a03e + 0.3, T.a03e + 0.8))));
-  const o = { t, flip: walkOut <= 0, umbrella: true, cake: false, book: false, um: -0.25 + 0.15 * reach, rs: -1.1 * reach - 2.2 * wave, re: -0.35 * reach - 0.6 * wave + 0.3 * Math.sin(t * 9) * wave, eyes: walkIn < 1 ? 'open' : 'happy', mouth: 'smile', lean: -0.05 * reach, bob: step, warm: 0.3 };
-  const R = S.lit(ctx, c => ES.hero(c, mx, GY, 1.06, o), { light: LAMP, at: [mx, GY - 300], r: 340, warm: [255, 214, 160], cool: [20, 20, 50], k: 0.95 });
-  // 杯子：在他手里 → 到她手边
-  const herHand = [hx + 70, GY - 262];
-  if (t < T.a04 + 0.6 && walkIn > 0.6) { const p = give < 1 ? [lerp(R.hand[0], herHand[0], give * 0.0), 0] : null; const cx = give < 1 ? R.hand[0] : herHand[0], cy = give < 1 ? R.hand[1] : herHand[1]; PR.mug(ctx, cx, cy + 40, 0.68, t, { c: [240, 130, 96], hot: 1 }); if (warm > 0.01 && warm < 1) S.add(ctx, () => glow(ctx, herHand[0], herHand[1] - 30, 320 * warm, [255, 190, 120], 0.35 * (1 - warm * 0.6))); }
-  // 围巾：从他手里绕到她脖子上
-  if (sc > 0.01 && leave < 1) { const s0 = smooth(prog(t, T.a03 + 0.2, T.a03 + 0.7)), sx = lerp(R.hand[0], hx + 30, s0), sy = lerp(R.hand[1], GY - 470, s0); PR.scarf(ctx, sx, sy, 0.9, t, { c: [214, 72, 70], sway: 1 }); }
-  // 便当盒：塞进她怀里
-  if (lb > 0.01 && leave < 1) { const lx = lerp(R.hand[0], hx + 40, lb), ly = lerp(R.hand[1] + 30, GY - 236, lb) - Math.sin(lb * Math.PI) * 60; PR.lunchbox(ctx, lx, ly, 0.6, { lid: 1, c: [96, 180, 170] }); }
+  // ---- 她 ----
+  const warm = smooth(prog(t, M.give[1] - 0.1, M.give[1] + 1.6)), leave = prog(t, M.leave[0], M.leave[1]), lv = easeIn(leave);
+  const shiver = (1 - warm) * Math.sin(t * 30) * 0.01, hx = HERX - lv * 760, hb = leave > 0 && leave < 1 ? Math.abs(Math.sin(leave * Math.PI * 6)) * 8 : 0;
+  const HP = MB.person(ctx, 'istj-female', hx, GY, 2.15, { a: 0 }); // 只取坐标
+  const her = { chest: HP.chest, neck: [hx + 4, HP.head[1] + 140], hand: [hx + 36, HP.chest[1] + 60] };
+  if (leave < 1) S.lit(ctx, c => MB.person(c, 'istj-female', hx, GY, 2.15, { lean: shiver, bob: hb, gray: 0.5 * (1 - warm), warm: 0.5 * warm }), { light: warm > 0.4 ? [HIMX, 800] : [480, 480], at: [hx, GY - 280], r: 330, warm: warm > 0.4 ? [255, 214, 160] : COOL, cool: [10, 12, 40], k: 1.0 });
+  if (warm < 0.95 && leave <= 0) for (let k = 0; k < 2; k++) { const ph = (t * 0.6 + k * 0.5) % 1; S.rgrad(ctx, hx + 50 + ph * 50, her.neck[1] - 80 - ph * 40, 22 + ph * 40, [[0, [236, 240, 250], 0.32 * (1 - ph) * (1 - warm)], [1, [236, 240, 250], 0]]); }
+  // ---- 他 ----
+  const walkIn = easeOut(prog(t, M.walk[0], M.walk[1])), give = easeInOut(prog(t, M.give[0], M.give[1])), gback = smooth(prog(t, M.give[1] + 0.2, M.give[1] + 0.8));
+  const scIn = prog(t, M.scIn[0], M.scIn[1]), scFly = prog(t, M.scFly[0], M.scFly[1]), lbIn = prog(t, M.lbIn[0], M.lbIn[1]), lbFly = prog(t, M.lbFly[0], M.lbFly[1]);
+  const umbG = easeInOut(prog(t, M.umb[0], M.umb[1])), wet = smooth(prog(t, M.umb[1], M.umb[1] + 2));
+  const mx = lerp(1320, HIMX, walkIn), step = walkIn < 1 ? Math.abs(Math.sin(walkIn * Math.PI * 5)) * 10 : 0;
+  // 手的姿势：递杯子（向前伸）→ 收回 → 伸进包（向下）→ 甩出围巾（上扬）→ 再进包 → 递便当（向前）→ 递伞
+  const dig = Math.max(K.vis(t, M.scIn[0], M.scIn[1] + 0.05, 0.15, 0.15), K.vis(t, M.lbIn[0], M.lbIn[1] + 0.05, 0.15, 0.15));
+  const throwA = Math.sin(clamp(scFly) * Math.PI), reachLb = Math.sin(clamp(lbFly) * Math.PI * 0.5) * (1 - smooth(prog(t, M.lbFly[1], M.lbFly[1] + 0.4)));
+  const reach = Math.max(give * (1 - gback), reachLb, Math.sin(umbG * Math.PI));
+  const o = { t, flip: true, umbrella: umbG < 0.5, cake: false, book: false, um: -0.2 + 0.25 * umbG, rs: -1.15 * reach + 0.6 * dig - 1.9 * throwA, re: -0.35 * reach + 0.3 * dig - 0.4 * throwA, eyes: walkIn < 1 ? 'open' : 'happy', mouth: wet > 0.5 ? 'grin' : 'smile', lean: -0.05 * reach, bob: step, warm: 0.3, gray: 0.15 * wet };
+  const R = S.lit(ctx, c => ES.hero(c, mx, GY, 0.92, o), { light: LAMP, at: [mx, GY - 300], r: 330, warm: [255, 214, 160], cool: [20, 20, 50], k: 0.95 });
+  // 帆布包：挎在身前（在他身上，不会凭空出现）
+  const bagP = [R.chest[0] - 20, R.chest[1] + 120];
+  canvasBag(ctx, bagP[0], bagP[1], 0.72, t);
+  // 杯子：一开始就捧在手里 → 沿弧线到她手里
+  if (walkIn > 0.02 && leave < 0.6) { const e = give, cx = lerp(R.hand[0], her.hand[0], e), cy = lerp(R.hand[1] + 36, her.hand[1], e) - Math.sin(e * Math.PI) * 60; PR.mug(ctx, cx, cy, 0.64, t, { c: [240, 130, 96], hot: 1 }); if (warm > 0.01) S.add(ctx, () => glow(ctx, her.hand[0], her.hand[1] - 60, 300, [255, 180, 110], 0.18 * Math.sin(warm * Math.PI))); }
+  // 围巾：从包里抽出来（被包口遮住下半截）→ 甩开飞过去 → 落在她脖子上
+  if (scIn > 0 && scFly < 1) {
+    if (scFly <= 0) { const up = easeOut(scIn); ctx.save(); ctx.beginPath(); ctx.rect(bagP[0] - 200, bagP[1] - 400, 400, 400 - 50); ctx.clip(); ctx.fillStyle = 'rgb(214,72,70)'; ctx.beginPath(); ctx.roundRect(bagP[0] - 18, bagP[1] - 50 - up * 110, 36, 150, 16); ctx.fill(); ctx.restore(); }
+    else flyingScarf(ctx, t, [bagP[0], bagP[1] - 160], her.neck, easeInOut(scFly));
+  }
+  if (scFly >= 1 && leave < 1) neckScarf(ctx, her.neck[0], her.neck[1], 1, t, smooth(prog(t, M.scFly[1] - 0.1, M.scFly[1] + 0.45)));
+  // 便当盒：从包里捧出来 → 弧线递进她怀里（盒子先微微倾斜、落定回正）
+  if (lbIn > 0) {
+    const inBag = lbFly <= 0, e = easeInOut(lbFly);
+    const x0 = bagP[0], y0 = bagP[1] - 60 - easeOut(lbIn) * 100, take = easeInOut(prog(t, M.leave[0] - 0.4, M.leave[0] + 0.2)), x1 = lerp(560, hx + 50, take), y1 = lerp(1040, her.chest[1] + 150, take);
+    const lx = inBag ? x0 : lerp(R.hand[0] - 10, x1, e) + (take > 0 ? 0 : 0), ly = inBag ? y0 : lerp(R.hand[1] + 30, y1, e) - Math.sin(e * Math.PI) * 90;
+    if (leave < 1) { ctx.save(); if (inBag) { ctx.beginPath(); ctx.rect(x0 - 300, y0 - 300, 600, bagP[1] - 70 - (y0 - 300)); ctx.clip(); } PR.lunchbox(ctx, lx, ly, 0.5, { lid: 1, c: [96, 180, 170], rot: Math.sin(e * Math.PI) * -0.3 }); if (!inBag && e >= 1 && take <= 0) S.add(ctx, () => PR.steam(ctx, lx, ly - 40, 0.6, t, 0.5, 2)); ctx.restore(); }
+  }
+  // 伞：从他手里 → 到她头顶；她撑着走
+  if (umbG >= 0.5 && leave < 1) { const e = smooth(prog(umbG, 0.5, 1)), ux = lerp(R.umb[0], hx + 40, e), uy = lerp(R.umb[1] + 60, GY - 640, e) - hb; umbrella(ctx, ux, uy, 0.95, lerp(-0.3, -0.08, e)); }
   ctx.restore();
-  // 公交车：不画车身，只有车灯 —— 两团白光从左边扫进来、停在她面前（她被光包住、走进光里），再往右开走
-  if (bus > 0 && bus < 1) { ctx.save(); S.cam(ctx, C, 1); const bx = lerp(-600, 260, easeOut(clamp(bus * 2.2))) + easeIn(clamp(bus * 1.8 - 0.9)) * 1800, a = smooth(clamp(bus * 6)) * (1 - smooth(clamp(bus * 4 - 3)));
-    S.add(ctx, () => { glow(ctx, bx, GY - 200, 1000, [255, 240, 210], 0.5 * a); glow(ctx, bx - 60, GY - 110, 150, [255, 252, 240], 0.9 * a); glow(ctx, bx + 120, GY - 110, 110, [255, 252, 240], 0.8 * a);
-      for (let k = 0; k < 8; k++) S.rgrad(ctx, bx + 40, GY + 80 + k * 50, 260 - k * 14, [[0, [255, 240, 210], 0.22 * a], [1, [255, 240, 210], 0]], 0.12); });
-    ctx.restore(); }
-  // 前景：雨帘（三层，近的粗而虚）
-  S.rain(ctx, t, { a: 0.85, n: 110 });
+  S.rain(ctx, t, { a: 0.85, n: 120 });
   ctx.restore();
   return { C };
 }
-function over(ctx, t) {
-  QT.draw(ctx, t, { y: 230 });
-  // A02：灯箱上的字（物件上的字，跟着镜头）
-  const ad = smooth(prog(t, T.a02 + 0.1, T.a02 + 1.3));
-  if (ad > 0.01) { const C = S.camKF(t, CAM), p = S.w2s(C, 210, 650); ctx.save(); ctx.globalAlpha = ad; const s = C.z; K.text(ctx, 'ESFJ', p[0], p[1], { size: 64 * s, family: 'Latin', weight: 600, color: [120, 60, 40], spacing: 0.12 }); K.text(ctx, '供给者', p[0], p[1] + 64 * s, { size: 46 * s, weight: 700, color: [140, 70, 50], spacing: 0.3 }); ctx.restore(); }
+// 帆布包（米色，包口露出一截保温杯盖、一角布）
+function canvasBag(ctx, x, y, s, t) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.rotate(Math.sin(t * 2) * 0.02);
+  ctx.strokeStyle = 'rgb(150,120,90)'; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(-60, -70); ctx.quadraticCurveTo(-20, -260, 70, -300); ctx.stroke();
+  ctx.fillStyle = 'rgb(120,170,160)'; ctx.beginPath(); ctx.roundRect(-36, -92, 30, 40, 6); ctx.fill();
+  const g = ctx.createLinearGradient(-90, 0, 90, 0); g.addColorStop(0, 'rgb(170,150,120)'); g.addColorStop(0.6, 'rgb(226,206,170)'); g.addColorStop(1, 'rgb(150,126,100)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-86, -70); ctx.lineTo(86, -70); ctx.lineTo(96, 80); ctx.quadraticCurveTo(0, 96, -96, 80); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(80,60,40,0.25)'; ctx.fillRect(-86, -70, 172, 12);
+  ctx.fillStyle = 'rgb(214,72,70)'; ctx.beginPath(); ctx.arc(40, 20, 16, 0, 6.2832); ctx.fill(); ctx.fillStyle = 'rgb(255,240,220)'; ctx.beginPath(); ctx.arc(40, 20, 7, 0, 6.2832); ctx.fill();
+  ctx.restore();
 }
-module.exports = { draw, over, T, scene };
+function over(ctx, t) {
+  // A02：画面上方金箔大字（逐字升起 + 扫光），压一条柔和的暗底让字立得住
+  const a = K.vis(t, T.a02 + 0.1, T.a03 + 0.1, 0.3, 0.5);
+  if (a > 0.003) {
+    const g = ctx.createLinearGradient(0, 120, 0, 700); g.addColorStop(0, `rgba(6,6,16,${0.0})`); g.addColorStop(0.35, `rgba(6,6,16,${0.42 * a})`); g.addColorStop(0.75, `rgba(6,6,16,${0.32 * a})`); g.addColorStop(1, 'rgba(6,6,16,0)'); ctx.fillStyle = g; ctx.fillRect(0, 120, W, 580);
+    TY.foil(ctx, 'ESFJ', W / 2, 400, { size: 210, family: 'Latin', weight: 600, spacing: 0.16, p: prog(t, T.a02 + 0.15, T.a02 + 1.1), sweep: prog(t, T.a02 + 1.3, T.a02 + 2.3), a });
+    TY.foil(ctx, '供给者', W / 2, 590, { size: 116, spacing: 0.42, p: prog(t, T.a02 + 0.8, T.a02 + 1.8), sweep: prog(t, T.a02 + 1.6, T.a02 + 2.6), a, glowA: 0.4 });
+  }
+  QT.draw(ctx, t, { y: 230 });
+}
+module.exports = { draw, over, T, scene, umbrella, neckScarf, flyingScarf, canvasBag, GY, LAMP };

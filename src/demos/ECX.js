@@ -30,7 +30,9 @@ function drawPart(ctx, p, t) {
   ctx.restore();
 }
 let BUF = null;
+const SK = require('./ESS_kit');
 function draw(ctx, t) {
+  SK.freeLayers(); // 离屏层每帧回收（以前没回收：每帧都新开画布，长片会把内存吃光）
   const k = idx(t), p = PARTS[k], u = k > 0 ? (t - p.t0) / TR : 1;
   if (u >= 1) { drawPart(ctx, p, t); return; }
   drawPart(ctx, PARTS[k - 1], t);
