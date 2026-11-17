@@ -17,13 +17,14 @@ const PR = require('./ESS_props');
 const SET = require('./ESS_set');
 const QT = require('./ESS_quote');
 const TP = require('./ESS_type');
+const NE = require('./ESS_neon');
 const CT = require('./ESS_city');
 const RSKY = S.lazy(() => CT.skyline({ w: W + 600, h: 1000, seed: 13, sky: [[12, 14, 40], [120, 70, 100]], fog: [130, 80, 110], base: [50, 38, 70], lit: 0.035, ground: 920, haze: [255, 160, 120], blurK: 1.7 }));
 const { K, ES, MB, vs, ve, at } = X;
 const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash, mulberry32 } = K;
 const glow = S.glow;
 
-const T = { in: vs('C01') - 0.9, c01: vs('C01'), c02: vs('C02'), c03: vs('C03'), name: at('C03', '名字'), lack: at('C03', '缺什么'), c04: vs('C04'), c05: vs('C05'), c06: vs('C06'), weather: at('C06', '天气'), price: at('C06', '菜价'), kid: at('C06', '谁家'),
+const T = { in: vs('C01') - 0.9, c01: vs('C01'), c02: vs('C02'), c03: vs('C03'), name: at('C03', '名字'), lack: at('C03', '缺什么'), c04: vs('C04'), alone: at('C04', '一个人'), uneasy: at('C04', '不踏实'), c05: vs('C05'), c06: vs('C06'), weather: at('C06', '天气'), price: at('C06', '菜价'), kid: at('C06', '谁家'),
   c07: vs('C07'), c08: vs('C08'), quiet: at('C08', '安静'), c09: vs('C09'), auth: at('C09', '权威'), listen: at('C09', '认真听'), c10: vs('C10'), past: at('C10', '怀念'), worry: at('C10', '担心'), end: vs('D01') };
 const A2 = T.c04 - 0.6, A3 = T.c05 - 0.6, A4 = T.c10 - 0.6;
 const PAD = SET.PAD, WARM = [255, 200, 130];
@@ -101,22 +102,28 @@ const LIV = S.lazy(() => S.bake(W + PAD * 2, H + PAD, c => {
   // 沙发
   const sg = c.createLinearGradient(0, 900, 0, 1200); sg.addColorStop(0, 'rgb(120,96,140)'); sg.addColorStop(1, 'rgb(70,54,90)'); c.fillStyle = sg; c.beginPath(); c.roundRect(-40, 880, 560, 200, 46); c.fill(); c.fillStyle = 'rgb(140,112,156)'; c.beginPath(); c.roundRect(-60, 1030, 600, 120, 40); c.fill();
 }));
+// C04（2026-11-17 第二轮）：散场的客厅换成霓虹线稿 —— 他站在中间，一圈人连着他（线一根根长出来，金色）；
+//   「一个人待久了」：人往外飘远、淡掉，连线从人那头往回缩；他的线稿从金变冷蓝、低下头；
+//   「不踏实」：头顶那条心跳线从平稳变成乱跳
 function act2(ctx, t) {
-  const C = S.camKF(t, [[A2, { x: 0, y: -40, z: 1.12, ax: 540, ay: 1000 }], [A3 + 0.6, { x: 30, y: -60, z: 1.04 }]]);
-  ctx.fillStyle = 'rgb(30,26,46)'; ctx.fillRect(0, 0, W, H);
-  ctx.save(); S.cam(ctx, C, 1); ctx.drawImage(LIV(), -PAD, -PAD / 2);
-  SET.pendant(ctx, 300, 700, t, { k: 0.55, len: 900, shade: [200, 150, 110] });
-  // 挂钟：秒针在走，分针转得飞快（独处的时间被拉长）
-  X.clock(ctx, 300, 420, 110, 21 * 60 + 40 + (t - A2) * 40, 1);
-  const u = prog(t, A2 + 0.2, A3 + 0.2);
-  // 他：坐下 → 起来来回走 → 拿起手机看（没消息）→ 抓外套出门
-  const ph = u * 4, seg = Math.floor(ph), f = ph - seg;
-  const hx = [300, 300, 640, 760, 1000][Math.min(4, seg)] + ([0, 340, 120, 240, 200][Math.min(4, seg)]) * easeInOut(f) * (seg === 1 || seg === 2 || seg === 3 ? 1 : 0) * (seg === 2 ? -1 : 1) * 0 + (seg === 1 ? 340 * easeInOut(f) : seg === 2 ? 340 - 200 * easeInOut(f) : seg === 3 ? 140 + 300 * easeInOut(f) : seg >= 4 ? 440 : 0);
-  const sit = seg === 0 ? 1 : 0, phoneUp = seg === 2 ? Math.sin(Math.PI * f) : 0;
-  const R = S.lit(ctx, c => ES.hero(c, hx, 1300 - sit * 120, 1.0, { t, flip: seg === 2, umbrella: false, cake: false, book: false, eyes: seg === 2 ? 'open' : 'squint', mouth: 'flat', rs: -1.3 * phoneUp, re: -0.8 * phoneUp, bob: seg === 1 || seg === 3 ? Math.abs(Math.sin(f * Math.PI * 4)) * 8 : 0, look: [seg === 0 ? 2 : 0, 0.5], lean: sit * 0.04 }), { light: [300, 760], at: [hx, 1000], r: 340, warm: [255, 210, 160], cool: [20, 16, 40], k: 1 });
-  if (phoneUp > 0.05) PR.phone(ctx, R.hand[0] - 10, R.hand[1] - 60, 0.72, { rot: -0.2, on: phoneUp, draw: (c, w, h) => { S.vgrad(c, [[0, [30, 34, 54]], [1, [14, 16, 28]]], 0, h, 0, w); K.text(c, '22:47', w / 2, 90, { size: 54, family: 'ESSans', weight: 500, color: [230, 236, 250] }); c.fillStyle = 'rgba(255,255,255,0.1)'; c.beginPath(); c.roundRect(14, h / 2 - 34, w - 28, 68, 18); c.fill(); K.text(c, '没有新消息', w / 2, h / 2 + 12, { size: 34, family: 'ESSans', weight: 700, color: [170, 180, 200] }); } });
-  ctx.restore();
-  return { C };
+  const alone = smooth(prog(t, T.alone - 0.3, T.alone + 0.9)), uneasy = smooth(prog(t, T.uneasy - 0.4, T.uneasy + 0.3));
+  NE.bg(ctx, t, { c1: mix([12, 30, 40], [14, 18, 40], alone), haze: mix(NE.GOLD, NE.ICE, alone) });
+  NE.floor(ctx, 1300, mix(NE.GOLD, NE.ICE, alone), 1);
+  const col = mix(NE.GOLD, NE.ICE, alone);
+  const R = NE.wire(ctx, c => ES.hero(c, 540, 1300, 1.0, { t, umbrella: false, cake: false, book: false, eyes: alone > 0.5 ? 'closed' : 'happy', mouth: alone > 0.5 ? 'flat' : 'smile', nod: 0.9 * alone, lean: 0.06 * alone, rs: -0.3 * (1 - alone) }), { c: col, w: 3, p: prog(t, A2, A2 + 0.9), a: 1 - 0.35 * alone });
+  if (!R) return { C: { x: 0, y: 0, z: 1 } };
+  const N = 8, cx = 540, cy = 860;
+  for (let i = 0; i < N; i++) {
+    const an = (150 + i * (240 / (N - 1))) * Math.PI / 180 + Math.sin(t * 0.3 + i) * 0.03, r = 400 + alone * (220 + 80 * Math.sin(i * 1.7)), x = cx + Math.cos(an) * r, y = cy + Math.sin(an) * r * 0.9;
+    const born = prog(t, A2 + 0.3 + i * 0.12, A2 + 0.9 + i * 0.12), fade = 1 - alone * 0.85;
+    const lp = born * (1 - smooth(prog(t, T.alone - 0.2 + i * 0.06, T.alone + 0.6 + i * 0.06)));
+    if (lp > 0.01) NE.line(ctx, [[x, y], [R.chest[0], R.chest[1]]].map(q => q).reverse(), lp, mix(NE.GOLD, NE.ICE, alone), 2.5, 0.7, { head: false });
+    if (born > 0) { ctx.save(); ctx.fillStyle = `rgba(4,14,20,${0.85 * born * fade})`; ctx.beginPath(); ctx.arc(x, y, 58, 0, 6.2832); ctx.fill(); ctx.restore(); NE.line(ctx, NE.arcPts(x, y, 58, 0, Math.PI * 2, 36), born, col, 2, 0.7 * fade, { head: false }); NE.icon(ctx, 'person', x, y + 4, 0.62, born, mix([255, 230, 190], NE.ICE, alone), fade, t, 3); }
+  }
+  // 心跳线（头顶上方横穿画面）
+  const pts = NE.sample(u => { const x = 60 + u * 960, ph = u * 7 - t * 1.4, k = ph - Math.floor(ph), calm = k > 0.45 && k < 0.55 ? Math.sin((k - 0.45) * 10 * Math.PI) * 70 : 0, jit = (Math.sin(u * 91 + t * 23) * 0.6 + Math.sin(u * 37 - t * 17) * 0.4) * 90 * Math.abs(Math.sin(u * 13 + t * 5)); return [x, 330 - lerp(calm, jit, uneasy)]; }, 160);
+  NE.line(ctx, pts, prog(t, A2 + 0.2, A2 + 1.2), mix(mix(NE.GOLD, NE.ICE, alone), NE.ROSE, uneasy), 3, 0.9, { head: false });
+  return { C: { x: 0, y: 0, z: 1 } };
 }
 // ================= 幕三：医院候诊室 =================
 const WROOM = S.lazy(() => S.bake(W + PAD * 2, H + PAD, c => {
@@ -194,7 +201,7 @@ function act4(ctx, t) {
 function draw(ctx, t) {
   let st;
   if (t < A2 + 0.7) st = act1(ctx, t);
-  if (t >= A2 && t < A3 + 0.7) S.group(ctx, smooth(prog(t, A2, A2 + 0.7)), c => { st = act2(c, t); });
+  if (t >= A2 && t < A3 + 0.7) S.group(ctx, smooth(prog(t, A2, A2 + 0.7)), c => { NE.batch(c, () => { st = act2(c, t); }); });
   if (t >= A3 && t < A4 + 0.7) S.group(ctx, smooth(prog(t, A3, A3 + 0.7)), c => { st = act3(c, t); });
   if (t >= A4) S.group(ctx, smooth(prog(t, A4, A4 + 0.7)), c => { st = act4(c, t); });
   return st;

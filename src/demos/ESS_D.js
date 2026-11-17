@@ -12,6 +12,7 @@ const PR = require('./ESS_props');
 const SET = require('./ESS_set');
 const QT = require('./ESS_quote');
 const TP = require('./ESS_type');
+const NE = require('./ESS_neon');
 const CT = require('./ESS_city');
 const DSKY = S.lazy(() => CT.skyline({ w: 900, h: 700, seed: 21, sky: [[14, 18, 44], [44, 40, 86]], fog: [70, 60, 110], base: [30, 26, 56], lit: 0.04, ground: 640, blurK: 1.6 }));
 const { K, ES, MB, vs, ve, at } = X;
@@ -35,6 +36,29 @@ function table(ctx) {
 }
 // 菜碟
 function dish(ctx, x, y, s, c, a = 1) { if (a <= 0.003) return; ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.scale(s, s); PR.contact(ctx, 0, 4, 120, 0.4); ctx.fillStyle = 'rgb(250,248,240)'; ctx.beginPath(); ctx.ellipse(0, 0, 120, 34, 0, 0, 6.2832); ctx.fill(); ctx.fillStyle = 'rgb(214,206,196)'; ctx.beginPath(); ctx.ellipse(0, -4, 92, 24, 0, 0, 6.2832); ctx.fill(); ctx.fillStyle = rgba(c); ctx.beginPath(); ctx.ellipse(0, -12, 70, 22, 0, 0, 6.2832); ctx.fill(); ctx.fillStyle = rgba(mix(c, [255, 255, 255], 0.35)); for (let k = 0; k < 6; k++) { ctx.beginPath(); ctx.ellipse(-40 + k * 16, -18 - (k % 2) * 6, 10, 6, k, 0, 6.2832); ctx.fill(); } ctx.restore(); }
+// D03–D04（2026-11-17 第二轮）：切进霓虹线稿 —— 一道红色锯齿闪电（批评）打在他胸口，碎线往下掉，他的线稿从金色褪成冷灰蓝、塌下去，
+//   头顶落下一根根冷色的线（消沉好久）；「我需要你」消息卡弹出；「打起精神」：胸口放射金光，金色从头到脚重新描一遍，他站直，身后一圈金环
+const NA = [T.d03 - 0.45, T.d04e + 0.5];
+function neonLow(ctx, t) {
+  const hit = T.d03 + 0.33, drain = smooth(prog(t, hit, hit + 1.4)), up = easeInOut(prog(t, T.up - 0.15, T.up + 0.9)), low = drain * (1 - up);
+  const DIM = [90, 110, 150], col = mix(NE.GOLD, DIM, drain);
+  NE.bg(ctx, t, { c1: mix([30, 26, 20], [12, 16, 32], drain), haze: mix(NE.GOLD, DIM, low) });
+  NE.floor(ctx, 1300, mix(NE.GOLD, DIM, low), 1 - 0.5 * low);
+  // 消沉：头顶落下的冷色线
+  if (low > 0.02) lit0(ctx, l => { l.strokeStyle = `rgba(150,170,220,${0.35 * low})`; l.lineWidth = 2; for (let k = 0; k < 26; k++) { const x = 120 + hash(k * 3.3) * 840, ph = (t * (0.35 + hash(k) * 0.3) + hash(k * 7.1)) % 1, y = 200 + ph * 1100; l.beginPath(); l.moveTo(x, y); l.lineTo(x, y + 90 + hash(k * 2) * 80); l.stroke(); } });
+  const pose = { t, umbrella: false, cake: false, book: false, eyes: low > 0.4 ? 'closed' : 'happy', mouth: low > 0.4 ? 'frown' : 'grin', nod: 1.3 * low, lean: 0.2 * low, rs: -0.4 * (1 - low) - 1.6 * Math.sin(Math.PI * clamp(up * 1.2)) };
+  const R = NE.wire(ctx, c => ES.hero(c, 520, 1300, 1.05, pose), { c: col, w: 3, p: prog(t, NA[0], NA[0] + 0.6), a: 1 - 0.4 * low });
+  if (!R) return;
+  if (up > 0.01) NE.wire(ctx, c => ES.hero(c, 520, 1300, 1.05, pose), { c: NE.GOLD, w: 3.5, p: up, fillA: 0 });
+  // 红色闪电：从左上角劈到胸口
+  const bolt = prog(t, hit - 0.25, hit), boltA = 1 - smooth(prog(t, hit + 0.2, hit + 1.0));
+  if (bolt > 0 && boltA > 0.01) { const a0 = [70, 300], b0 = R.chest, pts = NE.sample(u => [lerp(a0[0], b0[0], u) + (u > 0 && u < 1 ? (hash(Math.floor(u * 9)) - 0.5) * 120 : 0), lerp(a0[1], b0[1], u)], 9); NE.line(ctx, pts, bolt, NE.ROSE, 6, boltA); }
+  // 碎线：被打中的那一下，胸口炸出一把短线往下掉
+  { const p = prog(t, hit, hit + 1.6); if (p > 0 && p < 1) lit0(ctx, l => { l.strokeStyle = rgba(mix(NE.ROSE, NE.GOLD, 0.3), 1 - p); l.lineWidth = 3; l.lineCap = 'round'; for (let k = 0; k < 14; k++) { const an = hash(k * 5.1) * Math.PI * 2, v = 260 + hash(k * 2.7) * 380, x = R.chest[0] + Math.cos(an) * v * p, y = R.chest[1] + Math.sin(an) * v * p + 900 * p * p, ro = an + p * 6; l.beginPath(); l.moveTo(x, y); l.lineTo(x + Math.cos(ro) * 34, y + Math.sin(ro) * 34); l.stroke(); } }); }
+  // 打起精神：放射金光 + 金环
+  if (up > 0.01) { NE.rays(ctx, R.chest[0], R.chest[1], up, NE.GOLD, 1 - 0.5 * smooth(prog(t, T.up + 0.8, NA[1]))); NE.orbit(ctx, 540, 960, 380, up, t, NE.GOLD, 0.9); }
+}
+function lit0(ctx, fn) { NE.lit(ctx, fn, { glowA: 0.6 }); }
 function draw(ctx, t) {
   // 镜头：D01 脸部特写 → D02 中景 → D03 远景（他一个人）→ D04 慢慢推近 → D05 手机特写 → D06 中景
   const C = S.camKF(t, [[T.in, { x: 140, y: -330, z: 2.2, ax: 540, ay: 1000 }], [T.d02 - 0.2, { x: 140, y: -320, z: 2.1 }], [T.d02 + 0.8, { x: 60, y: -40, z: 1.2 }], [T.d03 - 0.1, { x: 60, y: -40, z: 1.22 }], [T.d03 + 1.0, { x: 0, y: -60, z: 0.92 }], [T.d04 - 0.2, { x: 0, y: -60, z: 0.94 }], [T.d04e, { x: 80, y: -120, z: 1.24 }],
@@ -100,6 +124,8 @@ function draw(ctx, t) {
   // D06：杯子被碰倒（朋友回来时）
   const cupU = prog(t, T.err - 0.2, T.err + 0.6); if (comeBack > 0.01) { const fall = easeIn(clamp(cupU * 1.6)); ctx.save(); ctx.translate(820, TB - 40); ctx.rotate(fall * 1.5); ctx.globalAlpha = comeBack; PR.mug(ctx, 0, 0, 0.6, t, { c: [130, 180, 230], hot: 0 }); ctx.restore(); if (cupU > 0.6) { ctx.save(); ctx.globalAlpha = comeBack * smooth(prog(cupU, 0.6, 1)); ctx.fillStyle = 'rgba(150,190,230,0.55)'; ctx.beginPath(); ctx.ellipse(900, TB - 26, 110 * smooth(prog(cupU, 0.6, 1)), 14, 0, 0, 6.2832); ctx.fill(); ctx.restore(); } }
   ctx.restore();
+  const na = K.vis(t, NA[0], NA[1], 0.45, 0.5);
+  if (na > 0.003) S.group(ctx, na, c => NE.batch(c, () => neonLow(c, t)));
   return { C };
 }
 function over(ctx, t) {

@@ -14,12 +14,13 @@ const S = require('./ESS_kit');
 const PR = require('./ESS_props');
 const SET = require('./ESS_set');
 const TP = require('./ESS_type');
+const NE = require('./ESS_neon');
 const { K, ES, MB, vs, ve, at } = X;
 const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash, mulberry32 } = K;
 const glow = S.glow;
 
 const T = { in: vs('F01') - 0.9, f01: vs('F01'), eat: at('F01', '吃穿住'), f02: vs('F02'), rule: at('F02', '该做'), agree: at('F02', '意见一致'), f03: vs('F03'), mate: at('F03', '伴侣'), bday: at('F03', '生日'),
-  f04: vs('F04'), istp: at('F04', 'ISTP'), f05: vs('F05'), adv: at('F05', '冒险'), tired: at('F05', '闯够'), home: at('F05', '迎他们'), f06: vs('F06'), keep: at('F06', '把家守好'), f07: vs('F07'), wrong: at('F07', '委屈'), strict: at('F07', '严格'),
+  f04: vs('F04'), istp: at('F04', 'ISTP'), f05: vs('F05'), adv: at('F05', '冒险'), tired: at('F05', '闯够'), home: at('F05', '迎他们'), f06: vs('F06'), f06e: ve('F06'), out: at('F06', '外面闯'), guard: at('F06', '把家守好'), match: at('F06', '互补'), keep: at('F06', '把家守好'), f07: vs('F07'), wrong: at('F07', '委屈'), strict: at('F07', '严格'),
   f08: vs('F08'), polite: at('F08', '有礼貌'), rude: at('F08', '没礼貌'), awk: at('F08', '尴尬'), end: vs('G01') };
 const PAD = SET.PAD, FY = 1040, GY = 1290, LAMP = [460, 600], DOOR = [940, 1060], WARM = [255, 200, 130];
 const HOUSE = S.lazy(() => S.bake(W + PAD * 2, H + PAD, c => {
@@ -69,6 +70,31 @@ function cake(ctx, x, y, s, t, a) { if (a <= 0.003) return; ctx.save(); ctx.glob
   const g = ctx.createLinearGradient(-90, 0, 90, 0); g.addColorStop(0, 'rgb(240,200,210)'); g.addColorStop(0.5, 'rgb(255,236,240)'); g.addColorStop(1, 'rgb(220,170,190)'); ctx.fillStyle = g; ctx.fillRect(-90, -110, 180, 110); ctx.fillStyle = 'rgb(255,250,250)'; ctx.beginPath(); ctx.ellipse(0, -110, 90, 20, 0, 0, 6.2832); ctx.fill(); ctx.fillStyle = 'rgb(236,90,110)'; for (let k = 0; k < 6; k++) { ctx.beginPath(); ctx.arc(-70 + k * 28, -114, 10, 0, 6.2832); ctx.fill(); }
   ctx.restore(); for (let k = 0; k < 3; k++) PR.candle(ctx, x + (-30 + k * 30) * s, y - 116 * s, 0.32 * s, t + k, { len: 0.7, a }); }
 const KID = 'enfp-male', MATE = 'esfp-female', ISTP = 'istp-male', GUEST = 'estj-female';
+// F06（2026-11-17 第二轮）：霓虹线稿 —— 金色的家先描出来（他站在门口）；一条青色的路从家门口蜿蜒出去，爬上远处的山脊（ISTP 在外面闯）；
+//   路绕一圈又回到家门口，ISTP 的线稿走回来；「互补」：一圈环从两边同时描过来，一半金一半青，在顶上合上
+const FN = [T.f06 - 0.35, T.f06e + 0.6];
+const chaikin = (pts, n = 3) => { for (let k = 0; k < n; k++) { const o = [pts[0]]; for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i + 1]; o.push([a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25], [a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75]); } o.push(pts[pts.length - 1]); pts = o; } return pts; };
+const ROAD_OUT = chaikin([[560, 1222], [720, 1262], [900, 1150], [940, 900], [810, 720], [870, 560], [760, 470]]), ROAD_BACK = chaikin([[760, 470], [520, 430], [300, 520], [150, 720], [210, 960], [170, 1150], [340, 1262], [520, 1222]]);
+function neonPair(ctx, t) {
+  NE.bg(ctx, t, { c0: [10, 10, 16], c1: [26, 22, 30], haze: [255, 200, 140] });
+  NE.floor(ctx, 1262, NE.GOLD, 0.7);
+  const hp = prog(t, FN[0] + 0.15, FN[0] + 1.0);
+  if (hp > 0) { const gl = smooth(prog(t, T.guard - 0.2, T.guard + 0.6)); ctx.save(); ctx.fillStyle = `rgba(255,190,110,${(0.18 + 0.2 * gl) * smooth(prog(hp, 0.6, 1))})`; ctx.fillRect(540 - 62 * 2.4 + 14, 1050 - 24 * 2.4 + 14, 124 * 2.4 - 28, 94 * 2.4 - 20); ctx.restore(); S.add(ctx, () => glow(ctx, 540, 1080, 420, NE.GOLD, 0.12 + 0.18 * gl)); NE.icon(ctx, 'house', 540, 1050, 2.4, hp, NE.GOLD, 1, t, 4); }
+  // 山脊
+  const ridge = NE.sample(u => [80 + u * 920, 470 - Math.abs(Math.sin(u * 5.2 + 0.6)) * 150 - Math.sin(u * 13) * 18], 60);
+  NE.line(ctx, ridge, prog(t, T.out - 0.1, T.out + 0.9), NE.TEAL, 3, 0.55, { head: false });
+  NE.line(ctx, ROAD_OUT, prog(t, T.out - 0.35, T.out + 0.75), NE.TEAL, 4, 1);
+  NE.line(ctx, ROAD_BACK, prog(t, T.guard, T.match - 0.6), NE.TEAL, 4, 1);
+  NE.wire(ctx, c => ES.hero(c, 470, 1262, 0.44, { umbrella: false, cake: false, book: false, eyes: 'happy', mouth: 'smile', rs: -0.8 * smooth(prog(t, T.match - 0.6, T.match)) }), { c: NE.GOLD, w: 2.5, p: prog(t, FN[0] + 0.5, FN[0] + 1.2) });
+  // ISTP：沿路走出去 → 绕回来（走在路上的小线稿）
+  const along = (pts, u) => { const L = []; let tot = 0; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); L.push(d); tot += d; } let want = tot * clamp(u); for (let i = 1; i < pts.length; i++) { if (want <= L[i - 1]) { const k = want / L[i - 1]; return [lerp(pts[i - 1][0], pts[i][0], k), lerp(pts[i - 1][1], pts[i][1], k)]; } want -= L[i - 1]; } return pts[pts.length - 1]; };
+  const goOut = prog(t, T.out - 0.2, T.out + 0.8), back = prog(t, T.guard + 0.05, T.match - 0.6);
+  const pos = back > 0 ? along(ROAD_BACK, easeInOut(back)) : along(ROAD_OUT, easeInOut(goOut)), sc = back >= 1 ? 1.0 : 0.62 - 0.25 * Math.sin(Math.PI * (back > 0 ? 1 - back : goOut)) * 0.8;
+  if (goOut > 0) NE.wire(ctx, c => MB.person(c, ISTP, back >= 1 ? 640 : pos[0], back >= 1 ? 1262 : pos[1] + 10, back >= 1 ? 1.05 : sc, { shadow: 0, flip: back >= 1 }), { c: NE.TEAL, w: 2, p: 1 });
+  // 互补：一圈环从左右两边同时描过来，左半金、右半青
+  const m = easeInOut(prog(t, T.match - 0.65, T.match + 0.15));
+  if (m > 0) { NE.line(ctx, NE.arcPts(540, 880, 470, Math.PI / 2, Math.PI / 2 + Math.PI * m, 80), 1, NE.GOLD, 4, 1, { head: false }); NE.line(ctx, NE.arcPts(540, 880, 470, Math.PI / 2, Math.PI / 2 - Math.PI * m, 80), 1, NE.TEAL, 4, 1, { head: false }); if (m >= 1) NE.rays(ctx, 540, 410, prog(t, T.match + 0.5, FN[1]), [255, 230, 190], 0.6, 14, 400); }
+}
 function draw(ctx, t) {
   const C = S.camKF(t, [[T.in, { x: 200, y: 110, z: 1.45, ax: 540, ay: 1000 }], [T.eat + 0.4, { x: 200, y: 100, z: 1.42 }], [T.f02 + 0.3, { x: -120, y: -100, z: 1.12 }], [T.agree + 0.6, { x: 0, y: -40, z: 1.0 }], [T.f03 + 0.4, { x: 0, y: -60, z: 1.08 }], [T.bday + 1.0, { x: -40, y: -20, z: 1.26 }],
     [T.f04 - 0.1, { x: 200, y: -40, z: 1.14 }], [T.adv + 0.5, { x: 300, y: -80, z: 1.42 }], [T.home + 0.6, { x: 180, y: -40, z: 1.1 }], [T.keep + 0.6, { x: 60, y: -30, z: 1.04 }], [T.f07 + 0.4, { x: -60, y: -20, z: 1.14 }], [T.strict + 0.8, { x: -120, y: -40, z: 1.18 }], [T.f08 + 0.3, { x: 100, y: -20, z: 1.02 }], [T.awk + 0.3, { x: 80, y: -60, z: 1.24 }], [T.end, { x: 80, y: -60, z: 1.28 }]]);
@@ -143,6 +169,8 @@ function draw(ctx, t) {
   ctx.restore();
   // 冷场：整个画面冷下去 + 一阵冷风
   if (cold > 0.01) { ctx.fillStyle = `rgba(30,50,90,${0.36 * cold})`; ctx.fillRect(0, 0, W, H); S.petals(ctx, t, { n: 16, seed: 23, dir: [1, 0.1], speed: 700, a: cold * (1 - smooth(prog(t, T.awk, T.awk + 0.6))), c: [200, 220, 255], c2: [240, 250, 255], size: 12, box: [-100, 300, W + 100, 1300] }); }
+  const nfa = K.vis(t, FN[0], FN[1], 0.35, 0.4);
+  if (nfa > 0.003) S.group(ctx, nfa, c => NE.batch(c, () => neonPair(c, t)));
   return { C };
 }
 function over(ctx, t) {

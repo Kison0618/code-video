@@ -12,12 +12,13 @@ const PR = require('./ESS_props');
 const SET = require('./ESS_set');
 const TP = require('./ESS_type');
 const AA = require('./ESS_A');
+const NE = require('./ESS_neon');
 const CT = require('./ESS_city');
 const { K, ES, MB, vs, ve, at } = X;
 const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash, mulberry32 } = K;
 const glow = S.glow;
 
-const T = { in: vs('E01') - 0.9, e01: vs('E01'), e02: vs('E02'), detail: at('E02', '安排'), tire: at('E02', '不知疲倦'), e03: vs('E03'), buy: at('E03', '顾客'), heart: at('E03', '热心'), e04: vs('E04'), boss: at('E04', '上司'), order: at('E04', '有条理'), loyal: at('E04', '忠心'), perfect: at('E04', '完美的下属'),
+const T = { in: vs('E01') - 0.9, e01: vs('E01'), care: at('E01', '在意'), work: at('E01', '工作'), e02: vs('E02'), detail: at('E02', '安排'), tire: at('E02', '不知疲倦'), e03: vs('E03'), buy: at('E03', '顾客'), heart: at('E03', '热心'), e04: vs('E04'), boss: at('E04', '上司'), order: at('E04', '有条理'), loyal: at('E04', '忠心'), perfect: at('E04', '完美的下属'),
   e05: vs('E05'), jobs: at('E05', '老师'), end: vs('F01') };
 // 楼的世界坐标：三层，每层高 FL，楼宽 BWID；镜头在楼里上下移动
 const FL = 1700, BWID = 1400, BX = -160, BT = 0;   // 楼左上角 (BX, BT)，楼层 k 的地板 y = BT + (k+1)*FL
@@ -72,8 +73,7 @@ const STREET = S.lazy(() => S.bake(2250, 2100, c => { c.scale(0.25, 0.25); c.tra
 // ---------- 镜头：楼里上下移动 ----------
 const fy = k => floorY(k) - 1180;   // 让这层地板落在屏幕 y≈1300（字幕区之上一点）
 const CAM = [
-  [T.in, { x: 140, y: fy(1) - 200, z: 1.0, ax: 540, ay: 1000 }], [T.e01 + 0.9, { x: 140, y: fy(1), z: 1.0 }],
-  [T.e02 - 0.2, { x: 100, y: fy(1), z: 1.02 }], [T.detail + 0.6, { x: -40, y: fy(1) - 60, z: 1.12 }], [T.e03 - 0.7, { x: -20, y: fy(1) - 40, z: 1.1 }],
+  [T.in, { x: 0, y: 1700, z: 0.33, ax: 540, ay: 1000 }], [T.e01 + 2.25, { x: 0, y: 1760, z: 0.36 }], [T.e02 + 0.35, { x: 100, y: fy(1), z: 1.02 }, easeInOut], [T.detail + 0.6, { x: -40, y: fy(1) - 60, z: 1.12 }], [T.e03 - 0.7, { x: -20, y: fy(1) - 40, z: 1.1 }],
   [T.e03 + 0.5, { x: 60, y: fy(0), z: 1.04 }, easeInOut], [T.buy + 0.3, { x: -170, y: fy(0) - 280, z: 1.3 }], [T.heart - 0.5, { x: -120, y: fy(0) - 260, z: 1.28 }], [T.heart + 0.4, { x: 200, y: fy(0) - 250, z: 1.26 }], [Math.max(T.heart + 0.6, T.e04 - 0.6), { x: 140, y: fy(0) - 120, z: 1.12 }],
   [T.e04 + 0.5, { x: 60, y: fy(2), z: 1.04 }], [T.order + 0.2, { x: 0, y: fy(2) - 120, z: 1.14 }], [T.perfect - 0.1, { x: 80, y: fy(2) - 300, z: 1.28 }], [T.e05 - 0.3, { x: 60, y: fy(2) - 200, z: 1.18 }],
   [T.e05 + 1.6, { x: 140, y: floorY(1) - 1500, z: 0.36 }], [T.end, { x: 140, y: floorY(1) - 1500, z: 0.34 }],
@@ -130,7 +130,44 @@ function draw(ctx, t) {
   ctx.restore();
   // 前景：近处虚化的绿植（只在楼里的镜头里，拉远时退掉）
   { const fa = smooth(clamp((C.z - 0.8) / 0.2)); if (fa > 0.01) { ctx.save(); ctx.globalAlpha = 0.9 * fa; ctx.drawImage(SET.FGLEAF(), -170 - (C.x || 0) * 0.25, 1080, 700, 800); ctx.restore(); } }
+  const ba = 1 - smooth(prog(t, T.e01 + 2.2, T.e01 + 2.7));
+  if (ba > 0.003) S.group(ctx, ba, c => NE.batch(c, () => blueprint(c, t, C)));
   return { C };
+}
+// E01（2026-11-17 第二轮）：整栋楼先是一张发光的图纸 —— 外墙、楼板、窗、门、家具、尺寸线一笔笔画出来；
+//   「这份在意」：一颗金色的心在楼前描出来，落进一层的门；「放进工作里」：心落进去的地方亮起来；
+//   「就成了长处」：一道扫描线从下往上扫过，扫过的地方图纸变成真实的楼
+function blueprint(ctx, t, C) {
+  const t0 = T.in + 0.15, scan = easeInOut(prog(t, T.e01 + 1.25, T.e01 + 2.35)), z = C.z || 1, w = 3 / z;
+  const toS = (x, y) => S.w2s(C, x, y), yScan = lerp(toS(0, floorY(0) + 60)[1], toS(0, BT - 200)[1], scan);
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, yScan); ctx.clip();
+  NE.bg(ctx, t, { c0: [4, 10, 24], c1: [10, 26, 52], haze: [120, 180, 255] });
+  ctx.save(); S.cam(ctx, C, 1);
+  const BL = [150, 210, 255], L = (pts, a0, a1, c = BL, ww = w) => NE.line(ctx, pts, prog(t, a0, a1), c, ww, 0.9, { head: true });
+  const R = (x, y, ww, hh) => [[x, y], [x + ww, y], [x + ww, y + hh], [x, y + hh], [x, y]];
+  L(R(BX - 60, BT - 90, BWID + 120, FL * 3 + 90), t0, t0 + 1.0, BL, w * 1.4);
+  for (let k = 0; k < 3; k++) { const y1 = floorY(k), d = t0 + 0.3 + (2 - k) * 0.25;
+    L([[BX, y1], [BX + BWID, y1]], d, d + 0.6); L(R(BX + 1000, y1 - 960, 340, 540), d + 0.3, d + 0.9); L([[BX + 1170, y1 - 960], [BX + 1170, y1 - 420]], d + 0.6, d + 1.0);
+    for (const lx of [BX + 300, BX + 800]) L([[lx - 80, y1 - 1090], [lx - 30, y1 - 1150], [lx + 30, y1 - 1150], [lx + 80, y1 - 1090], [lx - 80, y1 - 1090]], d + 0.5, d + 0.9); }
+  { const y1 = floorY(0); L(R(BX + 860, y1 - 280, 400, 220), t0 + 1.0, t0 + 1.5); L(R(BX + 80, y1 - 720, 420, 14), t0 + 1.0, t0 + 1.4); L(R(BX + 80, y1 - 540, 420, 14), t0 + 1.1, t0 + 1.5); L(R(BX + 560, y1 - 900, 400, 110), t0 + 1.2, t0 + 1.6);
+    L(R(BX + 40, y1 - 640, 220, 640), t0 + 0.6, t0 + 1.2, NE.GOLD); }
+  { const y1 = floorY(1); L(R(BX + 100, y1 - 860, 640, 420), t0 + 0.9, t0 + 1.5); L(R(BX + 840 - 70, y1 - 890, 140, 140), t0 + 1.2, t0 + 1.6); }
+  { const y1 = floorY(2); L(R(BX + 140, y1 - 330, 560, 40), t0 + 0.8, t0 + 1.3); L(R(BX + 520, y1 - 860, 420, 360), t0 + 0.9, t0 + 1.5); L(R(BX + 100, y1 - 760, 360, 14), t0 + 1.0, t0 + 1.4); }
+  // 左右邻楼的轮廓（更淡、更晚）
+  for (const [x0, ww, hh] of [[BX - 1160, 760, 4300], [BX + BWID + 260, 820, 4700]]) { const top = floorY(0) - hh; L(R(x0, top, ww, hh), t0 + 0.7, t0 + 1.6, [90, 140, 210], w * 0.9); for (let k = 1; k < 12; k++) L([[x0, top + k * hh / 12], [x0 + ww, top + k * hh / 12]], t0 + 1.0 + k * 0.04, t0 + 1.5 + k * 0.04, [70, 110, 180], w * 0.6); }
+  // 尺寸线（左侧，带刻度）
+  L([[BX - 220, BT], [BX - 220, floorY(0)]], t0 + 0.4, t0 + 1.3, BL, w * 0.8);
+  for (let k = 0; k <= 3; k++) L([[BX - 260, BT + k * FL], [BX - 180, BT + k * FL]], t0 + 0.8 + k * 0.1, t0 + 1.0 + k * 0.1, BL, w * 0.8);
+  // 金色的心：楼前描出来 → 落进一层的门
+  const hp = prog(t, T.care - 0.35, T.care + 0.35), drop = easeInOut(prog(t, T.work - 0.6, T.work + 0.1)), door = [BX + 150, floorY(0) - 320];
+  if (hp > 0) { const hx = lerp(540, door[0], drop), hy = lerp(floorY(1) - 600, door[1], drop), sc = lerp(5.5, 1.6, drop); NE.icon(ctx, 'heart', hx, hy, sc, hp, NE.GOLD, 1 - smooth(prog(t, T.work + 0.05, T.work + 0.4)), t, w * 1.6); }
+  const lit = smooth(prog(t, T.work - 0.05, T.work + 0.5)); if (lit > 0.01) S.add(ctx, () => { glow(ctx, door[0], door[1], 900, NE.GOLD, 0.35 * lit); });
+  ctx.restore();
+  // 楼层标签（屏幕空间，够大）
+  [['1F', '门店', 0], ['2F', '团队', 1], ['3F', '上司', 2]].forEach(([a1, b1, k], i) => { const p = smooth(prog(t, t0 + 0.9 + i * 0.2, t0 + 1.4 + i * 0.2)); if (p <= 0) return; const q = toS(BX + BWID + 60, floorY(k) - FL / 2); NE.tags(ctx, [[a1[0], b1]], q[1], p, [150, 210, 255], 1); });
+  ctx.restore();
+  // 扫描线
+  if (scan > 0 && scan < 1) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createLinearGradient(0, yScan - 60, 0, yScan + 4); g.addColorStop(0, 'rgba(150,210,255,0)'); g.addColorStop(1, 'rgba(200,236,255,0.7)'); ctx.fillStyle = g; ctx.fillRect(0, yScan - 60, W, 64); ctx.restore(); }
 }
 const BEAM = S.lazy(() => SET.beamImg(500, 490, [255, 232, 190], 0.5));
 // E05：拉远后楼外的五个职业 —— 在 over 层（清晰）里用小相框画出来，每个相框里是他在做那份工作

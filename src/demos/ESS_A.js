@@ -12,6 +12,7 @@ const PR = require('./ESS_props');
 const QT = require('./ESS_quote');
 const TY = require('./ESS_type');
 const CT = require('./ESS_city');
+const NE = require('./ESS_neon');
 const { K, ES, MB, vs, ve, at } = X;
 const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash } = K;
 const glow = S.glow;
@@ -153,6 +154,19 @@ function neckScarf(ctx, x, y, s, t, k) {
   ctx.fillStyle = rgba(mix(c, [40, 0, 10], 0.2)); ctx.beginPath(); ctx.ellipse(20, 12, 15, 12, 0.3, 0, 6.2832); ctx.fill(); // 结
   ctx.restore();
 }
+// A02 片名：切进霓虹线稿 —— 他的线稿捧着一只金色杯子，热气一缕缕长出来；身后一圈轨道环描出来，环上三个小图标（碗、外套、房子：吃穿住）慢慢转
+function neonTitle(ctx, t) {
+  const t0 = T.a02 - 0.1;
+  NE.bg(ctx, t);
+  NE.floor(ctx, 1300, NE.TEAL, smooth(prog(t, t0, t0 + 0.8)));
+  const cx = 540, cy = 1000, ring = easeInOut(prog(t, t0 + 0.2, t0 + 1.5));
+  NE.orbit(ctx, cx, cy, 340, ring, t, NE.TEAL, 0.9);
+  NE.orbit(ctx, cx, cy, 300, easeInOut(prog(t, t0 + 0.5, t0 + 1.9)), -t, NE.GOLD, 0.35, { ticks: 0, w: 2, dash: [4, 14] });
+  [['bowl', 200], ['coat', 340], ['house', 270]].forEach(([k, deg], i) => { const an = (deg * Math.PI / 180) + t * 0.12, x = cx + Math.cos(an) * 340, y = cy + Math.sin(an) * 340, p = prog(t, t0 + 1.0 + i * 0.25, t0 + 1.8 + i * 0.25);
+    if (p > 0) { ctx.save(); ctx.fillStyle = `rgba(4,14,20,${0.9 * smooth(p)})`; ctx.beginPath(); ctx.arc(x, y, 62, 0, 6.2832); ctx.fill(); ctx.restore(); NE.line(ctx, NE.arcPts(x, y, 62, 0, Math.PI * 2, 40), p, NE.TEAL, 2, 0.8, { head: false }); NE.icon(ctx, k, x, y, 0.38, p, NE.GOLD, 1, t, 3); } });
+  const R = NE.wire(ctx, c => ES.hero(c, cx - 60, 1300, 1.02, { umbrella: false, cake: false, book: false, rs: -0.55, re: -0.85, eyes: 'happy', mouth: 'smile' }), { c: NE.TEAL, w: 3, p: prog(t, t0, t0 + 1.3) });
+  if (R) { const p = prog(t, t0 + 0.9, t0 + 1.5); NE.icon(ctx, 'mug', R.hand[0] + 6, R.hand[1] + 10, 0.42, p, NE.GOLD, 1, t, 4); if (p >= 1) NE.icon(ctx, 'steam', R.hand[0] + 6, R.hand[1] + 10, 0.42, 1, NE.GOLD, 0.8 * smooth(prog(t, t0 + 1.5, t0 + 2.0)), t, 3); S.add(ctx, () => glow(ctx, R.hand[0], R.hand[1], 220, NE.GOLD, 0.18 * p)); }
+}
 function draw(ctx, t) {
   const C = S.camKF(t, CAM);
   const push = easeIn(prog(t, T.end - 1.9, T.end - 0.1));
@@ -204,6 +218,8 @@ function draw(ctx, t) {
   ctx.restore();
   S.rain(ctx, t, { a: 0.85, n: 120 });
   ctx.restore();
+  const nA = K.vis(t, T.a02 - 0.15, T.a03 - 0.05, 0.4, 0.4);
+  if (nA > 0.003) S.group(ctx, nA, c => NE.batch(c, () => neonTitle(c, t)));
   return { C };
 }
 // 帆布包（米色，包口露出一截保温杯盖、一角布）
@@ -219,12 +235,18 @@ function canvasBag(ctx, x, y, s, t) {
 }
 function over(ctx, t) {
   // A02：画面上方金箔大字（逐字升起 + 扫光），压一条柔和的暗底让字立得住
-  const a = K.vis(t, T.a02 + 0.1, T.a03 + 0.1, 0.3, 0.5);
+  const a = K.vis(t, T.a02 + 0.05, T.a03 - 0.05, 0.3, 0.4);
   if (a > 0.003) {
-    const g = ctx.createLinearGradient(0, 120, 0, 700); g.addColorStop(0, `rgba(6,6,16,${0.0})`); g.addColorStop(0.35, `rgba(6,6,16,${0.42 * a})`); g.addColorStop(0.75, `rgba(6,6,16,${0.32 * a})`); g.addColorStop(1, 'rgba(6,6,16,0)'); ctx.fillStyle = g; ctx.fillRect(0, 120, W, 580);
-    TY.foil(ctx, 'ESFJ', W / 2, 400, { size: 210, family: 'Latin', weight: 600, spacing: 0.16, p: prog(t, T.a02 + 0.15, T.a02 + 1.1), sweep: prog(t, T.a02 + 1.3, T.a02 + 2.3), a });
-    TY.foil(ctx, '供给者', W / 2, 590, { size: 116, spacing: 0.42, p: prog(t, T.a02 + 0.8, T.a02 + 1.8), sweep: prog(t, T.a02 + 1.6, T.a02 + 2.6), a, glowA: 0.4 });
+    TY.foil(ctx, 'ESFJ', W / 2, 300, { size: 190, family: 'Latin', weight: 600, spacing: 0.16, p: prog(t, T.a02 + 0.15, T.a02 + 1.1), sweep: prog(t, T.a02 + 1.3, T.a02 + 2.3), a });
+    TY.foil(ctx, '供给者', W / 2, 466, { size: 112, spacing: 0.42, p: prog(t, T.a02 + 0.6, T.a02 + 1.5), sweep: prog(t, T.a02 + 1.6, T.a02 + 2.6), a, glowA: 0.4 });
+    NE.tags(ctx, [['E', '外向'], ['S', '实感'], ['F', '情感'], ['J', '判断']], 570, prog(t, T.a02 + 1.1, T.a02 + 2.0), NE.TEAL, a);
   }
   QT.draw(ctx, t, { y: 230 });
 }
-module.exports = { draw, over, T, scene, umbrella, neckScarf, flyingScarf, canvasBag, GY, LAMP };
+// 第 6 章用：对面楼此刻亮着（被 city 点亮）的窗，在屏幕上的位置
+function cityWins(C, city) {
+  const F = FAC(), out = [];
+  for (const u of F.units) { if (u.on || (u.i === MYW[0] && u.j === MYW[1])) continue; const on = smooth(prog(city, hash(u.i * 3 + u.j * 7) * 0.7, hash(u.i * 3 + u.j * 7) * 0.7 + 0.3)); if (on > 0.05) out.push([...S.w2s(C, FX + 30 + u.i * F.uw + F.uw / 2, FY + 20 + u.j * F.uh + F.uh * 0.43, 0.6), on]); }
+  return out;
+}
+module.exports = { cityWins, draw, over, T, scene, umbrella, neckScarf, flyingScarf, canvasBag, GY, LAMP };

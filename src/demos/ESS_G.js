@@ -12,6 +12,7 @@ const PR = require('./ESS_props');
 const QT = require('./ESS_quote');
 const A = require('./ESS_A');
 const TP = require('./ESS_type');
+const NE = require('./ESS_neon');
 let HEAD = null; // 她头顶在屏幕上的位置（over 里画「谢谢你」气泡用）
 const { K, L, ES, MB, vs, ve, at } = X;
 const { W, H, clamp, lerp, prog, smooth, easeOut, easeIn, easeInOut, rgba, mix, hash, mulberry32 } = K;
@@ -55,6 +56,8 @@ function draw(ctx, t) {
   { const p = prog(t, T.thank + 0.2, T.thank + 1.8); if (p > 0 && p < 1) S.ring(ctx, R.chest[0], R.chest[1], 160 + p * 560, 24, [255, 200, 140], 0.2 * (1 - p)); }
   ctx.restore();
   S.rain(ctx, t, { a: 0.85 * (1 - 0.3 * city), n: 110 });
+  // G04：从伞下那一小圈暖光，往对面楼每一扇亮起来的窗连出一根金线（他照顾过的人，都亮着灯）
+  if (city > 0.02) NE.batch(ctx, () => { const src = S.w2s(C, 640, GY - 520, 1); A.cityWins(C, city).forEach(([x, y, on], i) => { const p = smooth(prog(on, 0.2, 1)); if (p > 0) { NE.line(ctx, NE.sample(u => [lerp(src[0], x, u), lerp(src[1], y, u) - Math.sin(u * Math.PI) * 80], 30), p, NE.GOLD, 1.8, 0.4 * (1 - smooth(prog(t, TC, TC + 1.0))), { head: p < 1 }); } }); });
   // 片尾暗下来
   const card = smooth(prog(t, TC, TC + 1.2)); if (card > 0.003) { ctx.fillStyle = `rgba(4,5,14,${0.55 * card})`; ctx.fillRect(0, 0, W, H); }
   if (t > TC) { const Q = targets(); LINES.forEach((Ln, i) => gatherLite(ctx, Q[i], Ln, t)); }

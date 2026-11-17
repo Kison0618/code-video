@@ -99,6 +99,7 @@ function act1(ctx, t) {
 //       珍视感恩：保护者把孩子画的画递给他（画上是他端着蛋糕），他捧着看了好一会儿，转身把画挂到自家门边那面「谢谢墙」正中间 —— 墙上是这些年邻居们给他的照片、卡片、画；
 //       安全感：回屋，关门，特写门锁拧了两圈、挂上链条，他背靠着门松了口气
 const TY = require('./ESS_type');
+const NE = require('./ESS_neon');
 const CT = require('./ESS_city');
 const DOORS = [['estj-male', '监管者', 'ESTJ'], ['istj-male', '检查者', 'ISTJ'], ['isfj-female', '保护者', 'ISFJ'], ['esfj', '供给者', 'ESFJ']];
 const DXS = [300, 900, 1500, 2160], DW = 250, DH = 520, DB = 1150, BULB = [1830, 360], BOARD = [1800, 560, 300, 380], WALLX = 2440;
@@ -276,7 +277,9 @@ function act2b(ctx, t) {
 const BLDF = S.lazy(() => CT.facade({ cols: 4, rows: 8, uw: 280, uh: 240, seed: 41, lit: 0.22, skip: [[1, 2]], wall: [56, 50, 82] }));
 const NEIGH = S.lazy(() => [0, 1, 2, 3].map(k => CT.facade({ cols: 3, rows: 9, uw: 260, uh: 230, seed: 60 + k, lit: 0.08, wall: mix([46, 42, 76], [60, 48, 70], k / 3) })));
 const NSKY = S.lazy(() => CT.skyline({ w: 2400, h: 1800, seed: 9, sky: [[6, 8, 24], [40, 30, 66]], fog: [80, 56, 92], base: [20, 18, 40], lit: 0.06, ground: 1700 }));
+let STARS = [];
 function goldWin(ctx, x, y, uw, uh, on, mine) {
+  { const m = ctx.getTransform(), cx = x + uw / 2, cy = y + uh * 0.43; STARS.push([m.a * cx + m.c * cy + m.e, m.b * cx + m.d * cy + m.f, on, mine]); }
   const ww = uw * 0.56, wh = uh * 0.62, wx = x + (uw - ww) / 2, wy = y + uh * 0.12;
   ctx.save(); ctx.globalAlpha *= on; const g = ctx.createLinearGradient(0, wy, 0, wy + wh); g.addColorStop(0, 'rgb(255,222,150)'); g.addColorStop(1, 'rgb(240,150,80)'); ctx.fillStyle = g; ctx.fillRect(wx, wy, ww, wh);
   ctx.save(); ctx.beginPath(); ctx.rect(wx, wy, ww, wh); ctx.clip(); ES.hero(ctx, wx + ww * 0.55, wy + wh + 14, wh / 560, { umbrella: false, book: false, cake: mine, dim: 0.75, flame: false }); ctx.restore();
@@ -284,6 +287,7 @@ function goldWin(ctx, x, y, uw, uh, on, mine) {
   S.add(ctx, () => glow(ctx, wx + ww / 2, wy + wh / 2, ww * 1.6, [255, 180, 100], 0.3 * on));
 }
 function act3(ctx, t) {
+  STARS = [];
   const pull = easeInOut(prog(t, ACT3 + 0.1, T.more + 0.5)), z = lerp(2.3, 0.6, pull);
   ctx.fillStyle = 'rgb(8,10,26)'; ctx.fillRect(0, 0, W, H);
   const F = BLDF(), N = NEIGH(), mine = [30 + 1 * F.uw + F.uw / 2, 20 + 2 * F.uh + F.uh * 0.43];
@@ -300,6 +304,12 @@ function act3(ctx, t) {
   // 地面的雾
   const fg = ctx.createLinearGradient(0, F.H - 300, 0, F.H + 200); fg.addColorStop(0, 'rgba(60,40,70,0)'); fg.addColorStop(1, 'rgba(60,40,70,0.8)'); ctx.fillStyle = fg; ctx.fillRect(-3000, F.H - 300, 7000, 1500);
   ctx.restore();
+  // 「每十个人里就有一个」：亮起来的金窗之间连出金线（像星座），从他家那扇窗开始一笔笔连出去
+  const lk = prog(t, T.ten - 0.1, T.more + 0.6);
+  if (lk > 0 && STARS.length > 1) NE.batch(ctx, () => { const st = STARS.filter(q => q[2] > 0.3 && q[0] > 40 && q[0] < W - 40 && q[1] > 80 && q[1] < 1280), m = st.find(q => q[3]) || st[0], order = [m], rest = st.filter(q => q !== m);
+    while (rest.length) { const last = order[order.length - 1]; let bi = 0, bd = 1e9; rest.forEach((q, i) => { const d = Math.hypot(q[0] - last[0], q[1] - last[1]); if (d < bd) { bd = d; bi = i; } }); order.push(rest.splice(bi, 1)[0]); }
+    NE.line(ctx, order.map(q => [q[0], q[1]]), lk, NE.GOLD, 2.5, 0.75, { head: true });
+    order.forEach((q, i) => { const u = clamp(lk * order.length - i); if (u > 0) NE.line(ctx, NE.arcPts(q[0], q[1], 26 + 10 * (1 - u), 0, Math.PI * 2, 24), u, NE.GOLD, 2, 0.7 * u, { head: false }); }); });
   return { C: { x: 0, y: 0, z: 1 } };
 }
 function draw(ctx, t) {
