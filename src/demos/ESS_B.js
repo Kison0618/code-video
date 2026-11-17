@@ -94,7 +94,8 @@ const DOORS = [['estj-male', '监管者', 'ESTJ'], ['istj-male', '检查者', 'I
 const DX = [150, 410, 670, 930], DW = 210, DH = 430, DB = 1080, BULB = [540, 300];
 const HALL = S.lazy(() => S.bake(W + PAD * 2, H + PAD, c => {
   c.translate(PAD, PAD / 2);
-  SET.walls(c, { FY: DB, wall: [176, 168, 150], wall2: [110, 104, 100], floor: [150, 140, 130], floor2: [60, 56, 60], stripe: 0, base: [90, 84, 80] });
+  SET.walls(c, { FY: DB, wall: [184, 156, 132], wall2: [96, 78, 80], floor: [150, 128, 110], floor2: [52, 44, 50], stripe: 0.035, base: [90, 70, 64] });
+  { const g = c.createLinearGradient(0, -PAD, 0, 260); g.addColorStop(0, 'rgba(16,12,20,0.6)'); g.addColorStop(1, 'rgba(16,12,20,0)'); c.fillStyle = g; c.fillRect(-PAD, -PAD, W + PAD * 2, 560); for (const [x0, x1] of [[-PAD, 160], [W + PAD, W - 160]]) { const h = c.createLinearGradient(x0, 0, x1, 0); h.addColorStop(0, 'rgba(16,12,20,0.5)'); h.addColorStop(1, 'rgba(16,12,20,0)'); c.fillStyle = h; c.fillRect(Math.min(x0, x1), -PAD, Math.abs(x1 - x0), DB + PAD); } }
   c.fillStyle = 'rgba(80,100,90,0.35)'; c.fillRect(-PAD, 760, W + PAD * 2, DB - 760); c.fillStyle = 'rgba(60,70,64,0.4)'; c.fillRect(-PAD, 756, W + PAD * 2, 6);
   // 住户公约（墙上的告示板）
   c.fillStyle = 'rgb(120,90,60)'; c.fillRect(-250, 420, 260, 330); c.fillStyle = 'rgb(250,246,232)'; c.fillRect(-236, 434, 232, 302); K.text(c, '住户公约', -120, 490, { size: 40, weight: 700, color: [150, 50, 40] }); for (let k = 0; k < 6; k++) { c.fillStyle = 'rgba(80,80,90,0.4)'; c.fillRect(-214, 530 + k * 30, 190 - (k % 2) * 30, 8); }
@@ -117,6 +118,8 @@ function act2(ctx, t) {
   ctx.fillStyle = 'rgb(90,86,84)'; ctx.fillRect(0, 0, W, H);
   ctx.save(); S.cam(ctx, C, 1);
   ctx.drawImage(HALL(), -PAD, -PAD / 2);
+  // 楼梯间左边窗户斜照进来的白天的光（主光源之一，灯亮之前就有）
+  S.add(ctx, () => { ctx.globalAlpha = 0.45; ctx.drawImage(BEAM(), -360, -120, 1300, 1300); }); SET.motes(ctx, t, [0, 200, 700, DB], SUN, 0.35, 14, 31);
   // 楼道很暗 → 灯亮了
   ctx.fillStyle = `rgba(14,14,30,${0.5 * (1 - lamp)})`; ctx.fillRect(-PAD, -PAD, W + PAD * 2, H + PAD * 2);
   ctx.fillStyle = 'rgb(60,56,60)'; ctx.fillRect(BULB[0] - 3, 0, 6, BULB[1] - 30); ctx.beginPath(); ctx.ellipse(BULB[0], BULB[1] - 26, 30, 10, 0, 0, 6.2832); ctx.fill();
@@ -155,7 +158,9 @@ function facade(c, x0, y0, cols, rows, seed, sc = 1) {
   for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) { const x = x0 + i * 170 * sc, y = y0 + j * 210 * sc, w = BW2 * sc, h = BH2 * sc, on = r() < 0.4;
     c.fillStyle = 'rgb(24,22,44)'; c.fillRect(x - 8 * sc, y - 8 * sc, w + 16 * sc, h + 16 * sc);
     const wc = r() < 0.6 ? [180, 200, 240] : [240, 210, 170]; const wg = c.createLinearGradient(0, y, 0, y + h); wg.addColorStop(0, on ? rgba(mix(wc, [255, 255, 255], 0.2), 0.85) : 'rgb(40,44,80)'); wg.addColorStop(1, on ? rgba(mix(wc, [60, 60, 100], 0.4), 0.85) : 'rgb(22,24,50)'); c.fillStyle = wg; c.fillRect(x, y, w, h);
-    c.fillStyle = 'rgb(24,22,44)'; c.fillRect(x + w / 2 - 3 * sc, y, 6 * sc, h); c.fillStyle = 'rgb(70,66,100)'; c.fillRect(x - 14 * sc, y + h + 6 * sc, w + 28 * sc, 10 * sc); }
+    if (on) { for (const sd of [0, 1]) { const cw = w * (0.16 + r() * 0.12), cx = sd ? x + w - cw : x, cg = c.createLinearGradient(cx, 0, cx + cw, 0); const cc = r() < 0.5 ? [200, 120, 110] : [150, 170, 200]; cg.addColorStop(0, rgba(mix(cc, [40, 30, 50], 0.45), 0.9)); cg.addColorStop(0.5, rgba(cc, 0.9)); cg.addColorStop(1, rgba(mix(cc, [40, 30, 50], 0.45), 0.9)); c.fillStyle = cg; c.fillRect(cx, y, cw, h); } S.add(c, () => glow(c, x + w / 2, y + h * 0.4, w * 0.9, wc, 0.35)); if (r() < 0.35) { c.fillStyle = 'rgba(40,30,40,0.7)'; c.beginPath(); c.ellipse(x + w * (0.35 + r() * 0.3), y + h * 0.62, w * 0.12, h * 0.2, 0, 0, 6.2832); c.fill(); c.beginPath(); c.arc(x + w * 0.5, y + h * 0.36, w * 0.09, 0, 6.2832); c.fill(); } }
+    else { c.fillStyle = 'rgba(150,160,220,0.12)'; S.poly(c, [[x + w * 0.1, y + h], [x + w * 0.35, y + h], [x + w * 0.9, y], [x + w * 0.65, y]]); c.fill(); }
+    c.fillStyle = 'rgb(24,22,44)'; c.fillRect(x + w / 2 - 3 * sc, y, 6 * sc, h); c.fillStyle = 'rgb(70,66,100)'; c.fillRect(x - 14 * sc, y + h + 6 * sc, w + 28 * sc, 10 * sc); c.fillStyle = 'rgba(255,240,220,0.18)'; c.fillRect(x - 14 * sc, y + h + 6 * sc, w + 28 * sc, 3 * sc); }
 }
 const BLD = S.lazy(() => S.bake(W + PAD * 2, 2400, c => { c.translate(PAD, 300); facade(c, GX0, GY0, COLS, ROWS, 41); }));
 const CITY = S.lazy(() => S.bake(W * 3, 2600, c => { const r = mulberry32(77); S.vgrad(c, [[0, [8, 10, 30]], [0.6, [30, 30, 70]], [1, [80, 56, 90]]], 0, 2600, 0, W * 3); S.stars(c, 4, [0, 0, W * 3, 900], 120, 0.8); for (let k = 0; k < 9; k++) { const x = k * 360 + r() * 60, top = 600 + r() * 700; facade(c, x, top, 2, 9, 50 + k, 1.0); } }));

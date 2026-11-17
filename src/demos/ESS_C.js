@@ -120,14 +120,15 @@ function act2(ctx, t) {
 // ================= 幕三：医院候诊室 =================
 const WROOM = S.lazy(() => S.bake(W + PAD * 2, H + PAD, c => {
   c.translate(PAD, PAD / 2);
-  SET.walls(c, { FY: 1000, wall: [196, 214, 216], wall2: [150, 170, 176], floor: [176, 186, 186], floor2: [80, 90, 96], stripe: 0, base: [110, 130, 130] });
+  SET.walls(c, { FY: 1000, wall: [150, 178, 184], wall2: [86, 108, 120], floor: [158, 166, 168], floor2: [52, 60, 70], stripe: 0, base: [110, 130, 130] });
   c.fillStyle = 'rgba(110,160,160,0.35)'; c.fillRect(-PAD, 760, W + PAD * 2, 240);
-  SET.window(c, 80, 260, 300, 420, { sky: (c2, x, y, w, h) => { S.vgrad(c2, [[0, [140, 190, 236]], [1, [220, 236, 250]]], y, y + h, x, x + w); c2.fillStyle = 'rgba(100,160,110,0.8)'; for (let k = 0; k < 6; k++) { c2.beginPath(); c2.arc(x + 30 + k * 50, y + h - 30, 50, 0, 6.2832); c2.fill(); } }, curtain: null, frame: [240, 246, 246] });
+  SET.window(c, 80, 260, 300, 420, { sky: (c2, x, y, w, h) => { S.vgrad(c2, [[0, [110, 160, 220]], [1, [200, 216, 236]]], y, y + h, x, x + w); c2.fillStyle = 'rgba(100,160,110,0.8)'; for (let k = 0; k < 6; k++) { c2.beginPath(); c2.arc(x + 30 + k * 50, y + h - 30, 50, 0, 6.2832); c2.fill(); } }, curtain: null, frame: [240, 246, 246] });
   // 诊室门 + 门牌 + 叫号屏
   c.fillStyle = 'rgb(120,140,150)'; c.fillRect(760, 520, 260, 480); c.fillStyle = 'rgb(220,230,232)'; c.fillRect(780, 540, 220, 460); c.fillStyle = 'rgb(160,180,186)'; c.fillRect(790, 760, 10, 60);
   c.fillStyle = 'rgb(40,60,70)'; c.fillRect(780, 420, 220, 70); K.text(c, '3 诊室', 890, 468, { size: 40, weight: 700, color: [120, 240, 200] });
   c.fillStyle = 'rgb(250,250,250)'; c.fillRect(440, 380, 200, 260); c.fillStyle = 'rgba(80,150,160,0.5)'; for (let k = 0; k < 6; k++) c.fillRect(460, 410 + k * 36, 160 - (k % 2) * 40, 12);
 }));
+const WBEAM = S.lazy(() => SET.beamImg(500, 490, [255, 226, 176], 0.55));
 const WR = [['esfp-male', 120, 1150, 1.7, 0], ['isfj-female', 990, 1130, 1.65, 1], ['enfp-male', -80, 1460, 2.4, 2], ['esfj-female', 1180, 1470, 2.4, 3]];
 function chair(ctx, x, y, s) { ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.fillStyle = 'rgb(70,150,170)'; ctx.beginPath(); ctx.roundRect(-80, -150, 160, 120, 24); ctx.fill(); ctx.fillStyle = 'rgb(90,176,196)'; ctx.beginPath(); ctx.roundRect(-86, -40, 172, 36, 14); ctx.fill(); ctx.fillStyle = 'rgb(140,150,160)'; ctx.fillRect(-60, -6, 10, 60); ctx.fillRect(50, -6, 10, 60); ctx.restore(); }
 function act3(ctx, t) {
@@ -135,8 +136,9 @@ function act3(ctx, t) {
   const gather = easeInOut(prog(t, T.c07 - 0.2, T.c07 + 1.2)) * (1 - easeInOut(prog(t, T.c08 - 0.4, T.c08 + 0.3)));
   ctx.fillStyle = 'rgb(180,200,204)'; ctx.fillRect(0, 0, W, H);
   ctx.save(); S.cam(ctx, C, 1); ctx.drawImage(WROOM(), -PAD, -PAD / 2);
-  S.add(ctx, () => { glow(ctx, 230, 480, 700, [255, 240, 210], 0.35); });
-  for (const x of [300, 560]) { ctx.fillStyle = 'rgb(240,250,255)'; ctx.fillRect(x - 120, 0, 240, 14); S.add(ctx, () => glow(ctx, x, 20, 420, [220, 240, 255], 0.3)); }
+  S.add(ctx, () => { glow(ctx, 230, 480, 600, [255, 220, 170], 0.16); ctx.globalAlpha = 0.55; ctx.drawImage(WBEAM(), 40, 240, 1000, 980); });
+  SET.motes(ctx, t, [160, 300, 900, 1100], [255, 236, 200], 0.45, 16, 21);
+  for (const x of [300, 560]) { ctx.fillStyle = 'rgb(240,250,255)'; ctx.fillRect(x - 120, 0, 240, 14); S.add(ctx, () => glow(ctx, x, 20, 420, [220, 240, 255], 0.16)); }
   // 诊室门开（C09）
   const door = easeOut(prog(t, T.c09 - 0.2, T.c09 + 0.6));
   if (door > 0.01) { ctx.fillStyle = `rgba(255,252,240,${door})`; ctx.fillRect(780, 540, 220 * door, 460); }
@@ -184,7 +186,7 @@ function act4(ctx, t) {
   const R = S.lit(ctx, c => ES.hero(c, hx, 1180 + 0 * close, 1.0, { t, flip: close < 0.5, umbrella: false, cake: false, book: false, eyes: storm > 0.3 ? 'open' : 'happy', mouth: storm > 0.3 ? 'frown' : 'smile', brow: storm > 0.3 ? 1 : 0, rs: -0.6 * (1 - close) - 2.0 * smooth(prog(close, 0.8, 1)), look: storm > 0.3 ? [2, -1] : [1, 1.2], bob: Math.abs(Math.sin(close * Math.PI * 4)) * 8 * (close > 0 && close < 1 ? 1 : 0) }), { light: [300, 760], at: [hx, 900], r: 340, warm: [255, 210, 160], cool: [20, 16, 40], k: 1 });
   // 相册：膝上翻开（翻一页）
   const pg = Math.floor(clamp((t - A4) / 1.6) * 2), ao = 1 - smooth(prog(t, T.worry - 0.2, T.worry + 0.3));
-  if (ao > 0.01) { ctx.save(); ctx.globalAlpha = ao; album(ctx, 480, 1240, 0.8, t, 1, pg); ctx.restore(); }
+  if (ao > 0.01) { ctx.save(); ctx.globalAlpha = ao; album(ctx, 470, 1130, 0.74, t, 1, pg); ctx.restore(); }
   ctx.restore();
   return { C };
 }

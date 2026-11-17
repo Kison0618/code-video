@@ -40,7 +40,7 @@ function draw(ctx, t) {
 }
 function subBand(ctx, a = 1) {
   const y0 = 1300, y1 = 1600, g = ctx.createLinearGradient(0, y0, 0, y1);
-  g.addColorStop(0, 'rgba(6,4,10,0)'); g.addColorStop(0.35, `rgba(6,4,10,${0.5 * a})`); g.addColorStop(0.65, `rgba(6,4,10,${0.5 * a})`); g.addColorStop(1, 'rgba(6,4,10,0)');
+  g.addColorStop(0, 'rgba(6,4,10,0)'); g.addColorStop(0.3, `rgba(6,4,10,${0.72 * a})`); g.addColorStop(0.7, `rgba(6,4,10,${0.72 * a})`); g.addColorStop(1, 'rgba(6,4,10,0)');
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.filter = 'none'; ctx.fillStyle = g; ctx.fillRect(0, y0, W, y1 - y0); ctx.restore();
 }
 function over(ctx, t) {

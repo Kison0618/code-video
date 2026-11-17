@@ -19,7 +19,6 @@ function draw(ctx, t, o = {}) {
     ctx.fillStyle = g; ctx.fillRect(0, y - 40, W, h + 80);
     K.text(ctx, '“', 116, y + 82, { size: 120, family: 'Latin', weight: 600, color: [240, 200, 130], alpha: 0.9 });
     lines.forEach((ln, i) => K.text(ctx, ln, 150, y + 70 + i * 72, { size: 50, weight: 500, color: [250, 244, 232], align: 'left', spacing: 0.02 }));
-    K.text(ctx, '—— 网友', W - 120, y + 70 + lines.length * 72 + 2, { size: 30, weight: 500, color: [200, 190, 176], align: 'right' });
     ctx.restore();
   }
 }

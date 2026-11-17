@@ -28,6 +28,12 @@ const BLD = S.lazy(() => S.bake((BWID + 400) / 2, (FL * 3 + 300) / 2, c => {
     const y0 = floorY(k) - FL, y1 = floorY(k);
     const wall = [[214, 176, 150], [176, 196, 200], [170, 150, 176]][k], floor = [[170, 120, 90], [140, 150, 160], [130, 96, 90]][k];
     S.vgrad(c, [[0, mix(wall, [40, 30, 40], 0.4)], [1, wall]], y0 + 636, y1 - 320, BX, BX + BWID);
+    // 墙面质感：天花板下沿的阴影、两侧墙角暗下去、齐腰的护墙板、窗边被阳光照亮的一片
+    { const g = c.createLinearGradient(0, y0 + 636, 0, y0 + 836); g.addColorStop(0, 'rgba(20,14,24,0.55)'); g.addColorStop(1, 'rgba(20,14,24,0)'); c.fillStyle = g; c.fillRect(BX, y0 + 636, BWID, 200); }
+    for (const [x0, x1, a0] of [[BX, BX + 260, 0.45], [BX + BWID, BX + BWID - 220, 0.35]]) { const g = c.createLinearGradient(x0, 0, x1, 0); g.addColorStop(0, `rgba(20,14,24,${a0})`); g.addColorStop(1, 'rgba(20,14,24,0)'); c.fillStyle = g; c.fillRect(Math.min(x0, x1), y0 + 636, 260, FL - 956); }
+    { const dy = y1 - 560; c.fillStyle = rgba(mix(wall, [70, 50, 50], 0.35)); c.fillRect(BX, dy, BWID, 240); c.fillStyle = 'rgba(255,248,236,0.22)'; c.fillRect(BX, dy, BWID, 8); c.fillStyle = 'rgba(0,0,0,0.12)'; c.fillRect(BX, dy + 8, BWID, 6);
+      for (let px = BX + 40; px < BX + BWID - 120; px += 230) { c.fillStyle = 'rgba(255,244,230,0.08)'; c.fillRect(px, dy + 40, 190, 150); c.fillStyle = 'rgba(0,0,0,0.08)'; c.fillRect(px, dy + 186, 190, 6); } }
+    S.add(c, () => { glow(c, BX + 1060, y1 - 520, 620, [255, 236, 200], 0.28); });
     S.vgrad(c, [[0, floor], [1, mix(floor, [30, 20, 26], 0.6)]], y1 - 320, y1, BX, BX + BWID);
     for (let i = -6; i <= 16; i++) { const xb = BX + i * 140, xa = BX + 640 + (xb - BX - 640) * 0.45; S.poly(c, [[xa - 1, y1 - 320], [xa + 1, y1 - 320], [xb + 4, y1], [xb - 4, y1]], 'rgba(20,10,10,0.14)'); }
     { const g = c.createLinearGradient(0, y1 - 4, 0, y1 + 640); g.addColorStop(0, 'rgb(60,50,58)'); g.addColorStop(0.15, 'rgb(40,34,44)'); g.addColorStop(1, 'rgb(28,24,34)'); c.fillStyle = g; c.fillRect(BX - 30, y1 - 4, BWID + 60, 640); c.fillStyle = 'rgba(255,240,220,0.12)'; c.fillRect(BX - 30, y1 - 4, BWID + 60, 6); }
@@ -64,8 +70,8 @@ const fy = k => floorY(k) - 1180;   // 让这层地板落在屏幕 y≈1300（�
 const CAM = [
   [T.in, { x: 140, y: fy(1) - 200, z: 1.0, ax: 540, ay: 1000 }], [T.e01 + 0.9, { x: 140, y: fy(1), z: 1.0 }],
   [T.e02 - 0.2, { x: 100, y: fy(1), z: 1.02 }], [T.detail + 0.6, { x: -40, y: fy(1) - 60, z: 1.12 }], [T.e03 - 0.7, { x: -20, y: fy(1) - 40, z: 1.1 }],
-  [T.e03 + 0.5, { x: 60, y: fy(0), z: 1.04 }, easeInOut], [T.e04 - 0.7, { x: 60, y: fy(0), z: 1.06 }],
-  [T.e04 + 0.5, { x: 60, y: fy(2), z: 1.04 }], [T.e05 - 0.3, { x: 60, y: fy(2), z: 1.06 }],
+  [T.e03 + 0.5, { x: 60, y: fy(0), z: 1.04 }, easeInOut], [T.buy + 0.3, { x: -170, y: fy(0) - 280, z: 1.3 }], [T.heart - 0.5, { x: -120, y: fy(0) - 260, z: 1.28 }], [T.heart + 0.4, { x: 200, y: fy(0) - 250, z: 1.26 }], [Math.max(T.heart + 0.6, T.e04 - 0.6), { x: 140, y: fy(0) - 120, z: 1.12 }],
+  [T.e04 + 0.5, { x: 60, y: fy(2), z: 1.04 }], [T.order + 0.2, { x: 0, y: fy(2) - 120, z: 1.14 }], [T.perfect - 0.1, { x: 80, y: fy(2) - 300, z: 1.28 }], [T.e05 - 0.3, { x: 60, y: fy(2) - 200, z: 1.18 }],
   [T.e05 + 1.6, { x: 140, y: floorY(1) - 1500, z: 0.36 }], [T.end, { x: 140, y: floorY(1) - 1500, z: 0.34 }],
 ];
 function draw(ctx, t) {
@@ -80,6 +86,8 @@ function draw(ctx, t) {
   // 楼外墙边框（剖面感）
   ctx.fillStyle = 'rgb(80,74,90)'; ctx.fillRect(BX - 60, BT - 60, 60, FL * 3 + 90); ctx.fillRect(BX + BWID, BT - 60, 60, FL * 3 + 90); ctx.fillRect(BX - 60, BT - 90, BWID + 120, 60);
   K.text(ctx, '供 给 大 厦', BX + BWID / 2, BT - 40, { size: 60, weight: 700, color: [255, 236, 200], spacing: 0.3 });
+  // 每层：从右边大窗斜照进来的阳光 + 光里的浮尘（主光源）
+  for (let k = 0; k < 3; k++) { const y1 = floorY(k); S.add(ctx, () => { ctx.save(); ctx.translate(BX + 1360, y1 - 980); ctx.scale(-1, 1); ctx.globalAlpha = 0.85; ctx.drawImage(BEAM(), 0, 0, 1000, 980); ctx.restore(); }); SET.motes(ctx, t, [BX + 380, y1 - 900, BX + 1300, y1 - 120], [255, 236, 200], 0.4, 14, 11 + k); }
   // ---------- 二层：团队 ----------
   const y2 = floorY(1);
   const clockMin = 9 * 60 + 11 * 60 * smooth(prog(t, T.detail, T.tire + 0.8));
@@ -116,8 +124,11 @@ function draw(ctx, t) {
   // 照片墙上的星
   if (star > 0.01) { const sx = BX + 560 + 124, sy = y3 - 760; ctx.fillStyle = 'rgb(255,255,250)'; ctx.fillRect(sx, sy, 96, 110); ES.hero(ctx, sx + 48, sy + 108, 0.17, { umbrella: false, cake: false, book: false, eyes: 'happy' }); S.add(ctx, () => glow(ctx, sx + 80, sy, 120 * star, [255, 214, 110], 0.8)); ctx.fillStyle = 'rgb(255,214,90)'; ctx.beginPath(); for (let q = 0; q < 10; q++) { const a = q * Math.PI / 5 - 1.57, rr = (q % 2 ? 12 : 30) * star; ctx.lineTo(sx + 80 + Math.cos(a) * rr, sy + Math.sin(a) * rr); } ctx.fill(); }
   ctx.restore();
+  // 前景：近处虚化的绿植（只在楼里的镜头里，拉远时退掉）
+  { const fa = smooth(clamp((C.z - 0.8) / 0.2)); if (fa > 0.01) { ctx.save(); ctx.globalAlpha = 0.9 * fa; ctx.drawImage(SET.FGLEAF(), -170 - (C.x || 0) * 0.25, 1080, 700, 800); ctx.restore(); } }
   return { C };
 }
+const BEAM = S.lazy(() => SET.beamImg(500, 490, [255, 232, 190], 0.5));
 // E05：拉远后楼外的五个职业 —— 在 over 层（清晰）里用小相框画出来，每个相框里是他在做那份工作
 function job(ctx, x, y, w, h, kind, a, t) {
   if (a <= 0.003) return;

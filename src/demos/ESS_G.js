@@ -1,8 +1,8 @@
 'use strict';
-// ESFJ v9 第 6 章「结尾」：G01–G04 + 片尾关注卡。首尾呼应第 0 章的雨夜公交站
+// ESFJ v9 第 6 章「结尾」：G01–G04 + 片尾关注卡。雨夜街头的公交站
 //   G01 被需要也被看见：深夜，还是那个下雨的公交站。这次只有他一个人，撑着伞等车；他手里提满了别人的东西（便当袋、围巾、给别人买的药），自己肩膀湿了一半
 //   G02 一直在付出，希望有人放在心上：他把伞往旁边一个淋雨的路人那边歪过去，自己整个露在雨里；路人走了，没回头。网友原话上屏。他低头看看自己湿掉的鞋（停）
-//   G03 别吝啬一句谢谢：一个人撑着伞走进来（就是第 0 章他帮过的那个女孩），站到他旁边，把一杯冒热气的杯子递到他手边，杯子上贴着便签「谢谢你」——
+//   G03 别吝啬一句谢谢：一个人撑着伞走进来（第 4 章被他照顾过的同事），站到他旁边，把一杯冒热气的杯子递到他手边，杯子上贴着便签「谢谢你」——
 //       他愣一下，接过来，身上的冷色一点点退掉，胸口亮起来；她把自己那把伞举到他头顶
 //   G04 你身边有这样的 ESFJ 吗：镜头升起来，越过候车亭，整条街的窗一扇扇亮起暖光；最后他们俩那一小圈暖光在雨夜里最亮
 //   片尾：金色粒子聚成「关注依恋研究室 / 了解更多心理知识」（照 v8 轻量版），4 秒，导出 END
@@ -41,7 +41,7 @@ function draw(ctx, t) {
   if (bags > 0.01) { PR.bag(ctx, 830, GY - 30, 0.6, { a: bags }); PR.lunchbox(ctx, 590, GY - 20, 0.6, { lid: 1, a: bags }); }
   // 湿掉的肩膀：雨点打在他身上（G02）
   if (wet > 0.01) S.add(ctx, () => { for (let k = 0; k < 10; k++) { const ph = (t * 2.4 + hash(k * 2.9)) % 1; glow(ctx, R.top[0] - 80 + hash(k * 8.3 + Math.floor(t * 2.4 + hash(k * 2.9))) * 160, R.top[1] + 40 + hash(k * 1.7) * 300 - ph * 20, 16 * (1 - ph) + 5, [220, 232, 255], 0.8 * (1 - ph) * wet); } });
-  if (gIn > 0.01) { const GP = S.lit(ctx, c => MB.person(c, 'istj-female', gx, GY, 2.5, { warm: 0.4, bob: Math.abs(Math.sin(gIn * Math.PI * 4)) * 8 * (gIn < 1 ? 1 : 0) }), { light: LAMP, at: [gx, GY - 300], r: 340, warm: [255, 214, 160], cool: [20, 20, 50], k: 0.95 });
+  if (gIn > 0.01) { const GP = S.lit(ctx, c => MB.person(c, 'isfp-female', gx, GY, 2.5, { warm: 0.4, bob: Math.abs(Math.sin(gIn * Math.PI * 4)) * 8 * (gIn < 1 ? 1 : 0) }), { light: LAMP, at: [gx, GY - 300], r: 340, warm: [255, 214, 160], cool: [20, 20, 50], k: 0.95 });
     // 她的伞：先撑在自己头上 → 举到他头顶
     const ux = lerp(gx + 40, 620, cover), uy = lerp(GY - 640, GY - 700, cover); ctx.save(); ctx.translate(ux, uy); ctx.rotate(lerp(0, -0.25, cover)); const g = ctx.createLinearGradient(-240, 0, 240, 0); g.addColorStop(0, 'rgb(150,40,50)'); g.addColorStop(0.5, 'rgb(230,90,90)'); g.addColorStop(1, 'rgb(140,40,50)'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-250, 60); ctx.quadraticCurveTo(-200, -110, 0, -130); ctx.quadraticCurveTo(200, -110, 250, 60); for (let k = 5; k >= 0; k--) ctx.quadraticCurveTo(-250 + (k + 0.5) * 83, 30, -250 + k * 83, 60); ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgb(80,30,40)'; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(0, -130); ctx.lineTo(0, 240); ctx.stroke(); ctx.restore();
     // 杯子 + 便签
